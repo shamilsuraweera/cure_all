@@ -46,3 +46,13 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 }
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  type      OrgType
+  domain    String?
+  status    OrgStatus @default(ACTIVE)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
