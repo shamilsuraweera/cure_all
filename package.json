@@ -7,7 +7,9 @@
     "dev": "tsx src/server.ts",
     "start": "tsx src/server.ts",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:reset": "prisma migrate reset"
+    "prisma:reset": "prisma migrate reset",
+    "format": "prettier . --check",
+    "format:write": "prettier . --write"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +23,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "prettier": "^3.6.2",
     "prisma": "^7.2.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
