@@ -5,4 +5,3 @@ node_modules
 /src/generated/prisma
 sql/
 tasks.txt
-working_task.txt
