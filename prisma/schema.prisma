@@ -12,3 +12,28 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum GlobalRole {
+  ROOT_ADMIN
+  USER
+}
+
+enum OrgType {
+  HOSPITAL
+  CLINIC
+  PHARMACY
+  LAB
+}
+
+enum OrgRole {
+  ORG_ADMIN
+  DOCTOR
+  PHARMACIST
+  LAB_TECH
+  STAFF
+}
+
+enum OrgStatus {
+  ACTIVE
+  SUSPENDED
+}
