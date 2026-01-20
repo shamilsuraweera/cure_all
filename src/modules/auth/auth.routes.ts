@@ -113,4 +113,11 @@ router.post("/refresh", async (req, res, next) => {
   }
 });
 
+router.post("/logout", (req, res) => {
+  res.clearCookie("access_token", { path: "/" });
+  res.clearCookie("refresh_token", { path: "/auth/refresh" });
+
+  return res.status(200).json({ message: "Logged out" });
+});
+
 export default router;
