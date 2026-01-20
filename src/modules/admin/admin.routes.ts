@@ -1,10 +1,16 @@
+import crypto from "crypto";
 import { Router } from "express";
 import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { requireGlobalRole } from "../../middlewares/require-global-role.js";
-import { GlobalRole, OrgStatus, OrgType } from "../../generated/prisma/enums.js";
+import {
+  GlobalRole,
+  OrgRole,
+  OrgStatus,
+  OrgType,
+} from "../../generated/prisma/enums.js";
 
 const router = Router();
 
@@ -86,6 +92,40 @@ router.patch(
       });
 
       return res.status(200).json({ org });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+const inviteSchema = z.object({
+  email: z.string().email(),
+  role: z.nativeEnum(OrgRole),
+});
+
+router.post(
+  "/orgs/:id/invite",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const { email, role } = inviteSchema.parse(req.body);
+      const { id: orgId } = req.params;
+
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const token = crypto.randomUUID();
+
+      const invite = await prisma.orgInvite.create({
+        data: {
+          orgId,
+          email,
+          role,
+          token,
+          expiresAt,
+        },
+      });
+
+      return res.status(201).json({ invite });
     } catch (error) {
       return next(error);
     }

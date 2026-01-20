@@ -83,3 +83,26 @@ model ProviderProfile {
 
   user User @relation(fields: [userId], references: [id])
 }
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+model OrgInvite {
+  id        String       @id @default(uuid())
+  orgId     String
+  email     String
+  role      OrgRole
+  token     String       @unique
+  status    InviteStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  org Organization @relation(fields: [orgId], references: [id])
+
+  @@index([orgId])
+  @@index([email])
+}
