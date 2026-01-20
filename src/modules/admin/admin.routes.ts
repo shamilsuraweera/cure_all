@@ -111,7 +111,7 @@ const createPatientSchema = z.object({
   password: z.string().min(8),
   nic: z.string().min(1),
   name: z.string().min(1).optional(),
-  age: z.coerce.number().int().positive().optional(),
+  dob: z.coerce.date().optional(),
   location: z.string().min(1).optional(),
   guardianEmail: z.string().email().optional(),
 });
@@ -122,7 +122,7 @@ router.post(
   requireGlobalRole([GlobalRole.ROOT_ADMIN]),
   async (req, res, next) => {
     try {
-      const { email, password, nic, name, age, location, guardianEmail } =
+      const { email, password, nic, name, dob, location, guardianEmail } =
         createPatientSchema.parse(req.body);
 
       if (!isValidNic(nic)) {
@@ -170,7 +170,7 @@ router.post(
             userId: user.id,
             nic,
             name,
-            age,
+            dob,
             location,
           },
         });

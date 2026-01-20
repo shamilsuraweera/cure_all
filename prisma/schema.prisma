@@ -50,6 +50,7 @@ model User {
   patientProfile PatientProfile?
   guardianLinks GuardianLink[] @relation("GuardianUser")
   patientLinks  GuardianLink[] @relation("GuardianPatient")
+  guardianInvites GuardianInvite[] @relation("GuardianInvitePatient")
 }
 
 model Organization {
@@ -93,7 +94,7 @@ model PatientProfile {
   userId    String   @unique
   nic       String   @unique
   name      String?
-  age       Int?
+  dob       DateTime?
   location  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -104,6 +105,12 @@ model PatientProfile {
 enum GuardianStatus {
   PENDING
   ACTIVE
+}
+
+enum GuardianInviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
 }
 
 model GuardianLink {
@@ -119,6 +126,22 @@ model GuardianLink {
 
   @@unique([patientId, guardianId])
   @@index([guardianId])
+}
+
+model GuardianInvite {
+  id        String              @id @default(uuid())
+  patientId String
+  email     String
+  token     String              @unique
+  status    GuardianInviteStatus @default(PENDING)
+  expiresAt DateTime
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  patient User @relation("GuardianInvitePatient", fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@index([email])
 }
 
 enum InviteStatus {
