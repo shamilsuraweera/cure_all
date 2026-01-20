@@ -278,6 +278,7 @@ model LabResult {
   labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
   performedBy User        @relation("LabResultPerformer", fields: [performedById], references: [id])
   measures    LabMeasureValue[]
+  attachments LabAttachment[]
 
   @@index([patientId])
   @@index([labTestTypeId])
@@ -298,4 +299,18 @@ model LabMeasureValue {
 
   @@index([labResultId])
   @@index([labMeasureDefId])
+}
+
+model LabAttachment {
+  id          String   @id @default(uuid())
+  labResultId String
+  fileName    String
+  url         String
+  mimeType    String?
+  sizeBytes   Int?
+  createdAt   DateTime @default(now())
+
+  labResult LabResult @relation(fields: [labResultId], references: [id])
+
+  @@index([labResultId])
 }
