@@ -374,4 +374,53 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/:id/lab-results", requireAuth, async (req, res, next) => {
+  try {
+    const { id: patientProfileId } = req.params;
+
+    const patient = await prisma.patientProfile.findUnique({
+      where: { id: patientProfileId },
+    });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
+      const isPatient = req.user?.sub === patient.userId;
+      const hasGuardianAccess = await canAccessPatient(
+        patient.userId,
+        req.user?.sub ?? "",
+      );
+      const isLabTech = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.LAB_TECH,
+        },
+      });
+
+      if (!isPatient && !hasGuardianAccess && !isLabTech) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    }
+
+    const labResults = await prisma.labResult.findMany({
+      where: { patientId: patient.userId },
+      include: {
+        labTestType: true,
+        measures: {
+          include: {
+            labMeasureDef: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.status(200).json({ labResults });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 export default router;
