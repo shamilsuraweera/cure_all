@@ -125,6 +125,12 @@ const createMedicineSchema = z.object({
   notes: z.string().min(1).optional(),
 });
 
+const createLabTestTypeSchema = z.object({
+  name: z.string().min(1),
+  code: z.string().min(1).optional(),
+  description: z.string().min(1).optional(),
+});
+
 router.post(
   "/patients",
   requireAuth,
@@ -228,6 +234,23 @@ router.post(
       const medicine = await prisma.medicine.create({ data });
 
       return res.status(201).json({ medicine });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+router.post(
+  "/lab-test-types",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const data = createLabTestTypeSchema.parse(req.body);
+
+      const labTestType = await prisma.labTestType.create({ data });
+
+      return res.status(201).json({ labTestType });
     } catch (error) {
       return next(error);
     }
