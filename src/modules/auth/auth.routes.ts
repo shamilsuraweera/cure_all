@@ -23,6 +23,14 @@ const isProd = env.NODE_ENV === "production";
 const accessCookieMaxAge = durationToMs(env.ACCESS_TOKEN_TTL);
 const refreshCookieMaxAge = durationToMs(env.REFRESH_TOKEN_TTL);
 
+const buildCookieOptions = (maxAge: number, path: string) => ({
+  httpOnly: true,
+  sameSite: "strict" as const,
+  secure: isProd,
+  maxAge,
+  path,
+});
+
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
@@ -47,23 +55,59 @@ router.post("/login", async (req, res, next) => {
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken(payload);
 
-    res.cookie("access_token", accessToken, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: isProd,
-      maxAge: accessCookieMaxAge,
-      path: "/",
-    });
-
-    res.cookie("refresh_token", refreshToken, {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: isProd,
-      maxAge: refreshCookieMaxAge,
-      path: "/auth/refresh",
-    });
+    res.cookie(
+      "access_token",
+      accessToken,
+      buildCookieOptions(accessCookieMaxAge, "/"),
+    );
+    res.cookie(
+      "refresh_token",
+      refreshToken,
+      buildCookieOptions(refreshCookieMaxAge, "/auth/refresh"),
+    );
 
     return res.status(200).json({ message: "Login successful" });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post("/refresh", async (req, res, next) => {
+  try {
+    const token = req.cookies?.refresh_token as string | undefined;
+
+    if (!token) {
+      return res.status(401).json({ message: "Missing refresh token" });
+    }
+
+    const payload = verifyRefreshToken(token);
+
+    const user = await prisma.user.findUnique({ where: { id: payload.sub } });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    const newPayload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      globalRole: user.globalRole,
+    };
+
+    const accessToken = signAccessToken(newPayload);
+    const refreshToken = signRefreshToken(newPayload);
+
+    res.cookie(
+      "access_token",
+      accessToken,
+      buildCookieOptions(accessCookieMaxAge, "/"),
+    );
+    res.cookie(
+      "refresh_token",
+      refreshToken,
+      buildCookieOptions(refreshCookieMaxAge, "/auth/refresh"),
+    );
+
+    return res.status(200).json({ message: "Token refreshed" });
   } catch (error) {
     return next(error);
   }
