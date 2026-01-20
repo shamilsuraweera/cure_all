@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import { z } from "zod";
 
 import { env } from "../config/env.js";
+import { sendError } from "../utils/response.js";
 
 type ErrorResponse = {
   error: {
@@ -23,13 +24,13 @@ export const errorHandler = (
   }
 
   if (err instanceof z.ZodError) {
-    return res.status(400).json({
-      error: {
-        message: "Validation failed",
-        code: "VALIDATION_ERROR",
-        details: env.NODE_ENV === "production" ? undefined : err.flatten(),
-      },
-    });
+    return sendError(
+      res,
+      400,
+      "Validation failed",
+      "VALIDATION_ERROR",
+      env.NODE_ENV === "production" ? undefined : err.flatten(),
+    );
   }
 
   const message = err instanceof Error ? err.message : "Internal server error";
@@ -41,11 +42,5 @@ export const errorHandler = (
         ? err.stack
         : err;
 
-  return res.status(500).json({
-    error: {
-      message,
-      code,
-      details,
-    },
-  });
+  return sendError(res, 500, message, code, details);
 };

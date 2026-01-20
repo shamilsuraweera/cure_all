@@ -4,6 +4,8 @@ import { z } from "zod";
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { logAuditEvent } from "../../utils/audit.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
+import { buildPageMeta, getPagination } from "../../utils/pagination.js";
 import {
   DispenseStatus,
   GlobalRole,
@@ -92,27 +94,27 @@ router.post("/:id/verify", requireAuth, async (req, res, next) => {
     });
 
     if (!prescription) {
-      return res.status(404).json({ message: "Prescription not found" });
+      return sendError(res, 404, "Prescription not found", "PRESCRIPTION_NOT_FOUND");
     }
 
     if (
       prescription.status === PrescriptionStatus.CANCELLED ||
       prescription.status === PrescriptionStatus.DISPENSED
     ) {
-      return res.status(400).json({ message: "Prescription is not active" });
+      return sendError(res, 400, "Prescription is not active", "PRESCRIPTION_INACTIVE");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
       const membership = await getPharmacyMembership(req.user?.sub ?? "");
       if (!membership) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
     const totals = await getDispensedTotals(prescription.id);
     const remainingItems = getRemainingByItem(prescription.items, totals);
 
-    return res.status(200).json({ prescription, remainingItems });
+    return sendSuccess(res, 200, { prescription, remainingItems });
   } catch (error) {
     return next(error);
   }
@@ -131,25 +133,25 @@ router.post("/:id/dispense", requireAuth, async (req, res, next) => {
     });
 
     if (!prescription) {
-      return res.status(404).json({ message: "Prescription not found" });
+      return sendError(res, 404, "Prescription not found", "PRESCRIPTION_NOT_FOUND");
     }
 
     if (
       prescription.status === PrescriptionStatus.CANCELLED ||
       prescription.status === PrescriptionStatus.DISPENSED
     ) {
-      return res.status(400).json({ message: "Prescription is not active" });
+      return sendError(res, 400, "Prescription is not active", "PRESCRIPTION_INACTIVE");
     }
 
     const membership = await getPharmacyMembership(req.user?.sub ?? "");
 
     if (!membership) {
-      return res.status(403).json({ message: "Forbidden" });
+      return sendError(res, 403, "Forbidden", "FORBIDDEN");
     }
 
     const itemIds = new Set(prescription.items.map((item) => item.id));
     if (!items.every((item) => itemIds.has(item.prescriptionItemId))) {
-      return res.status(400).json({ message: "Invalid prescription items" });
+      return sendError(res, 400, "Invalid prescription items", "INVALID_PRESCRIPTION_ITEMS");
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -217,10 +219,10 @@ router.post("/:id/dispense", requireAuth, async (req, res, next) => {
       req,
     });
 
-    return res.status(201).json({ dispenseRecord: result });
+    return sendSuccess(res, 201, { dispenseRecord: result });
   } catch (error) {
     if (error instanceof Error && error.message.includes("remaining amount")) {
-      return res.status(400).json({ message: "Over-dispensing is not allowed" });
+      return sendError(res, 400, "Over-dispensing is not allowed", "OVER_DISPENSE");
     }
     return next(error);
   }
@@ -232,28 +234,11 @@ router.get("/:id/dispenses", requireAuth, async (req, res, next) => {
 
     const prescription = await prisma.prescription.findUnique({
       where: { id },
-      include: {
-        items: true,
-        dispenseRecords: {
-          include: {
-            items: {
-              include: {
-                prescriptionItem: {
-                  include: {
-                    medicine: true,
-                  },
-                },
-              },
-            },
-            pharmacyOrg: true,
-          },
-          orderBy: { createdAt: "desc" },
-        },
-      },
+      include: { items: true },
     });
 
     if (!prescription) {
-      return res.status(404).json({ message: "Prescription not found" });
+      return sendError(res, 404, "Prescription not found", "PRESCRIPTION_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -266,11 +251,40 @@ router.get("/:id/dispenses", requireAuth, async (req, res, next) => {
       const isPharmacist = await getPharmacyMembership(req.user?.sub ?? "");
 
       if (!isPatient && !hasGuardianAccess && !isDoctor && !isPharmacist) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
-    return res.status(200).json({ dispenseRecords: prescription.dispenseRecords });
+    const { page, pageSize, skip, take } = getPagination(req.query);
+
+    const [dispenseRecords, total] = await Promise.all([
+      prisma.dispenseRecord.findMany({
+        where: { prescriptionId: prescription.id },
+        include: {
+          items: {
+            include: {
+              prescriptionItem: {
+                include: {
+                  medicine: true,
+                },
+              },
+            },
+          },
+          pharmacyOrg: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      prisma.dispenseRecord.count({ where: { prescriptionId: prescription.id } }),
+    ]);
+
+    return sendSuccess(
+      res,
+      200,
+      { dispenseRecords },
+      buildPageMeta(page, pageSize, total),
+    );
   } catch (error) {
     return next(error);
   }

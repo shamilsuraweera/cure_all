@@ -14,6 +14,7 @@ import medicineRoutes from "./modules/medicines/medicine.routes.js";
 import labRoutes from "./modules/labs/lab.routes.js";
 import dispenseRoutes from "./modules/pharmacy/dispense.routes.js";
 import { errorHandler } from "./middlewares/error-handler.js";
+import { sendSuccess } from "./utils/response.js";
 
 const app = express();
 
@@ -67,11 +68,11 @@ app.use("/prescriptions", dispenseRoutes);
 app.use(errorHandler);
 
 app.get("/health", (_req, res) => {
-  res.json({ status: "OK" });
+  sendSuccess(res, 200, { status: "OK" });
 });
 
 app.get("/", (_req, res) => {
-  res.json({ message: "Cure-All API running" });
+  sendSuccess(res, 200, { message: "Cure-All API running" });
 });
 
 export default app;

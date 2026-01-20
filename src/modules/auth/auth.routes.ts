@@ -13,6 +13,7 @@ import {
 import { verifyPassword } from "../../utils/password.js";
 import { durationToMs } from "../../utils/time.js";
 import { logAuditEvent } from "../../utils/audit.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
@@ -41,12 +42,12 @@ router.post("/login", async (req, res, next) => {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return sendError(res, 401, "Invalid credentials", "INVALID_CREDENTIALS");
     }
 
     const passwordOk = await verifyPassword(user.passwordHash, password);
     if (!passwordOk) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return sendError(res, 401, "Invalid credentials", "INVALID_CREDENTIALS");
     }
 
     const payload: JwtPayload = {
@@ -77,7 +78,7 @@ router.post("/login", async (req, res, next) => {
       req,
     });
 
-    return res.status(200).json({ message: "Login successful" });
+    return sendSuccess(res, 200, { message: "Login successful" });
   } catch (error) {
     return next(error);
   }
@@ -96,7 +97,7 @@ router.post("/refresh", async (req, res, next) => {
     }
 
     if (!token) {
-      return res.status(401).json({ message: "Missing refresh token" });
+      return sendError(res, 401, "Missing refresh token", "MISSING_REFRESH_TOKEN");
     }
 
     let payload: JwtPayload;
@@ -109,12 +110,12 @@ router.post("/refresh", async (req, res, next) => {
           hasToken: Boolean(token),
         });
       }
-      return res.status(401).json({ message: "Invalid refresh token" });
+      return sendError(res, 401, "Invalid refresh token", "INVALID_REFRESH_TOKEN");
     }
 
     const user = await prisma.user.findUnique({ where: { id: payload.sub } });
     if (!user) {
-      return res.status(401).json({ message: "Invalid refresh token" });
+      return sendError(res, 401, "Invalid refresh token", "INVALID_REFRESH_TOKEN");
     }
 
     const newPayload: JwtPayload = {
@@ -145,7 +146,7 @@ router.post("/refresh", async (req, res, next) => {
       req,
     });
 
-    return res.status(200).json({ message: "Token refreshed" });
+    return sendSuccess(res, 200, { message: "Token refreshed" });
   } catch (error) {
     return next(error);
   }
@@ -175,7 +176,7 @@ router.post("/logout", async (req, res) => {
     req,
   });
 
-  return res.status(200).json({ message: "Logged out" });
+  return sendSuccess(res, 200, { message: "Logged out" });
 });
 
 export default router;

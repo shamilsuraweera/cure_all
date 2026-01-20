@@ -14,6 +14,8 @@ import {
 } from "../../generated/prisma/enums.js";
 import { hashPassword } from "../../utils/password.js";
 import { isValidNic } from "../../utils/nic.js";
+import { buildPageMeta, getPagination } from "../../utils/pagination.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
@@ -33,7 +35,7 @@ router.post(
 
       const org = await prisma.organization.create({ data });
 
-      return res.status(201).json({ org });
+      return sendSuccess(res, 201, { org });
     } catch (error) {
       return next(error);
     }
@@ -46,30 +48,18 @@ router.get(
   requireGlobalRole([GlobalRole.ROOT_ADMIN]),
   async (req, res, next) => {
     try {
-      const page = Number(req.query.page ?? "1");
-      const pageSize = Number(req.query.pageSize ?? "20");
-
-      const safePage = Number.isFinite(page) && page > 0 ? page : 1;
-      const safePageSize =
-        Number.isFinite(pageSize) && pageSize > 0 && pageSize <= 100
-          ? pageSize
-          : 20;
+      const { page, pageSize, skip, take } = getPagination(req.query);
 
       const [items, total] = await Promise.all([
         prisma.organization.findMany({
-          skip: (safePage - 1) * safePageSize,
-          take: safePageSize,
+          skip,
+          take,
           orderBy: { createdAt: "desc" },
         }),
         prisma.organization.count(),
       ]);
 
-      return res.status(200).json({
-        items,
-        page: safePage,
-        pageSize: safePageSize,
-        total,
-      });
+      return sendSuccess(res, 200, { items }, buildPageMeta(page, pageSize, total));
     } catch (error) {
       return next(error);
     }
@@ -94,7 +84,7 @@ router.patch(
         data: { status },
       });
 
-      return res.status(200).json({ org });
+      return sendSuccess(res, 200, { org });
     } catch (error) {
       return next(error);
     }
@@ -148,11 +138,11 @@ router.post(
         createPatientSchema.parse(req.body);
 
       if (!isValidNic(nic)) {
-        return res.status(400).json({ message: "Invalid NIC" });
+        return sendError(res, 400, "Invalid NIC", "INVALID_NIC");
       }
 
       if (guardianEmail && guardianEmail === email) {
-        return res.status(400).json({ message: "Guardian cannot be the patient" });
+        return sendError(res, 400, "Guardian cannot be the patient", "INVALID_GUARDIAN");
       }
 
       const guardian = guardianEmail
@@ -160,7 +150,7 @@ router.post(
         : null;
 
       if (guardianEmail && !guardian) {
-        return res.status(404).json({ message: "Guardian user not found" });
+        return sendError(res, 404, "Guardian user not found", "GUARDIAN_NOT_FOUND");
       }
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -169,7 +159,7 @@ router.post(
           where: { userId: existingUser.id },
         });
         if (existingProfile) {
-          return res.status(409).json({ message: "Patient already exists" });
+          return sendError(res, 409, "Patient already exists", "PATIENT_EXISTS");
         }
       }
 
@@ -223,7 +213,7 @@ router.post(
         return patient;
       });
 
-      return res.status(201).json({ patient: result });
+      return sendSuccess(res, 201, { patient: result });
     } catch (error) {
       return next(error);
     }
@@ -240,7 +230,7 @@ router.post(
 
       const medicine = await prisma.medicine.create({ data });
 
-      return res.status(201).json({ medicine });
+      return sendSuccess(res, 201, { medicine });
     } catch (error) {
       return next(error);
     }
@@ -257,7 +247,7 @@ router.post(
 
       const labTestType = await prisma.labTestType.create({ data });
 
-      return res.status(201).json({ labTestType });
+      return sendSuccess(res, 201, { labTestType });
     } catch (error) {
       return next(error);
     }
@@ -278,7 +268,7 @@ router.post(
       });
 
       if (!labTestType) {
-        return res.status(404).json({ message: "Lab test type not found" });
+        return sendError(res, 404, "Lab test type not found", "LAB_TEST_NOT_FOUND");
       }
 
       const measure = await prisma.labMeasureDef.create({
@@ -291,7 +281,7 @@ router.post(
         },
       });
 
-      return res.status(201).json({ measure });
+      return sendSuccess(res, 201, { measure });
     } catch (error) {
       return next(error);
     }
@@ -309,7 +299,7 @@ router.post(
 
       const org = await prisma.organization.findUnique({ where: { id: orgId } });
       if (!org) {
-        return res.status(404).json({ message: "Organization not found" });
+        return sendError(res, 404, "Organization not found", "ORG_NOT_FOUND");
       }
 
       if (org.domain) {
@@ -317,7 +307,7 @@ router.post(
         const orgDomain = org.domain.toLowerCase();
 
         if (!emailDomain || emailDomain !== orgDomain) {
-          return res.status(400).json({ message: "Email domain not allowed" });
+          return sendError(res, 400, "Email domain not allowed", "DOMAIN_NOT_ALLOWED");
         }
       }
 
@@ -334,7 +324,7 @@ router.post(
         },
       });
 
-      return res.status(201).json({ invite });
+      return sendSuccess(res, 201, { invite });
     } catch (error) {
       return next(error);
     }

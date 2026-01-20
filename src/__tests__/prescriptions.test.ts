@@ -18,7 +18,7 @@ describe("prescriptions endpoints", () => {
     });
 
     expect(medicineRes.status).toBe(201);
-    const medicineId = medicineRes.body.medicine.id as string;
+    const medicineId = medicineRes.body.data.medicine.id as string;
 
     const patientRes = await agent.post("/admin/patients").send({
       email: `patient_${Date.now()}@example.com`,
@@ -27,7 +27,7 @@ describe("prescriptions endpoints", () => {
     });
 
     expect(patientRes.status).toBe(201);
-    const patientProfileId = patientRes.body.patient.id as string;
+    const patientProfileId = patientRes.body.data.patient.id as string;
 
     const createRes = await agent
       .post(`/patients/${patientProfileId}/prescriptions`)
@@ -45,18 +45,18 @@ describe("prescriptions endpoints", () => {
       });
 
     expect(createRes.status).toBe(201);
-    const prescriptionId = createRes.body.prescription.id as string;
+    const prescriptionId = createRes.body.data.prescription.id as string;
 
     const listRes = await agent.get(
       `/patients/${patientProfileId}/prescriptions`,
     );
 
     expect(listRes.status).toBe(200);
-    expect(listRes.body.prescriptions.length).toBeGreaterThan(0);
+    expect(listRes.body.data.prescriptions.length).toBeGreaterThan(0);
 
     const detailRes = await agent.get(`/patients/prescriptions/${prescriptionId}`);
     expect(detailRes.status).toBe(200);
-    expect(detailRes.body.prescription.id).toBe(prescriptionId);
+    expect(detailRes.body.data.prescription.id).toBe(prescriptionId);
 
     const immutabilityRes = await agent.patch(
       `/patients/prescriptions/${prescriptionId}`,
