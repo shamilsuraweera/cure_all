@@ -95,6 +95,26 @@ model PatientProfile {
   user User @relation(fields: [userId], references: [id])
 }
 
+enum GuardianStatus {
+  PENDING
+  ACTIVE
+}
+
+model GuardianLink {
+  id         String         @id @default(uuid())
+  patientId  String
+  guardianId String
+  status     GuardianStatus @default(PENDING)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  patient  User @relation("GuardianPatient", fields: [patientId], references: [id])
+  guardian User @relation("GuardianUser", fields: [guardianId], references: [id])
+
+  @@unique([patientId, guardianId])
+  @@index([guardianId])
+}
+
 enum InviteStatus {
   PENDING
   ACCEPTED
