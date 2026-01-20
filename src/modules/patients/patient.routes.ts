@@ -240,4 +240,47 @@ router.get("/:id/prescriptions", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/prescriptions/:id", requireAuth, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const prescription = await prisma.prescription.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            medicine: true,
+          },
+        },
+      },
+    });
+
+    if (!prescription) {
+      return res.status(404).json({ message: "Prescription not found" });
+    }
+
+    if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
+      const isPatient = req.user?.sub === prescription.patientId;
+      const hasGuardianAccess = await canAccessPatient(
+        prescription.patientId,
+        req.user?.sub ?? "",
+      );
+      const isDoctor = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.DOCTOR,
+        },
+      });
+
+      if (!isPatient && !hasGuardianAccess && !isDoctor) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    }
+
+    return res.status(200).json({ prescription });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 export default router;
