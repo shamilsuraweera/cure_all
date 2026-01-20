@@ -4,7 +4,9 @@ import crypto from "crypto";
 import app from "../app.js";
 
 const getCookieHeader = (res: request.Response) =>
-  (res.headers["set-cookie"] || []).map((cookie) => cookie.split(";")[0]).join("; ");
+  (res.headers["set-cookie"] || [])
+    .map((cookie) => cookie.split(";")[0])
+    .join("; ");
 
 describe("auth endpoints", () => {
   it("POST /auth/login sets cookies", async () => {
@@ -26,27 +28,30 @@ describe("auth endpoints", () => {
       password: process.env.ROOT_ADMIN_PASSWORD,
     });
 
-    const cookieHeader = getCookieHeader(loginRes);
+    const refreshCookie = (loginRes.headers["set-cookie"] || []).find((cookie) =>
+      cookie.startsWith("refresh_token="),
+    );
+    expect(refreshCookie).toBeDefined();
+    const refreshPair = refreshCookie?.split(";")[0] ?? "";
 
     const res = await request(app)
       .post("/auth/refresh")
-      .set("Cookie", cookieHeader);
+      .set("Cookie", refreshPair);
 
-    expect(res.status).toBe(200);
+    if (res.status !== 200) {
+      throw new Error(`Refresh failed: ${res.status} ${JSON.stringify(res.body)}`);
+    }
     expect(res.headers["set-cookie"]).toBeDefined();
   });
 
   it("POST /auth/logout clears cookies", async () => {
-    const loginRes = await request(app).post("/auth/login").send({
+    const agent = request.agent(app);
+    const loginRes = await agent.post("/auth/login").send({
       email: process.env.ROOT_ADMIN_EMAIL,
       password: process.env.ROOT_ADMIN_PASSWORD,
     });
 
-    const cookieHeader = getCookieHeader(loginRes);
-
-    const res = await request(app)
-      .post("/auth/logout")
-      .set("Cookie", cookieHeader);
+    const res = await agent.post("/auth/logout");
 
     expect(res.status).toBe(200);
     const cookies = (res.headers["set-cookie"] || []).join(";");
