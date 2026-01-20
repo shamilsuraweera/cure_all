@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./modules/auth/auth.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import inviteRoutes from "./modules/invites/invite.routes.js";
+import patientRoutes from "./modules/patients/patient.routes.js";
+import guardianRoutes from "./modules/guardians/guardian.routes.js";
 import { errorHandler } from "./middlewares/error-handler.js";
 
 const app = express();
@@ -16,6 +18,8 @@ app.use(cookieParser());
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/invites", inviteRoutes);
+app.use("/patients", patientRoutes);
+app.use(guardianRoutes);
 
 app.use(errorHandler);
 

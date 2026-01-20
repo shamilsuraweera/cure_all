@@ -7,10 +7,13 @@ import { requireAuth } from "../../middlewares/require-auth.js";
 import { requireGlobalRole } from "../../middlewares/require-global-role.js";
 import {
   GlobalRole,
+  GuardianStatus,
   OrgRole,
   OrgStatus,
   OrgType,
 } from "../../generated/prisma/enums.js";
+import { hashPassword } from "../../utils/password.js";
+import { isValidNic } from "../../utils/nic.js";
 
 const router = Router();
 
@@ -102,6 +105,108 @@ const inviteSchema = z.object({
   email: z.string().email(),
   role: z.nativeEnum(OrgRole),
 });
+
+const createPatientSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+  nic: z.string().min(1),
+  name: z.string().min(1).optional(),
+  dob: z.coerce.date().optional(),
+  location: z.string().min(1).optional(),
+  guardianEmail: z.string().email().optional(),
+});
+
+router.post(
+  "/patients",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const { email, password, nic, name, dob, location, guardianEmail } =
+        createPatientSchema.parse(req.body);
+
+      if (!isValidNic(nic)) {
+        return res.status(400).json({ message: "Invalid NIC" });
+      }
+
+      if (guardianEmail && guardianEmail === email) {
+        return res.status(400).json({ message: "Guardian cannot be the patient" });
+      }
+
+      const guardian = guardianEmail
+        ? await prisma.user.findUnique({ where: { email: guardianEmail } })
+        : null;
+
+      if (guardianEmail && !guardian) {
+        return res.status(404).json({ message: "Guardian user not found" });
+      }
+
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) {
+        const existingProfile = await prisma.patientProfile.findUnique({
+          where: { userId: existingUser.id },
+        });
+        if (existingProfile) {
+          return res.status(409).json({ message: "Patient already exists" });
+        }
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        let user = await tx.user.findUnique({ where: { email } });
+
+        if (!user) {
+          const passwordHash = await hashPassword(password);
+          user = await tx.user.create({
+            data: {
+              email,
+              passwordHash,
+              globalRole: "USER",
+            },
+          });
+        }
+
+        const patient = await tx.patientProfile.create({
+          data: {
+            userId: user.id,
+            nic,
+            name,
+            dob,
+            location,
+          },
+        });
+
+        if (guardian) {
+          const existingLink = await tx.guardianLink.findUnique({
+            where: {
+              patientId_guardianId: {
+                patientId: user.id,
+                guardianId: guardian.id,
+              },
+            },
+          });
+
+          if (existingLink) {
+            return patient;
+          }
+
+          await tx.guardianLink.create({
+            data: {
+              patientId: user.id,
+              guardianId: guardian.id,
+              status: GuardianStatus.ACTIVE,
+            },
+          });
+        }
+
+        return patient;
+      });
+
+      return res.status(201).json({ patient: result });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
 
 router.post(
   "/orgs/:id/invite",
