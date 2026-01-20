@@ -3,12 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
-import {
-  GlobalRole,
-  GuardianStatus,
-  OrgRole,
-  PrescriptionStatus,
-} from "../../generated/prisma/enums.js";
+import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/enums.js";
 
 const router = Router();
 
@@ -171,7 +166,7 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
         patientId: patient.userId,
         doctorId: req.user?.sub ?? "",
         notes,
-        status: PrescriptionStatus.ACTIVE,
+        status: "ACTIVE",
         items: {
           create: items.map((item) => ({
             medicineId: item.medicineId,
