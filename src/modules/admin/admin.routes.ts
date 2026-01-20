@@ -31,4 +31,40 @@ router.post(
   },
 );
 
+router.get(
+  "/orgs",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const page = Number(req.query.page ?? "1");
+      const pageSize = Number(req.query.pageSize ?? "20");
+
+      const safePage = Number.isFinite(page) && page > 0 ? page : 1;
+      const safePageSize =
+        Number.isFinite(pageSize) && pageSize > 0 && pageSize <= 100
+          ? pageSize
+          : 20;
+
+      const [items, total] = await Promise.all([
+        prisma.organization.findMany({
+          skip: (safePage - 1) * safePageSize,
+          take: safePageSize,
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.organization.count(),
+      ]);
+
+      return res.status(200).json({
+        items,
+        page: safePage,
+        pageSize: safePageSize,
+        total,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 export default router;
