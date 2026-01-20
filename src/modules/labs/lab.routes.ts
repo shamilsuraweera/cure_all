@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/enums.js";
+import { logAuditEvent } from "../../utils/audit.js";
 
 const router = Router();
 
@@ -106,6 +107,15 @@ router.post("/:id/attachments", requireAuth, async (req, res, next) => {
         mimeType: data.mimeType,
         sizeBytes: data.sizeBytes,
       },
+    });
+
+    await logAuditEvent({
+      action: "lab_attachment.create",
+      actorUserId: req.user?.sub ?? null,
+      targetType: "lab_attachment",
+      targetId: attachment.id,
+      metadata: { labResultId: labResult.id },
+      req,
     });
 
     return res.status(201).json({ attachment });

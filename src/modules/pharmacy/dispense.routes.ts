@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
+import { logAuditEvent } from "../../utils/audit.js";
 import {
   DispenseStatus,
   GlobalRole,
@@ -204,6 +205,16 @@ router.post("/:id/dispense", requireAuth, async (req, res, next) => {
       });
 
       return dispenseRecord;
+    });
+
+    await logAuditEvent({
+      action: "prescription.dispense",
+      actorUserId: req.user?.sub ?? null,
+      targetType: "dispense_record",
+      targetId: result.id,
+      orgId: membership.orgId,
+      metadata: { prescriptionId: prescription.id },
+      req,
     });
 
     return res.status(201).json({ dispenseRecord: result });

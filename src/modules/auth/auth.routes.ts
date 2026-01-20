@@ -6,11 +6,13 @@ import { prisma } from "../../config/prisma.js";
 import {
   signAccessToken,
   signRefreshToken,
+  verifyAccessToken,
   verifyRefreshToken,
   type JwtPayload,
 } from "../../utils/jwt.js";
 import { verifyPassword } from "../../utils/password.js";
 import { durationToMs } from "../../utils/time.js";
+import { logAuditEvent } from "../../utils/audit.js";
 
 const router = Router();
 
@@ -66,6 +68,14 @@ router.post("/login", async (req, res, next) => {
       refreshToken,
       buildCookieOptions(refreshCookieMaxAge, "/auth/refresh"),
     );
+
+    await logAuditEvent({
+      action: "auth.login",
+      actorUserId: user.id,
+      targetType: "user",
+      targetId: user.id,
+      req,
+    });
 
     return res.status(200).json({ message: "Login successful" });
   } catch (error) {
@@ -127,15 +137,43 @@ router.post("/refresh", async (req, res, next) => {
       buildCookieOptions(refreshCookieMaxAge, "/auth/refresh"),
     );
 
+    await logAuditEvent({
+      action: "auth.refresh",
+      actorUserId: user.id,
+      targetType: "user",
+      targetId: user.id,
+      req,
+    });
+
     return res.status(200).json({ message: "Token refreshed" });
   } catch (error) {
     return next(error);
   }
 });
 
-router.post("/logout", (req, res) => {
+router.post("/logout", async (req, res) => {
+  let actorUserId: string | null = null;
+  const accessToken = req.cookies?.access_token as string | undefined;
+
+  if (accessToken) {
+    try {
+      const payload = verifyAccessToken(accessToken);
+      actorUserId = payload.sub;
+    } catch (error) {
+      actorUserId = null;
+    }
+  }
+
   res.clearCookie("access_token", { path: "/" });
   res.clearCookie("refresh_token", { path: "/auth/refresh" });
+
+  await logAuditEvent({
+    action: "auth.logout",
+    actorUserId,
+    targetType: "user",
+    targetId: actorUserId,
+    req,
+  });
 
   return res.status(200).json({ message: "Logged out" });
 });

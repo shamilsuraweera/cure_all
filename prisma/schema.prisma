@@ -358,3 +358,22 @@ model LabAttachment {
 
   @@index([labResultId])
 }
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  actorUserId String?
+  targetType  String
+  targetId    String?
+  orgId       String?
+  ip          String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([action])
+  @@index([actorUserId])
+  @@index([targetType])
+  @@index([targetId])
+  @@index([createdAt])
+}

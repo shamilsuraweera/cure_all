@@ -9,6 +9,9 @@ const envSchema = z.object({
   REFRESH_TOKEN_TTL: z.string().min(1).default("7d"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3000),
+  CORS_ORIGINS: z
+    .string()
+    .default("http://localhost:5173,http://localhost:3000"),
 });
 
 export const env = envSchema.parse(process.env);
