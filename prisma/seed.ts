@@ -1,6 +1,6 @@
 import "dotenv/config";
-import crypto from "crypto";
 import { z } from "zod";
+import argon2 from "argon2";
 
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -19,14 +19,7 @@ const pool = new Pool({
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const hashPassword = (password: string) => {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto
-    .pbkdf2Sync(password, salt, 310000, 32, "sha256")
-    .toString("hex");
-
-  return `pbkdf2$310000$${salt}$${hash}`;
-};
+const hashPassword = async (password: string) => argon2.hash(password);
 
 const main = async () => {
   const existing = await prisma.user.findUnique({
@@ -44,7 +37,7 @@ const main = async () => {
   await prisma.user.create({
     data: {
       email: env.ROOT_ADMIN_EMAIL,
-      passwordHash: hashPassword(env.ROOT_ADMIN_PASSWORD),
+      passwordHash: await hashPassword(env.ROOT_ADMIN_PASSWORD),
       globalRole: "ROOT_ADMIN",
     },
   });
