@@ -51,6 +51,8 @@ model User {
   guardianLinks GuardianLink[] @relation("GuardianUser")
   patientLinks  GuardianLink[] @relation("GuardianPatient")
   guardianInvites GuardianInvite[] @relation("GuardianInvitePatient")
+  prescriptionsAsPatient Prescription[] @relation("PrescriptionPatient")
+  prescriptionsAsDoctor  Prescription[] @relation("PrescriptionDoctor")
 }
 
 model Organization {
@@ -150,6 +152,20 @@ enum InviteStatus {
   EXPIRED
 }
 
+enum MedicineForm {
+  TABLET
+  CAPSULE
+  SYRUP
+  INJECTION
+  CREAM
+  OTHER
+}
+
+enum PrescriptionStatus {
+  ACTIVE
+  CANCELLED
+}
+
 model OrgInvite {
   id        String       @id @default(uuid())
   orgId     String
@@ -165,4 +181,53 @@ model OrgInvite {
 
   @@index([orgId])
   @@index([email])
+}
+
+model Medicine {
+  id           String       @id @default(uuid())
+  name         String
+  genericName  String?
+  strength     String?
+  form         MedicineForm
+  manufacturer String?
+  notes        String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Prescription {
+  id        String             @id @default(uuid())
+  patientId String
+  doctorId  String
+  notes     String?
+  status    PrescriptionStatus @default(ACTIVE)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  patient User @relation("PrescriptionPatient", fields: [patientId], references: [id])
+  doctor  User @relation("PrescriptionDoctor", fields: [doctorId], references: [id])
+  items   PrescriptionItem[]
+
+  @@index([patientId])
+  @@index([doctorId])
+}
+
+model PrescriptionItem {
+  id             String   @id @default(uuid())
+  prescriptionId String
+  medicineId     String
+  dose           String
+  frequency      String
+  durationDays   Int
+  quantity       Int
+  instructions   String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
+  medicine     Medicine     @relation(fields: [medicineId], references: [id])
+
+  @@index([prescriptionId])
+  @@index([medicineId])
 }

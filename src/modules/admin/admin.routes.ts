@@ -8,6 +8,7 @@ import { requireGlobalRole } from "../../middlewares/require-global-role.js";
 import {
   GlobalRole,
   GuardianStatus,
+  MedicineForm,
   OrgRole,
   OrgStatus,
   OrgType,
@@ -116,6 +117,15 @@ const createPatientSchema = z.object({
   guardianEmail: z.string().email().optional(),
 });
 
+const createMedicineSchema = z.object({
+  name: z.string().min(1),
+  genericName: z.string().min(1).optional(),
+  strength: z.string().min(1).optional(),
+  form: z.nativeEnum(MedicineForm),
+  manufacturer: z.string().min(1).optional(),
+  notes: z.string().min(1).optional(),
+});
+
 router.post(
   "/patients",
   requireAuth,
@@ -202,6 +212,23 @@ router.post(
       });
 
       return res.status(201).json({ patient: result });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+router.post(
+  "/medicines",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const data = createMedicineSchema.parse(req.body);
+
+      const medicine = await prisma.medicine.create({ data });
+
+      return res.status(201).json({ medicine });
     } catch (error) {
       return next(error);
     }

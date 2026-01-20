@@ -7,6 +7,7 @@ import adminRoutes from "./modules/admin/admin.routes.js";
 import inviteRoutes from "./modules/invites/invite.routes.js";
 import patientRoutes from "./modules/patients/patient.routes.js";
 import guardianRoutes from "./modules/guardians/guardian.routes.js";
+import medicineRoutes from "./modules/medicines/medicine.routes.js";
 import { errorHandler } from "./middlewares/error-handler.js";
 
 const app = express();
@@ -20,6 +21,7 @@ app.use("/admin", adminRoutes);
 app.use("/invites", inviteRoutes);
 app.use("/patients", patientRoutes);
 app.use(guardianRoutes);
+app.use("/medicines", medicineRoutes);
 
 app.use(errorHandler);
 
