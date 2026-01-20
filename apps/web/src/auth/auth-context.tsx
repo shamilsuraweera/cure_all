@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
-import { apiPost } from "../lib/api";
+import { apiClient } from "../lib/api-client";
 
 type AuthState = {
   isReady: boolean;
@@ -24,22 +24,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   const refresh = useCallback(async () => {
-    const result = await apiPost<{ message: string }>("/auth/refresh");
+    const result = await apiClient.post<{ message: string }>("/auth/refresh");
     setState({ isReady: true, isAuthenticated: result.ok });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const result = await apiPost<{ message: string }, { email: string; password: string }>(
-      "/auth/login",
-      { email, password },
-    );
+    const result = await apiClient.post<
+      { message: string },
+      { email: string; password: string }
+    >("/auth/login", { email, password });
 
     setState({ isReady: true, isAuthenticated: result.ok });
     return result.ok;
   }, []);
 
   const logout = useCallback(async () => {
-    await apiPost<{ message: string }>("/auth/logout");
+    await apiClient.post<{ message: string }>("/auth/logout");
     setState({ isReady: true, isAuthenticated: false });
   }, []);
 
