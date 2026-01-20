@@ -4,7 +4,7 @@ import { z } from "zod";
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { requireGlobalRole } from "../../middlewares/require-global-role.js";
-import { GlobalRole, OrgType } from "../../generated/prisma/enums.js";
+import { GlobalRole, OrgStatus, OrgType } from "../../generated/prisma/enums.js";
 
 const router = Router();
 
@@ -61,6 +61,31 @@ router.get(
         pageSize: safePageSize,
         total,
       });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+const updateOrgStatusSchema = z.object({
+  status: z.nativeEnum(OrgStatus),
+});
+
+router.patch(
+  "/orgs/:id",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const { status } = updateOrgStatusSchema.parse(req.body);
+      const { id } = req.params;
+
+      const org = await prisma.organization.update({
+        where: { id },
+        data: { status },
+      });
+
+      return res.status(200).json({ org });
     } catch (error) {
       return next(error);
     }
