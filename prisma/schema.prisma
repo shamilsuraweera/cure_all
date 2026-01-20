@@ -242,3 +242,19 @@ model LabTestType {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model LabMeasureDef {
+  id             String   @id @default(uuid())
+  labTestTypeId  String
+  name           String
+  unit           String?
+  normalRangeMin Float?
+  normalRangeMax Float?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
+
+  @@index([labTestTypeId])
+}
