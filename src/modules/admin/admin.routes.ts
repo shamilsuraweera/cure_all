@@ -8,7 +8,6 @@ import { requireGlobalRole } from "../../middlewares/require-global-role.js";
 import {
   GlobalRole,
   GuardianStatus,
-  MedicineForm,
   OrgRole,
   OrgStatus,
   OrgType,
@@ -121,7 +120,7 @@ const createMedicineSchema = z.object({
   name: z.string().min(1),
   genericName: z.string().min(1).optional(),
   strength: z.string().min(1).optional(),
-  form: z.nativeEnum(MedicineForm),
+  form: z.enum(["TABLET", "CAPSULE", "SYRUP", "INJECTION", "CREAM", "OTHER"]),
   manufacturer: z.string().min(1).optional(),
   notes: z.string().min(1).optional(),
 });
