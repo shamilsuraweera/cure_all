@@ -150,6 +150,15 @@ enum InviteStatus {
   EXPIRED
 }
 
+enum MedicineForm {
+  TABLET
+  CAPSULE
+  SYRUP
+  INJECTION
+  CREAM
+  OTHER
+}
+
 model OrgInvite {
   id        String       @id @default(uuid())
   orgId     String
@@ -165,4 +174,17 @@ model OrgInvite {
 
   @@index([orgId])
   @@index([email])
+}
+
+model Medicine {
+  id           String       @id @default(uuid())
+  name         String
+  genericName  String?
+  strength     String?
+  form         MedicineForm
+  manufacturer String?
+  notes        String?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 }
