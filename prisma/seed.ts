@@ -2,7 +2,9 @@ import "dotenv/config";
 import crypto from "crypto";
 import { z } from "zod";
 
-import { PrismaClient } from "../src/generated/prisma/index.js";
+import { PrismaClient } from "../src/generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
 const envSchema = z.object({
   ROOT_ADMIN_EMAIL: z.string().email(),
@@ -11,7 +13,11 @@ const envSchema = z.object({
 
 const env = envSchema.parse(process.env);
 
-const prisma = new PrismaClient();
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 const hashPassword = (password: string) => {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -46,10 +52,12 @@ const main = async () => {
 
 main()
   .then(async () => {
+    await pool.end();
     await prisma.$disconnect();
   })
   .catch(async (error) => {
     console.error(error);
+    await pool.end();
     await prisma.$disconnect();
     process.exit(1);
   });

@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -45,6 +45,8 @@ model User {
   globalRole   GlobalRole @default(USER)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  orgMemberships OrgMember[]
+  providerProfile ProviderProfile?
 }
 
 model Organization {
@@ -55,6 +57,7 @@ model Organization {
   status    OrgStatus @default(ACTIVE)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  members   OrgMember[]
 }
 
 model OrgMember {
