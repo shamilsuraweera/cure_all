@@ -17,6 +17,11 @@ export const errorHandler = (
   res: Response<ErrorResponse>,
   _next: NextFunction,
 ) => {
+  if (env.NODE_ENV !== "production") {
+    // Helps diagnose test/dev failures without leaking in prod responses.
+    console.error(err);
+  }
+
   if (err instanceof z.ZodError) {
     return res.status(400).json({
       error: {
