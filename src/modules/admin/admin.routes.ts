@@ -1,0 +1,149 @@
+import crypto from "crypto";
+import { Router } from "express";
+import { z } from "zod";
+
+import { prisma } from "../../config/prisma.js";
+import { requireAuth } from "../../middlewares/require-auth.js";
+import { requireGlobalRole } from "../../middlewares/require-global-role.js";
+import {
+  GlobalRole,
+  OrgRole,
+  OrgStatus,
+  OrgType,
+} from "../../generated/prisma/enums.js";
+
+const router = Router();
+
+const createOrgSchema = z.object({
+  name: z.string().min(1),
+  type: z.nativeEnum(OrgType),
+  domain: z.string().min(1).optional(),
+});
+
+router.post(
+  "/orgs",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const data = createOrgSchema.parse(req.body);
+
+      const org = await prisma.organization.create({ data });
+
+      return res.status(201).json({ org });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+router.get(
+  "/orgs",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const page = Number(req.query.page ?? "1");
+      const pageSize = Number(req.query.pageSize ?? "20");
+
+      const safePage = Number.isFinite(page) && page > 0 ? page : 1;
+      const safePageSize =
+        Number.isFinite(pageSize) && pageSize > 0 && pageSize <= 100
+          ? pageSize
+          : 20;
+
+      const [items, total] = await Promise.all([
+        prisma.organization.findMany({
+          skip: (safePage - 1) * safePageSize,
+          take: safePageSize,
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.organization.count(),
+      ]);
+
+      return res.status(200).json({
+        items,
+        page: safePage,
+        pageSize: safePageSize,
+        total,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+const updateOrgStatusSchema = z.object({
+  status: z.nativeEnum(OrgStatus),
+});
+
+router.patch(
+  "/orgs/:id",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const { status } = updateOrgStatusSchema.parse(req.body);
+      const { id } = req.params;
+
+      const org = await prisma.organization.update({
+        where: { id },
+        data: { status },
+      });
+
+      return res.status(200).json({ org });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+const inviteSchema = z.object({
+  email: z.string().email(),
+  role: z.nativeEnum(OrgRole),
+});
+
+router.post(
+  "/orgs/:id/invite",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const { email, role } = inviteSchema.parse(req.body);
+      const { id: orgId } = req.params;
+
+      const org = await prisma.organization.findUnique({ where: { id: orgId } });
+      if (!org) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      if (org.domain) {
+        const emailDomain = email.split("@")[1]?.toLowerCase();
+        const orgDomain = org.domain.toLowerCase();
+
+        if (!emailDomain || emailDomain !== orgDomain) {
+          return res.status(400).json({ message: "Email domain not allowed" });
+        }
+      }
+
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const token = crypto.randomUUID();
+
+      const invite = await prisma.orgInvite.create({
+        data: {
+          orgId,
+          email,
+          role,
+          token,
+          expiresAt,
+        },
+      });
+
+      return res.status(201).json({ invite });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+export default router;
