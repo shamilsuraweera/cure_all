@@ -243,6 +243,9 @@ model LabTestType {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  measures LabMeasureDef[]
+  results  LabResult[]
 }
 
 model LabMeasureDef {
@@ -257,6 +260,7 @@ model LabMeasureDef {
   updatedAt      DateTime @updatedAt
 
   labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
+  values      LabMeasureValue[]
 
   @@index([labTestTypeId])
 }
