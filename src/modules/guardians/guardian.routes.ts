@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
-import { GlobalRole } from "../../generated/prisma/enums.js";
+import { GlobalRole } from "../../generated/prisma/index.js";
 import { hashPassword } from "../../utils/password.js";
 import { sendError, sendSuccess } from "../../utils/response.js";
 

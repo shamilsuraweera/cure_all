@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 
-import type { OrgRole } from "../generated/prisma/enums.js";
+import type { OrgRole } from "../generated/prisma/index.js";
 import { prisma } from "../config/prisma.js";
 
 type OrgIdResolver = (req: Request) => string | undefined;

@@ -13,7 +13,7 @@ import {
   OrgRole,
   OrgType,
   PrescriptionStatus,
-} from "../../generated/prisma/enums.js";
+} from "../../generated/prisma/index.js";
 
 const router = Router();
 

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 
-import type { GlobalRole } from "../generated/prisma/enums.js";
+import type { GlobalRole } from "../generated/prisma/index.js";
 
 export const requireGlobalRole =
   (roles: GlobalRole[]) => (req: Request, res: Response, next: NextFunction) => {

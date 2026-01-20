@@ -11,7 +11,7 @@ import {
   OrgRole,
   OrgStatus,
   OrgType,
-} from "../../generated/prisma/enums.js";
+} from "../../generated/prisma/index.js";
 import { hashPassword } from "../../utils/password.js";
 import { isValidNic } from "../../utils/nic.js";
 import { buildPageMeta, getPagination } from "../../utils/pagination.js";
@@ -77,7 +77,7 @@ router.patch(
   async (req, res, next) => {
     try {
       const { status } = updateOrgStatusSchema.parse(req.body);
-      const { id } = req.params;
+      const id = String(req.params.id);
 
       const org = await prisma.organization.update({
         where: { id },
@@ -261,7 +261,7 @@ router.post(
   async (req, res, next) => {
     try {
       const data = createLabMeasureSchema.parse(req.body);
-      const { id: labTestTypeId } = req.params;
+      const labTestTypeId = String(req.params.id);
 
       const labTestType = await prisma.labTestType.findUnique({
         where: { id: labTestTypeId },
@@ -295,7 +295,7 @@ router.post(
   async (req, res, next) => {
     try {
       const { email, role } = inviteSchema.parse(req.body);
-      const { id: orgId } = req.params;
+      const orgId = String(req.params.id);
 
       const org = await prisma.organization.findUnique({ where: { id: orgId } });
       if (!org) {
