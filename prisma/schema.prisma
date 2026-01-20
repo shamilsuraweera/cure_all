@@ -5,10 +5,81 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum GlobalRole {
+  ROOT_ADMIN
+  USER
+}
+
+enum OrgType {
+  HOSPITAL
+  CLINIC
+  PHARMACY
+  LAB
+}
+
+enum OrgRole {
+  ORG_ADMIN
+  DOCTOR
+  PHARMACIST
+  LAB_TECH
+  STAFF
+}
+
+enum OrgStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  globalRole   GlobalRole @default(USER)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  orgMemberships OrgMember[]
+  providerProfile ProviderProfile?
+}
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  type      OrgType
+  domain    String?
+  status    OrgStatus @default(ACTIVE)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  members   OrgMember[]
+}
+
+model OrgMember {
+  id        String   @id @default(uuid())
+  userId    String
+  orgId     String
+  role      OrgRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User         @relation(fields: [userId], references: [id])
+  org  Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+}
+
+model ProviderProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  licenseNo String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
 }
