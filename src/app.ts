@@ -9,6 +9,7 @@ import patientRoutes from "./modules/patients/patient.routes.js";
 import guardianRoutes from "./modules/guardians/guardian.routes.js";
 import medicineRoutes from "./modules/medicines/medicine.routes.js";
 import labRoutes from "./modules/labs/lab.routes.js";
+import dispenseRoutes from "./modules/pharmacy/dispense.routes.js";
 import { errorHandler } from "./middlewares/error-handler.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.use("/patients", patientRoutes);
 app.use(guardianRoutes);
 app.use("/medicines", medicineRoutes);
 app.use("/lab-results", labRoutes);
+app.use("/prescriptions", dispenseRoutes);
 
 app.use(errorHandler);
 

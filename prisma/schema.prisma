@@ -55,6 +55,7 @@ model User {
   prescriptionsAsDoctor  Prescription[] @relation("PrescriptionDoctor")
   labResultsAsPatient   LabResult[] @relation("LabResultPatient")
   labResultsAsPerformer LabResult[] @relation("LabResultPerformer")
+  dispenseRecords DispenseRecord[]
 }
 
 model Organization {
@@ -67,6 +68,7 @@ model Organization {
   updatedAt DateTime  @updatedAt
   members   OrgMember[]
   invites   OrgInvite[]
+  dispenseRecords DispenseRecord[]
 }
 
 model OrgMember {
@@ -166,6 +168,13 @@ enum MedicineForm {
 enum PrescriptionStatus {
   ACTIVE
   CANCELLED
+  PARTIALLY_DISPENSED
+  DISPENSED
+}
+
+enum DispenseStatus {
+  PARTIAL
+  FULL
 }
 
 model OrgInvite {
@@ -211,6 +220,7 @@ model Prescription {
   patient User @relation("PrescriptionPatient", fields: [patientId], references: [id])
   doctor  User @relation("PrescriptionDoctor", fields: [doctorId], references: [id])
   items   PrescriptionItem[]
+  dispenseRecords DispenseRecord[]
 
   @@index([patientId])
   @@index([doctorId])
@@ -230,9 +240,43 @@ model PrescriptionItem {
 
   prescription Prescription @relation(fields: [prescriptionId], references: [id])
   medicine     Medicine     @relation(fields: [medicineId], references: [id])
+  dispenseItems DispenseItem[]
 
   @@index([prescriptionId])
   @@index([medicineId])
+}
+
+model DispenseRecord {
+  id            String         @id @default(uuid())
+  prescriptionId String
+  dispensedById String
+  pharmacyOrgId String
+  status        DispenseStatus
+  notes         String?
+  createdAt     DateTime       @default(now())
+
+  prescription Prescription @relation(fields: [prescriptionId], references: [id])
+  dispensedBy  User         @relation(fields: [dispensedById], references: [id])
+  pharmacyOrg  Organization @relation(fields: [pharmacyOrgId], references: [id])
+  items        DispenseItem[]
+
+  @@index([prescriptionId])
+  @@index([dispensedById])
+  @@index([pharmacyOrgId])
+}
+
+model DispenseItem {
+  id              String   @id @default(uuid())
+  dispenseRecordId String
+  prescriptionItemId String
+  quantity        Int
+  createdAt       DateTime @default(now())
+
+  dispenseRecord   DispenseRecord   @relation(fields: [dispenseRecordId], references: [id])
+  prescriptionItem PrescriptionItem @relation(fields: [prescriptionItemId], references: [id])
+
+  @@index([dispenseRecordId])
+  @@index([prescriptionItemId])
 }
 
 model LabTestType {
