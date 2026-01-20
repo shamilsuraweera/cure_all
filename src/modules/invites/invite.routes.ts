@@ -20,6 +20,23 @@ router.post("/accept", async (req, res, next) => {
       return res.status(404).json({ message: "Invite not found" });
     }
 
+    const org = await prisma.organization.findUnique({
+      where: { id: invite.orgId },
+      select: { domain: true },
+    });
+    if (!org) {
+      return res.status(404).json({ message: "Organization not found" });
+    }
+
+    if (org.domain) {
+      const emailDomain = invite.email.split("@")[1]?.toLowerCase();
+      const orgDomain = org.domain.toLowerCase();
+
+      if (!emailDomain || emailDomain !== orgDomain) {
+        return res.status(400).json({ message: "Email domain not allowed" });
+      }
+    }
+
     if (invite.status !== "PENDING") {
       return res.status(400).json({ message: "Invite is not active" });
     }

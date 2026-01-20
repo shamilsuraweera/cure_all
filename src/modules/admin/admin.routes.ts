@@ -112,6 +112,20 @@ router.post(
       const { email, role } = inviteSchema.parse(req.body);
       const { id: orgId } = req.params;
 
+      const org = await prisma.organization.findUnique({ where: { id: orgId } });
+      if (!org) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      if (org.domain) {
+        const emailDomain = email.split("@")[1]?.toLowerCase();
+        const orgDomain = org.domain.toLowerCase();
+
+        if (!emailDomain || emailDomain !== orgDomain) {
+          return res.status(400).json({ message: "Email domain not allowed" });
+        }
+      }
+
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const token = crypto.randomUUID();
 
