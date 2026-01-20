@@ -125,6 +125,19 @@ const createMedicineSchema = z.object({
   notes: z.string().min(1).optional(),
 });
 
+const createLabTestTypeSchema = z.object({
+  name: z.string().min(1),
+  code: z.string().min(1).optional(),
+  description: z.string().min(1).optional(),
+});
+
+const createLabMeasureSchema = z.object({
+  name: z.string().min(1),
+  unit: z.string().min(1).optional(),
+  normalRangeMin: z.coerce.number().optional(),
+  normalRangeMax: z.coerce.number().optional(),
+});
+
 router.post(
   "/patients",
   requireAuth,
@@ -228,6 +241,57 @@ router.post(
       const medicine = await prisma.medicine.create({ data });
 
       return res.status(201).json({ medicine });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+router.post(
+  "/lab-test-types",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const data = createLabTestTypeSchema.parse(req.body);
+
+      const labTestType = await prisma.labTestType.create({ data });
+
+      return res.status(201).json({ labTestType });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
+router.post(
+  "/lab-test-types/:id/measures",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const data = createLabMeasureSchema.parse(req.body);
+      const { id: labTestTypeId } = req.params;
+
+      const labTestType = await prisma.labTestType.findUnique({
+        where: { id: labTestTypeId },
+      });
+
+      if (!labTestType) {
+        return res.status(404).json({ message: "Lab test type not found" });
+      }
+
+      const measure = await prisma.labMeasureDef.create({
+        data: {
+          labTestTypeId,
+          name: data.name,
+          unit: data.unit,
+          normalRangeMin: data.normalRangeMin ?? null,
+          normalRangeMax: data.normalRangeMax ?? null,
+        },
+      });
+
+      return res.status(201).json({ measure });
     } catch (error) {
       return next(error);
     }

@@ -46,6 +46,20 @@ const createPrescriptionSchema = z.object({
     .min(1),
 });
 
+const createLabResultSchema = z.object({
+  labTestTypeId: z.string().min(1),
+  notes: z.string().min(1).optional(),
+  measures: z
+    .array(
+      z.object({
+        labMeasureDefId: z.string().min(1),
+        value: z.string().min(1),
+        unit: z.string().min(1).optional(),
+      }),
+    )
+    .min(1),
+});
+
 router.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -283,6 +297,130 @@ router.all("/prescriptions/:id", requireAuth, (req, res) => {
     return res.status(405).json({ message: "Prescriptions are immutable" });
   }
   return res.status(405).json({ message: "Method not allowed" });
+});
+
+router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
+  try {
+    const { id: patientProfileId } = req.params;
+    const { labTestTypeId, notes, measures } = createLabResultSchema.parse(
+      req.body,
+    );
+
+    const patient = await prisma.patientProfile.findUnique({
+      where: { id: patientProfileId },
+    });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
+      const labMembership = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.LAB_TECH,
+        },
+      });
+
+      if (!labMembership) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    }
+
+    const labTestType = await prisma.labTestType.findUnique({
+      where: { id: labTestTypeId },
+    });
+
+    if (!labTestType || !labTestType.isActive) {
+      return res.status(400).json({ message: "Invalid lab test type" });
+    }
+
+    const measureIds = measures.map((measure) => measure.labMeasureDefId);
+    const measureDefs = await prisma.labMeasureDef.findMany({
+      where: {
+        id: { in: measureIds },
+        labTestTypeId,
+        isActive: true,
+      },
+      select: { id: true },
+    });
+
+    if (measureDefs.length !== measureIds.length) {
+      return res.status(400).json({ message: "Invalid measure selection" });
+    }
+
+    const labResult = await prisma.labResult.create({
+      data: {
+        patientId: patient.userId,
+        labTestTypeId,
+        performedById: req.user?.sub ?? "",
+        notes,
+        measures: {
+          create: measures.map((measure) => ({
+            labMeasureDefId: measure.labMeasureDefId,
+            value: measure.value,
+            unit: measure.unit,
+          })),
+        },
+      },
+      include: {
+        measures: true,
+      },
+    });
+
+    return res.status(201).json({ labResult });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/:id/lab-results", requireAuth, async (req, res, next) => {
+  try {
+    const { id: patientProfileId } = req.params;
+
+    const patient = await prisma.patientProfile.findUnique({
+      where: { id: patientProfileId },
+    });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
+      const isPatient = req.user?.sub === patient.userId;
+      const hasGuardianAccess = await canAccessPatient(
+        patient.userId,
+        req.user?.sub ?? "",
+      );
+      const isLabTech = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.LAB_TECH,
+        },
+      });
+
+      if (!isPatient && !hasGuardianAccess && !isLabTech) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+    }
+
+    const labResults = await prisma.labResult.findMany({
+      where: { patientId: patient.userId },
+      include: {
+        labTestType: true,
+        measures: {
+          include: {
+            labMeasureDef: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return res.status(200).json({ labResults });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 export default router;

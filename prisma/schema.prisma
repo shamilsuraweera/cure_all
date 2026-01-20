@@ -53,6 +53,8 @@ model User {
   guardianInvites GuardianInvite[] @relation("GuardianInvitePatient")
   prescriptionsAsPatient Prescription[] @relation("PrescriptionPatient")
   prescriptionsAsDoctor  Prescription[] @relation("PrescriptionDoctor")
+  labResultsAsPatient   LabResult[] @relation("LabResultPatient")
+  labResultsAsPerformer LabResult[] @relation("LabResultPerformer")
 }
 
 model Organization {
@@ -231,4 +233,84 @@ model PrescriptionItem {
 
   @@index([prescriptionId])
   @@index([medicineId])
+}
+
+model LabTestType {
+  id          String   @id @default(uuid())
+  name        String
+  code        String?  @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  measures LabMeasureDef[]
+  results  LabResult[]
+}
+
+model LabMeasureDef {
+  id             String   @id @default(uuid())
+  labTestTypeId  String
+  name           String
+  unit           String?
+  normalRangeMin Float?
+  normalRangeMax Float?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
+  values      LabMeasureValue[]
+
+  @@index([labTestTypeId])
+}
+
+model LabResult {
+  id            String   @id @default(uuid())
+  patientId     String
+  labTestTypeId String
+  performedById String
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patient     User        @relation("LabResultPatient", fields: [patientId], references: [id])
+  labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
+  performedBy User        @relation("LabResultPerformer", fields: [performedById], references: [id])
+  measures    LabMeasureValue[]
+  attachments LabAttachment[]
+
+  @@index([patientId])
+  @@index([labTestTypeId])
+  @@index([performedById])
+}
+
+model LabMeasureValue {
+  id              String   @id @default(uuid())
+  labResultId     String
+  labMeasureDefId String
+  value           String
+  unit            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  labResult     LabResult     @relation(fields: [labResultId], references: [id])
+  labMeasureDef LabMeasureDef @relation(fields: [labMeasureDefId], references: [id])
+
+  @@index([labResultId])
+  @@index([labMeasureDefId])
+}
+
+model LabAttachment {
+  id          String   @id @default(uuid())
+  labResultId String
+  fileName    String
+  url         String
+  mimeType    String?
+  sizeBytes   Int?
+  createdAt   DateTime @default(now())
+
+  labResult LabResult @relation(fields: [labResultId], references: [id])
+
+  @@index([labResultId])
 }
