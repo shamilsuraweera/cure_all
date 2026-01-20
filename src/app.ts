@@ -1,7 +1,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
+import { env } from "./config/env.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import adminRoutes from "./modules/admin/admin.routes.js";
 import inviteRoutes from "./modules/invites/invite.routes.js";
@@ -14,9 +17,43 @@ import { errorHandler } from "./middlewares/error-handler.js";
 
 const app = express();
 
-app.use(cors());
+const corsOrigins = env.CORS_ORIGINS.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(helmet());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || corsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+
+const inviteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+});
+
+app.use("/auth/login", authLimiter);
+app.use("/auth/refresh", authLimiter);
+app.use("/invites/accept", inviteLimiter);
+app.use("/guardians/accept", inviteLimiter);
 
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);

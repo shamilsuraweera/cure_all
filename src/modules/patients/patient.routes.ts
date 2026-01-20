@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/enums.js";
+import { logAuditEvent } from "../../utils/audit.js";
 
 const router = Router();
 
@@ -195,6 +196,15 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
       include: { items: true },
     });
 
+    await logAuditEvent({
+      action: "prescription.create",
+      actorUserId: req.user?.sub ?? null,
+      targetType: "prescription",
+      targetId: prescription.id,
+      metadata: { patientId: patient.userId },
+      req,
+    });
+
     return res.status(201).json({ prescription });
   } catch (error) {
     return next(error);
@@ -366,6 +376,15 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
       include: {
         measures: true,
       },
+    });
+
+    await logAuditEvent({
+      action: "lab_result.create",
+      actorUserId: req.user?.sub ?? null,
+      targetType: "lab_result",
+      targetId: labResult.id,
+      metadata: { patientId: patient.userId, labTestTypeId },
+      req,
     });
 
     return res.status(201).json({ labResult });
