@@ -53,6 +53,8 @@ model User {
   guardianInvites GuardianInvite[] @relation("GuardianInvitePatient")
   prescriptionsAsPatient Prescription[] @relation("PrescriptionPatient")
   prescriptionsAsDoctor  Prescription[] @relation("PrescriptionDoctor")
+  labResultsAsPatient   LabResult[] @relation("LabResultPatient")
+  labResultsAsPerformer LabResult[] @relation("LabResultPerformer")
 }
 
 model Organization {
@@ -257,4 +259,39 @@ model LabMeasureDef {
   labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
 
   @@index([labTestTypeId])
+}
+
+model LabResult {
+  id            String   @id @default(uuid())
+  patientId     String
+  labTestTypeId String
+  performedById String
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  patient     User        @relation("LabResultPatient", fields: [patientId], references: [id])
+  labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
+  performedBy User        @relation("LabResultPerformer", fields: [performedById], references: [id])
+  measures    LabMeasureValue[]
+
+  @@index([patientId])
+  @@index([labTestTypeId])
+  @@index([performedById])
+}
+
+model LabMeasureValue {
+  id              String   @id @default(uuid())
+  labResultId     String
+  labMeasureDefId String
+  value           String
+  unit            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  labResult     LabResult     @relation(fields: [labResultId], references: [id])
+  labMeasureDef LabMeasureDef @relation(fields: [labMeasureDefId], references: [id])
+
+  @@index([labResultId])
+  @@index([labMeasureDefId])
 }
