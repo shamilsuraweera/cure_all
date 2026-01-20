@@ -283,4 +283,11 @@ router.get("/prescriptions/:id", requireAuth, async (req, res, next) => {
   }
 });
 
+router.all("/prescriptions/:id", requireAuth, (req, res) => {
+  if (req.method !== "GET") {
+    return res.status(405).json({ message: "Prescriptions are immutable" });
+  }
+  return res.status(405).json({ message: "Method not allowed" });
+});
+
 export default router;
