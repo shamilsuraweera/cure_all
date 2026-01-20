@@ -27,9 +27,10 @@ const main = async () => {
   });
 
   if (existing) {
+    const passwordHash = await hashPassword(env.ROOT_ADMIN_PASSWORD);
     await prisma.user.update({
       where: { email: env.ROOT_ADMIN_EMAIL },
-      data: { globalRole: "ROOT_ADMIN" },
+      data: { globalRole: "ROOT_ADMIN", passwordHash },
     });
     return;
   }

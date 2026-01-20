@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
-import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/enums.js";
+import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/index.js";
 import { logAuditEvent } from "../../utils/audit.js";
 import { buildPageMeta, getPagination } from "../../utils/pagination.js";
 import { sendError, sendSuccess } from "../../utils/response.js";
