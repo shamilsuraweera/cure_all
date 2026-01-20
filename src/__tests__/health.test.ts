@@ -6,13 +6,13 @@ describe("health endpoints", () => {
     const res = await request(app).get("/");
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ message: "Cure-All API running" });
+    expect(res.body.data).toEqual({ message: "Cure-All API running" });
   });
 
   it("GET /health responds with OK status", async () => {
     const res = await request(app).get("/health");
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: "OK" });
+    expect(res.body.data).toEqual({ status: "OK" });
   });
 });

@@ -78,6 +78,6 @@ describe("auth endpoints", () => {
       });
 
     expect(res.status).toBe(201);
-    expect(res.body.patient).toBeDefined();
+    expect(res.body.data.patient).toBeDefined();
   });
 });

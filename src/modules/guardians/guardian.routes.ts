@@ -6,6 +6,7 @@ import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole } from "../../generated/prisma/enums.js";
 import { hashPassword } from "../../utils/password.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
@@ -32,17 +33,17 @@ router.post(
       });
 
       if (!patientProfile) {
-        return res.status(404).json({ message: "Patient not found" });
+        return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
       }
 
       const isRoot = req.user?.globalRole === GlobalRole.ROOT_ADMIN;
       const isPatient = req.user?.sub === patientProfile.userId;
       if (!isRoot && !isPatient) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
 
       if (email.toLowerCase() === patientProfile.user.email.toLowerCase()) {
-        return res.status(400).json({ message: "Guardian cannot be the patient" });
+        return sendError(res, 400, "Guardian cannot be the patient", "INVALID_GUARDIAN");
       }
 
       const guardianUser = await prisma.user.findUnique({ where: { email } });
@@ -57,7 +58,7 @@ router.post(
         });
 
         if (existingLink) {
-          return res.status(409).json({ message: "Guardian already linked" });
+          return sendError(res, 409, "Guardian already linked", "GUARDIAN_LINK_EXISTS");
         }
       }
 
@@ -71,7 +72,7 @@ router.post(
       });
 
       if (activeInvite) {
-        return res.status(409).json({ message: "Invite already pending" });
+        return sendError(res, 409, "Invite already pending", "INVITE_EXISTS");
       }
 
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -86,7 +87,7 @@ router.post(
         },
       });
 
-      return res.status(201).json({ invite });
+      return sendSuccess(res, 201, { invite });
     } catch (error) {
       return next(error);
     }
@@ -99,11 +100,11 @@ router.post("/guardians/accept", async (req, res, next) => {
 
     const invite = await prisma.guardianInvite.findUnique({ where: { token } });
     if (!invite) {
-      return res.status(404).json({ message: "Invite not found" });
+      return sendError(res, 404, "Invite not found", "INVITE_NOT_FOUND");
     }
 
     if (invite.status !== "PENDING") {
-      return res.status(400).json({ message: "Invite is not active" });
+      return sendError(res, 400, "Invite is not active", "INVITE_NOT_ACTIVE");
     }
 
     if (invite.expiresAt.getTime() < Date.now()) {
@@ -111,7 +112,7 @@ router.post("/guardians/accept", async (req, res, next) => {
         where: { id: invite.id },
         data: { status: "EXPIRED" },
       });
-      return res.status(400).json({ message: "Invite expired" });
+      return sendError(res, 400, "Invite expired", "INVITE_EXPIRED");
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -167,7 +168,7 @@ router.post("/guardians/accept", async (req, res, next) => {
       return { patientId: patient.id, guardianId: guardian.id };
     });
 
-    return res.status(200).json(result);
+    return sendSuccess(res, 200, result);
   } catch (error) {
     return next(error);
   }

@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { hashPassword } from "../../utils/password.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.post("/accept", async (req, res, next) => {
 
     const invite = await prisma.orgInvite.findUnique({ where: { token } });
     if (!invite) {
-      return res.status(404).json({ message: "Invite not found" });
+      return sendError(res, 404, "Invite not found", "INVITE_NOT_FOUND");
     }
 
     const org = await prisma.organization.findUnique({
@@ -25,7 +26,7 @@ router.post("/accept", async (req, res, next) => {
       select: { domain: true },
     });
     if (!org) {
-      return res.status(404).json({ message: "Organization not found" });
+      return sendError(res, 404, "Organization not found", "ORG_NOT_FOUND");
     }
 
     if (org.domain) {
@@ -33,12 +34,12 @@ router.post("/accept", async (req, res, next) => {
       const orgDomain = org.domain.toLowerCase();
 
       if (!emailDomain || emailDomain !== orgDomain) {
-        return res.status(400).json({ message: "Email domain not allowed" });
+        return sendError(res, 400, "Email domain not allowed", "DOMAIN_NOT_ALLOWED");
       }
     }
 
     if (invite.status !== "PENDING") {
-      return res.status(400).json({ message: "Invite is not active" });
+      return sendError(res, 400, "Invite is not active", "INVITE_NOT_ACTIVE");
     }
 
     if (invite.expiresAt.getTime() < Date.now()) {
@@ -46,7 +47,7 @@ router.post("/accept", async (req, res, next) => {
         where: { id: invite.id },
         data: { status: "EXPIRED" },
       });
-      return res.status(400).json({ message: "Invite expired" });
+      return sendError(res, 400, "Invite expired", "INVITE_EXPIRED");
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -90,7 +91,7 @@ router.post("/accept", async (req, res, next) => {
       return user;
     });
 
-    return res.status(200).json({ userId: result.id });
+    return sendSuccess(res, 200, { userId: result.id });
   } catch (error) {
     return next(error);
   }

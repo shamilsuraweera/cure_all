@@ -2,20 +2,15 @@ import { Router } from "express";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
+import { buildPageMeta, getPagination } from "../../utils/pagination.js";
+import { sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
 router.get("/", requireAuth, async (req, res, next) => {
   try {
-    const page = Number(req.query.page ?? "1");
-    const pageSize = Number(req.query.pageSize ?? "20");
+    const { page, pageSize, skip, take } = getPagination(req.query);
     const query = String(req.query.q ?? "").trim();
-
-    const safePage = Number.isFinite(page) && page > 0 ? page : 1;
-    const safePageSize =
-      Number.isFinite(pageSize) && pageSize > 0 && pageSize <= 100
-        ? pageSize
-        : 20;
 
     const where = query
       ? {
@@ -29,19 +24,14 @@ router.get("/", requireAuth, async (req, res, next) => {
     const [items, total] = await Promise.all([
       prisma.medicine.findMany({
         where,
-        skip: (safePage - 1) * safePageSize,
-        take: safePageSize,
+        skip,
+        take,
         orderBy: { createdAt: "desc" },
       }),
       prisma.medicine.count({ where }),
     ]);
 
-    return res.status(200).json({
-      items,
-      page: safePage,
-      pageSize: safePageSize,
-      total,
-    });
+    return sendSuccess(res, 200, { items }, buildPageMeta(page, pageSize, total));
   } catch (error) {
     return next(error);
   }

@@ -5,6 +5,8 @@ import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/enums.js";
 import { logAuditEvent } from "../../utils/audit.js";
+import { buildPageMeta, getPagination } from "../../utils/pagination.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
@@ -75,15 +77,15 @@ router.get("/:id", requireAuth, async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     if (req.user?.globalRole === GlobalRole.ROOT_ADMIN) {
-      return res.status(200).json({ patient });
+      return sendSuccess(res, 200, { patient });
     }
 
     if (req.user?.sub === patient.userId) {
-      return res.status(200).json({ patient });
+      return sendSuccess(res, 200, { patient });
     }
 
     const hasAccess = await canAccessPatient(
@@ -92,10 +94,10 @@ router.get("/:id", requireAuth, async (req, res, next) => {
     );
 
     if (!hasAccess) {
-      return res.status(403).json({ message: "Forbidden" });
+      return sendError(res, 403, "Forbidden", "FORBIDDEN");
     }
 
-    return res.status(200).json({ patient });
+    return sendSuccess(res, 200, { patient });
   } catch (error) {
     return next(error);
   }
@@ -111,7 +113,7 @@ router.patch("/:id", requireAuth, async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -121,7 +123,7 @@ router.patch("/:id", requireAuth, async (req, res, next) => {
           req.user?.sub ?? "",
         );
         if (!hasAccess) {
-          return res.status(403).json({ message: "Forbidden" });
+          return sendError(res, 403, "Forbidden", "FORBIDDEN");
         }
       }
     }
@@ -131,7 +133,7 @@ router.patch("/:id", requireAuth, async (req, res, next) => {
       data: updateData,
     });
 
-    return res.status(200).json({ patient: updated });
+    return sendSuccess(res, 200, { patient: updated });
   } catch (error) {
     return next(error);
   }
@@ -147,7 +149,7 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -159,7 +161,7 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
       });
 
       if (!doctorMembership) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
@@ -173,7 +175,7 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
     });
 
     if (medicines.length !== medicineIds.length) {
-      return res.status(400).json({ message: "Invalid medicine selection" });
+      return sendError(res, 400, "Invalid medicine selection", "INVALID_MEDICINE");
     }
 
     const prescription = await prisma.prescription.create({
@@ -205,7 +207,7 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
       req,
     });
 
-    return res.status(201).json({ prescription });
+    return sendSuccess(res, 201, { prescription });
   } catch (error) {
     return next(error);
   }
@@ -220,7 +222,7 @@ router.get("/:id/prescriptions", requireAuth, async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -237,23 +239,35 @@ router.get("/:id/prescriptions", requireAuth, async (req, res, next) => {
       });
 
       if (!isPatient && !hasGuardianAccess && !isDoctor) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
-    const prescriptions = await prisma.prescription.findMany({
-      where: { patientId: patient.userId },
-      include: {
-        items: {
-          include: {
-            medicine: true,
+    const { page, pageSize, skip, take } = getPagination(req.query);
+
+    const [prescriptions, total] = await Promise.all([
+      prisma.prescription.findMany({
+        where: { patientId: patient.userId },
+        include: {
+          items: {
+            include: {
+              medicine: true,
+            },
           },
         },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      prisma.prescription.count({ where: { patientId: patient.userId } }),
+    ]);
 
-    return res.status(200).json({ prescriptions });
+    return sendSuccess(
+      res,
+      200,
+      { prescriptions },
+      buildPageMeta(page, pageSize, total),
+    );
   } catch (error) {
     return next(error);
   }
@@ -275,7 +289,7 @@ router.get("/prescriptions/:id", requireAuth, async (req, res, next) => {
     });
 
     if (!prescription) {
-      return res.status(404).json({ message: "Prescription not found" });
+      return sendError(res, 404, "Prescription not found", "PRESCRIPTION_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -292,11 +306,11 @@ router.get("/prescriptions/:id", requireAuth, async (req, res, next) => {
       });
 
       if (!isPatient && !hasGuardianAccess && !isDoctor) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
-    return res.status(200).json({ prescription });
+    return sendSuccess(res, 200, { prescription });
   } catch (error) {
     return next(error);
   }
@@ -304,9 +318,9 @@ router.get("/prescriptions/:id", requireAuth, async (req, res, next) => {
 
 router.all("/prescriptions/:id", requireAuth, (req, res) => {
   if (req.method !== "GET") {
-    return res.status(405).json({ message: "Prescriptions are immutable" });
+    return sendError(res, 405, "Prescriptions are immutable", "METHOD_NOT_ALLOWED");
   }
-  return res.status(405).json({ message: "Method not allowed" });
+  return sendError(res, 405, "Method not allowed", "METHOD_NOT_ALLOWED");
 });
 
 router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
@@ -321,7 +335,7 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -333,7 +347,7 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
       });
 
       if (!labMembership) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
@@ -342,7 +356,7 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
     });
 
     if (!labTestType || !labTestType.isActive) {
-      return res.status(400).json({ message: "Invalid lab test type" });
+      return sendError(res, 400, "Invalid lab test type", "INVALID_LAB_TEST");
     }
 
     const measureIds = measures.map((measure) => measure.labMeasureDefId);
@@ -356,7 +370,7 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
     });
 
     if (measureDefs.length !== measureIds.length) {
-      return res.status(400).json({ message: "Invalid measure selection" });
+      return sendError(res, 400, "Invalid measure selection", "INVALID_MEASURE");
     }
 
     const labResult = await prisma.labResult.create({
@@ -387,7 +401,7 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
       req,
     });
 
-    return res.status(201).json({ labResult });
+    return sendSuccess(res, 201, { labResult });
   } catch (error) {
     return next(error);
   }
@@ -402,7 +416,7 @@ router.get("/:id/lab-results", requireAuth, async (req, res, next) => {
     });
 
     if (!patient) {
-      return res.status(404).json({ message: "Patient not found" });
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -419,24 +433,37 @@ router.get("/:id/lab-results", requireAuth, async (req, res, next) => {
       });
 
       if (!isPatient && !hasGuardianAccess && !isLabTech) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
-    const labResults = await prisma.labResult.findMany({
-      where: { patientId: patient.userId },
-      include: {
-        labTestType: true,
-        measures: {
-          include: {
-            labMeasureDef: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const { page, pageSize, skip, take } = getPagination(req.query);
 
-    return res.status(200).json({ labResults });
+    const [labResults, total] = await Promise.all([
+      prisma.labResult.findMany({
+        where: { patientId: patient.userId },
+        include: {
+          labTestType: true,
+          measures: {
+            include: {
+              labMeasureDef: true,
+            },
+          },
+          attachments: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      prisma.labResult.count({ where: { patientId: patient.userId } }),
+    ]);
+
+    return sendSuccess(
+      res,
+      200,
+      { labResults },
+      buildPageMeta(page, pageSize, total),
+    );
   } catch (error) {
     return next(error);
   }

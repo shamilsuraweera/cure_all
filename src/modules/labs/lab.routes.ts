@@ -5,6 +5,7 @@ import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/enums.js";
 import { logAuditEvent } from "../../utils/audit.js";
+import { sendError, sendSuccess } from "../../utils/response.js";
 
 const router = Router();
 
@@ -46,7 +47,7 @@ router.get("/:id", requireAuth, async (req, res, next) => {
     });
 
     if (!labResult) {
-      return res.status(404).json({ message: "Lab result not found" });
+      return sendError(res, 404, "Lab result not found", "LAB_RESULT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -63,11 +64,11 @@ router.get("/:id", requireAuth, async (req, res, next) => {
       });
 
       if (!isPatient && !hasGuardianAccess && !isLabTech) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
-    return res.status(200).json({ labResult });
+    return sendSuccess(res, 200, { labResult });
   } catch (error) {
     return next(error);
   }
@@ -83,7 +84,7 @@ router.post("/:id/attachments", requireAuth, async (req, res, next) => {
     });
 
     if (!labResult) {
-      return res.status(404).json({ message: "Lab result not found" });
+      return sendError(res, 404, "Lab result not found", "LAB_RESULT_NOT_FOUND");
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
@@ -95,7 +96,7 @@ router.post("/:id/attachments", requireAuth, async (req, res, next) => {
       });
 
       if (!isLabTech) {
-        return res.status(403).json({ message: "Forbidden" });
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
 
@@ -118,7 +119,7 @@ router.post("/:id/attachments", requireAuth, async (req, res, next) => {
       req,
     });
 
-    return res.status(201).json({ attachment });
+    return sendSuccess(res, 201, { attachment });
   } catch (error) {
     return next(error);
   }
