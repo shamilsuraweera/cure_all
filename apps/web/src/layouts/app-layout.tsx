@@ -44,11 +44,17 @@ export const AppLayout = () => {
           {user?.globalRole === "ROOT_ADMIN" ? (
             <NavItem to="/root" label="Root Admin" />
           ) : null}
-          {user?.orgRoles?.includes("DOCTOR") ? (
+          {user?.globalRole === "ROOT_ADMIN" ||
+          user?.orgRoles?.includes("DOCTOR") ? (
             <NavItem to="/doctor" label="Doctor" />
           ) : null}
-          {user?.orgRoles?.includes("PHARMACIST") ? (
+          {user?.globalRole === "ROOT_ADMIN" ||
+          user?.orgRoles?.includes("PHARMACIST") ? (
             <NavItem to="/pharmacy" label="Pharmacy" />
+          ) : null}
+          {user?.globalRole === "ROOT_ADMIN" ||
+          user?.orgRoles?.includes("LAB_TECH") ? (
+            <NavItem to="/lab" label="Lab" />
           ) : null}
           <NavItem to="/login" label={isAuthenticated ? "Account" : "Login"} />
           {isAuthenticated ? (

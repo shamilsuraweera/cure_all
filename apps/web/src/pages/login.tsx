@@ -29,6 +29,10 @@ export const LoginPage = () => {
       navigate("/pharmacy");
       return;
     }
+    if (user?.orgRoles?.includes("LAB_TECH")) {
+      navigate("/lab");
+      return;
+    }
     navigate("/dashboard");
   }, [isAuthenticated, navigate, user]);
 

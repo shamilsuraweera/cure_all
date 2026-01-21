@@ -12,6 +12,7 @@ import patientRoutes from "./modules/patients/patient.routes.js";
 import guardianRoutes from "./modules/guardians/guardian.routes.js";
 import medicineRoutes from "./modules/medicines/medicine.routes.js";
 import labRoutes from "./modules/labs/lab.routes.js";
+import labCatalogRoutes from "./modules/labs/catalog.routes.js";
 import dispenseRoutes from "./modules/pharmacy/dispense.routes.js";
 import { errorHandler } from "./middlewares/error-handler.js";
 import { sendSuccess } from "./utils/response.js";
@@ -65,6 +66,7 @@ app.use("/patients", patientRoutes);
 app.use(guardianRoutes);
 app.use("/medicines", medicineRoutes);
 app.use("/lab-results", labRoutes);
+app.use("/lab-test-types", labCatalogRoutes);
 app.use("/prescriptions", dispenseRoutes);
 
 app.use(errorHandler);

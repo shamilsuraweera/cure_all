@@ -25,6 +25,10 @@ import { PatientDetailPage } from "./pages/doctor/patient-detail";
 import { PharmacyDashboardPage } from "./pages/pharmacy/pharmacy-dashboard";
 import { PharmacyPrescriptionLookupPage } from "./pages/pharmacy/prescription-lookup";
 import { PharmacyPrescriptionDetailPage } from "./pages/pharmacy/prescription-detail";
+import { LabDashboardPage } from "./pages/lab/lab-dashboard";
+import { LabPatientLookupPage } from "./pages/lab/patient-lookup";
+import { LabPatientDetailPage } from "./pages/lab/patient-detail";
+import { LabResultDetailPage } from "./pages/lab/lab-result-detail";
 
 const App = () => (
   <Routes>
@@ -215,6 +219,46 @@ const App = () => (
           <ProtectedRoute>
             <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["PHARMACIST"]}>
               <PharmacyPrescriptionDetailPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lab"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["LAB_TECH"]}>
+              <LabDashboardPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lab/patients"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["LAB_TECH"]}>
+              <LabPatientLookupPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lab/patients/:id"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["LAB_TECH"]}>
+              <LabPatientDetailPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/lab/results/:id"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["LAB_TECH"]}>
+              <LabResultDetailPage />
             </RoleGuard>
           </ProtectedRoute>
         }
