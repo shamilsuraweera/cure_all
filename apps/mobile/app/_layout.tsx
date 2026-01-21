@@ -13,7 +13,10 @@ export default function RootLayout() {
     <AppProviders>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="index" options={{ title: "Cure-All" }} />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ title: "Sign in" }} />
+          <Stack.Screen name="profile" options={{ title: "Profile" }} />
+          <Stack.Screen name="guardian/accept" options={{ title: "Guardian invite" }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
