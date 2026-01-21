@@ -166,6 +166,27 @@ router.get("/:id", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/me", requireAuth, async (req, res, next) => {
+  try {
+    const patient = await prisma.patientProfile.findUnique({
+      where: { userId: req.user?.sub ?? "" },
+      include: {
+        user: {
+          select: { id: true, email: true },
+        },
+      },
+    });
+
+    if (!patient) {
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
+    }
+
+    return sendSuccess(res, 200, { patient });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.patch("/:id", requireAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
