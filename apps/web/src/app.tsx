@@ -14,6 +14,11 @@ import { OrgInvitePage } from "./pages/root/org-invite";
 import { OrgListPage } from "./pages/root/org-list";
 import { InviteAcceptPage } from "./pages/root/invite-accept";
 import { PatientCreatePage } from "./pages/root/patient-create";
+import { MedicineListPage } from "./pages/root/medicine-list";
+import { MedicineCreatePage } from "./pages/root/medicine-create";
+import { LabTestListPage } from "./pages/root/lab-test-list";
+import { LabTestCreatePage } from "./pages/root/lab-test-create";
+import { LabMeasureCreatePage } from "./pages/root/lab-measure-create";
 
 const App = () => (
   <Routes>
@@ -94,6 +99,56 @@ const App = () => (
           <ProtectedRoute>
             <RoleGuard allow={["ROOT_ADMIN"]}>
               <RootChecklistPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/root/medicines"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allow={["ROOT_ADMIN"]}>
+              <MedicineListPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/root/medicines/create"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allow={["ROOT_ADMIN"]}>
+              <MedicineCreatePage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/root/lab-tests"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allow={["ROOT_ADMIN"]}>
+              <LabTestListPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/root/lab-tests/create"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allow={["ROOT_ADMIN"]}>
+              <LabTestCreatePage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/root/lab-tests/measures"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allow={["ROOT_ADMIN"]}>
+              <LabMeasureCreatePage />
             </RoleGuard>
           </ProtectedRoute>
         }

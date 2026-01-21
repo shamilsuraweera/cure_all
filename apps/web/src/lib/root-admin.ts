@@ -31,6 +31,33 @@ export type PatientProfile = {
   location?: string | null;
 };
 
+export type MedicineForm =
+  | "TABLET"
+  | "CAPSULE"
+  | "SYRUP"
+  | "INJECTION"
+  | "CREAM"
+  | "OTHER";
+
+export type Medicine = {
+  id: string;
+  name: string;
+  genericName?: string | null;
+  strength?: string | null;
+  form: MedicineForm;
+  manufacturer?: string | null;
+  notes?: string | null;
+  isActive: boolean;
+};
+
+export type LabTestType = {
+  id: string;
+  name: string;
+  code?: string | null;
+  description?: string | null;
+  isActive: boolean;
+};
+
 export const fetchOrgs = (page = 1, pageSize = 20) =>
   apiClient.get<{ items: Organization[] }>("/admin/orgs", {
     query: { page, pageSize },
@@ -66,3 +93,43 @@ export const createPatient = (payload: {
   location?: string;
   guardianEmail?: string;
 }) => apiClient.post<{ patient: PatientProfile }, typeof payload>("/admin/patients", payload);
+
+export const fetchMedicines = (page = 1, pageSize = 20, query = "") =>
+  apiClient.get<{ items: Medicine[] }>("/medicines", {
+    query: { page, pageSize, q: query || undefined },
+  });
+
+export const createMedicine = (payload: {
+  name: string;
+  genericName?: string;
+  strength?: string;
+  form: MedicineForm;
+  manufacturer?: string;
+  notes?: string;
+}) => apiClient.post<{ medicine: Medicine }, typeof payload>("/admin/medicines", payload);
+
+export const fetchLabTestTypes = (page = 1, pageSize = 20) =>
+  apiClient.get<{ items: LabTestType[] }>("/admin/lab-test-types", {
+    query: { page, pageSize },
+  });
+
+export const createLabTestType = (payload: {
+  name: string;
+  code?: string;
+  description?: string;
+}) =>
+  apiClient.post<{ labTestType: LabTestType }, typeof payload>(
+    "/admin/lab-test-types",
+    payload,
+  );
+
+export const createLabMeasure = (labTestTypeId: string, payload: {
+  name: string;
+  unit?: string;
+  normalRangeMin?: number;
+  normalRangeMax?: number;
+}) =>
+  apiClient.post<{ measure: { id: string } }, typeof payload>(
+    `/admin/lab-test-types/${labTestTypeId}/measures`,
+    payload,
+  );
