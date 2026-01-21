@@ -19,7 +19,7 @@ const NavItem = ({ to, label }: { to: string; label: string }) => (
 );
 
 export const AppLayout = () => {
-  const { isReady, refresh, logout, isAuthenticated } = useAuth();
+  const { isReady, refresh, logout, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     if (!isReady && import.meta.env.MODE !== "test") {
@@ -41,6 +41,9 @@ export const AppLayout = () => {
         <div className="flex items-center gap-3">
           <NavItem to="/" label="Overview" />
           <NavItem to="/dashboard" label="Dashboard" />
+          {user?.globalRole === "ROOT_ADMIN" ? (
+            <NavItem to="/dashboard" label="Root Admin" />
+          ) : null}
           <NavItem to="/login" label={isAuthenticated ? "Account" : "Login"} />
           {isAuthenticated ? (
             <button
