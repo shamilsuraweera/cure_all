@@ -73,14 +73,14 @@ router.get("/search", requireAuth, async (req, res, next) => {
     }
 
     if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
-      const isDoctor = await prisma.orgMember.findFirst({
+      const membership = await prisma.orgMember.findFirst({
         where: {
           userId: req.user?.sub ?? "",
-          role: OrgRole.DOCTOR,
+          role: { in: [OrgRole.DOCTOR, OrgRole.LAB_TECH] },
         },
       });
 
-      if (!isDoctor) {
+      if (!membership) {
         return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
@@ -146,13 +146,18 @@ router.get("/:id", requireAuth, async (req, res, next) => {
       return sendSuccess(res, 200, { patient });
     }
 
-    const hasAccess = await canAccessPatient(
-      patient.userId,
-      req.user?.sub ?? "",
-    );
-
+    const hasAccess = await canAccessPatient(patient.userId, req.user?.sub ?? "");
     if (!hasAccess) {
-      return sendError(res, 403, "Forbidden", "FORBIDDEN");
+      const membership = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: { in: [OrgRole.DOCTOR, OrgRole.LAB_TECH] },
+        },
+      });
+
+      if (!membership) {
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
+      }
     }
 
     return sendSuccess(res, 200, { patient });
