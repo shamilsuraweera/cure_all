@@ -254,6 +254,30 @@ router.post(
   },
 );
 
+router.get(
+  "/lab-test-types",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (req, res, next) => {
+    try {
+      const { page, pageSize, skip, take } = getPagination(req.query);
+
+      const [items, total] = await Promise.all([
+        prisma.labTestType.findMany({
+          skip,
+          take,
+          orderBy: { createdAt: "desc" },
+        }),
+        prisma.labTestType.count(),
+      ]);
+
+      return sendSuccess(res, 200, { items }, buildPageMeta(page, pageSize, total));
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 router.post(
   "/lab-test-types/:id/measures",
   requireAuth,

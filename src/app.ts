@@ -51,10 +51,12 @@ const inviteLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use("/auth/login", authLimiter);
-app.use("/auth/refresh", authLimiter);
-app.use("/invites/accept", inviteLimiter);
-app.use("/guardians/accept", inviteLimiter);
+if (env.NODE_ENV === "production") {
+  app.use("/auth/login", authLimiter);
+  app.use("/auth/refresh", authLimiter);
+  app.use("/invites/accept", inviteLimiter);
+  app.use("/guardians/accept", inviteLimiter);
+}
 
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
