@@ -44,6 +44,9 @@ export const AppLayout = () => {
           {user?.globalRole === "ROOT_ADMIN" ? (
             <NavItem to="/root" label="Root Admin" />
           ) : null}
+          {user?.orgRoles?.includes("DOCTOR") ? (
+            <NavItem to="/doctor" label="Doctor" />
+          ) : null}
           <NavItem to="/login" label={isAuthenticated ? "Account" : "Login"} />
           {isAuthenticated ? (
             <button

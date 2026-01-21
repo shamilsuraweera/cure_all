@@ -19,6 +19,9 @@ import { MedicineCreatePage } from "./pages/root/medicine-create";
 import { LabTestListPage } from "./pages/root/lab-test-list";
 import { LabTestCreatePage } from "./pages/root/lab-test-create";
 import { LabMeasureCreatePage } from "./pages/root/lab-measure-create";
+import { DoctorDashboardPage } from "./pages/doctor/doctor-dashboard";
+import { PatientLookupPage } from "./pages/doctor/patient-lookup";
+import { PatientDetailPage } from "./pages/doctor/patient-detail";
 
 const App = () => (
   <Routes>
@@ -37,7 +40,7 @@ const App = () => (
         path="/root"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <RootDashboardPage />
             </RoleGuard>
           </ProtectedRoute>
@@ -47,7 +50,7 @@ const App = () => (
         path="/root/orgs"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <OrgListPage />
             </RoleGuard>
           </ProtectedRoute>
@@ -57,7 +60,7 @@ const App = () => (
         path="/root/orgs/create"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <OrgCreatePage />
             </RoleGuard>
           </ProtectedRoute>
@@ -67,7 +70,7 @@ const App = () => (
         path="/root/orgs/invite"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <OrgInvitePage />
             </RoleGuard>
           </ProtectedRoute>
@@ -77,7 +80,7 @@ const App = () => (
         path="/root/orgs/accept"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <InviteAcceptPage />
             </RoleGuard>
           </ProtectedRoute>
@@ -87,7 +90,7 @@ const App = () => (
         path="/root/patients/create"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <PatientCreatePage />
             </RoleGuard>
           </ProtectedRoute>
@@ -97,7 +100,7 @@ const App = () => (
         path="/root/checklist"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <RootChecklistPage />
             </RoleGuard>
           </ProtectedRoute>
@@ -107,7 +110,7 @@ const App = () => (
         path="/root/medicines"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <MedicineListPage />
             </RoleGuard>
           </ProtectedRoute>
@@ -117,7 +120,7 @@ const App = () => (
         path="/root/medicines/create"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <MedicineCreatePage />
             </RoleGuard>
           </ProtectedRoute>
@@ -127,7 +130,7 @@ const App = () => (
         path="/root/lab-tests"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <LabTestListPage />
             </RoleGuard>
           </ProtectedRoute>
@@ -137,7 +140,7 @@ const App = () => (
         path="/root/lab-tests/create"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <LabTestCreatePage />
             </RoleGuard>
           </ProtectedRoute>
@@ -147,8 +150,38 @@ const App = () => (
         path="/root/lab-tests/measures"
         element={
           <ProtectedRoute>
-            <RoleGuard allow={["ROOT_ADMIN"]}>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]}>
               <LabMeasureCreatePage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["DOCTOR"]}>
+              <DoctorDashboardPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor/patients"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["DOCTOR"]}>
+              <PatientLookupPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/doctor/patients/:id"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["DOCTOR"]}>
+              <PatientDetailPage />
             </RoleGuard>
           </ProtectedRoute>
         }

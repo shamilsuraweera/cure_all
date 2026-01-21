@@ -26,6 +26,7 @@ type UserSummary = {
   id: string;
   email: string;
   globalRole: string;
+  orgRoles: string[];
 };
 
 type AuthProviderProps = {
@@ -44,13 +45,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   });
 
   const hydrateUser = useCallback(async () => {
-    const profile = await apiClient.get<{ user: UserSummary }>("/auth/me");
+    const profile = await apiClient.get<{
+      user: UserSummary & { orgMemberships?: { role: string }[] };
+    }>("/auth/me");
     if (profile.ok) {
+      const orgRoles =
+        profile.data?.user?.orgMemberships?.map((membership) => membership.role) ?? [];
+      const user = profile.data?.user
+        ? { ...profile.data.user, orgRoles }
+        : null;
       setState((prev) => ({
         ...prev,
         isReady: true,
         isAuthenticated: true,
-        user: profile.data?.user ?? null,
+        user,
       }));
       return true;
     }

@@ -62,8 +62,14 @@ router.get("/:id", requireAuth, async (req, res, next) => {
           role: OrgRole.LAB_TECH,
         },
       });
+      const isDoctor = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.DOCTOR,
+        },
+      });
 
-      if (!isPatient && !hasGuardianAccess && !isLabTech) {
+      if (!isPatient && !hasGuardianAccess && !isLabTech && !isDoctor) {
         return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
