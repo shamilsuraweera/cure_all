@@ -27,6 +27,7 @@ export type ApiClientOptions = {
   refreshPath?: string;
   logger?: (message: string, meta?: Record<string, unknown>) => void;
   debug?: boolean;
+  defaultHeaders?: Record<string, string>;
 };
 
 type RequestOptions = {
@@ -77,7 +78,9 @@ export const createApiClient = (options: ApiClientOptions) => {
 
   const refreshSession = async () => {
     const url = buildUrl(options.baseUrl, refreshPath);
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      ...options.defaultHeaders,
+    };
 
     if (authMode === "bearer" && options.tokenStorage) {
       const refreshToken = await options.tokenStorage.getRefreshToken();
@@ -92,6 +95,24 @@ export const createApiClient = (options: ApiClientOptions) => {
       credentials: authMode === "cookie" ? "include" : "omit",
     });
 
+    if (authMode === "bearer" && options.tokenStorage && res.ok) {
+      const payload = (await res.json().catch(() => ({}))) as ApiEnvelope<{
+        accessToken?: string;
+        refreshToken?: string;
+      }>;
+      const data = (payload as ApiSuccess<{
+        accessToken?: string;
+        refreshToken?: string;
+      }>).data;
+      if (data?.accessToken) {
+        await options.tokenStorage.setAccessToken(data.accessToken);
+      }
+      if (data?.refreshToken) {
+        await options.tokenStorage.setRefreshToken(data.refreshToken);
+      }
+      return true;
+    }
+
     return res.ok;
   };
 
@@ -105,6 +126,7 @@ export const createApiClient = (options: ApiClientOptions) => {
     const url = buildUrl(options.baseUrl, path, requestOptions.query);
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      ...options.defaultHeaders,
       ...requestOptions.headers,
     };
 
