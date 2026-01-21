@@ -79,7 +79,11 @@ router.post("/login", async (req, res, next) => {
       req,
     });
 
-    return sendSuccess(res, 200, { message: "Login successful" });
+    return sendSuccess(res, 200, {
+      message: "Login successful",
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     return next(error);
   }
@@ -95,6 +99,10 @@ router.post("/refresh", async (req, res, next) => {
         .map((part) => part.trim())
         .find((part) => part.startsWith("refresh_token="))
         ?.split("=")[1];
+    }
+
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.slice("Bearer ".length);
     }
 
     if (!token) {
@@ -147,7 +155,11 @@ router.post("/refresh", async (req, res, next) => {
       req,
     });
 
-    return sendSuccess(res, 200, { message: "Token refreshed" });
+    return sendSuccess(res, 200, {
+      message: "Token refreshed",
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     return next(error);
   }
@@ -157,9 +169,14 @@ router.post("/logout", async (req, res) => {
   let actorUserId: string | null = null;
   const accessToken = req.cookies?.access_token as string | undefined;
 
-  if (accessToken) {
+  const bearerToken = req.headers.authorization?.startsWith("Bearer ")
+    ? req.headers.authorization.slice("Bearer ".length)
+    : undefined;
+  const token = accessToken ?? bearerToken;
+
+  if (token) {
     try {
-      const payload = verifyAccessToken(accessToken);
+      const payload = verifyAccessToken(token);
       actorUserId = payload.sub;
     } catch (error) {
       actorUserId = null;
