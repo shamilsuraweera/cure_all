@@ -9,7 +9,7 @@ import { Input } from "../components/ui/input";
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -17,9 +17,15 @@ export const LoginPage = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/root");
+      if (user?.globalRole === "ROOT_ADMIN") {
+        navigate("/root");
+      } else if (user?.orgRoles?.includes("DOCTOR")) {
+        navigate("/doctor");
+      } else {
+        navigate("/dashboard");
+      }
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

@@ -188,6 +188,14 @@ router.get("/me", requireAuth, async (req, res, next) => {
         id: true,
         email: true,
         globalRole: true,
+        orgMemberships: {
+          select: {
+            role: true,
+            org: {
+              select: { id: true, type: true, name: true },
+            },
+          },
+        },
       },
     });
 

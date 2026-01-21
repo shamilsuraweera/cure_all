@@ -63,6 +63,64 @@ const createLabResultSchema = z.object({
     .min(1),
 });
 
+router.get("/search", requireAuth, async (req, res, next) => {
+  try {
+    const nic = String(req.query.nic ?? "").trim();
+    const email = String(req.query.email ?? "").trim();
+
+    if (!nic && !email) {
+      return sendError(res, 400, "NIC or email is required", "MISSING_QUERY");
+    }
+
+    if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
+      const isDoctor = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.DOCTOR,
+        },
+      });
+
+      if (!isDoctor) {
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
+      }
+    }
+
+    const { page, pageSize, skip, take } = getPagination(req.query);
+    const where = {
+      ...(nic ? { nic: { contains: nic } } : {}),
+      ...(email
+        ? {
+            user: {
+              email: { contains: email, mode: "insensitive" as const },
+            },
+          }
+        : {}),
+    };
+
+    const [patients, total] = await Promise.all([
+      prisma.patientProfile.findMany({
+        where,
+        include: {
+          user: { select: { id: true, email: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      prisma.patientProfile.count({ where }),
+    ]);
+
+    return sendSuccess(
+      res,
+      200,
+      { patients },
+      buildPageMeta(page, pageSize, total),
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -431,8 +489,14 @@ router.get("/:id/lab-results", requireAuth, async (req, res, next) => {
           role: OrgRole.LAB_TECH,
         },
       });
+      const isDoctor = await prisma.orgMember.findFirst({
+        where: {
+          userId: req.user?.sub ?? "",
+          role: OrgRole.DOCTOR,
+        },
+      });
 
-      if (!isPatient && !hasGuardianAccess && !isLabTech) {
+      if (!isPatient && !hasGuardianAccess && !isLabTech && !isDoctor) {
         return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
     }
