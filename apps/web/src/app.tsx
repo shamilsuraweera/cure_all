@@ -22,6 +22,9 @@ import { LabMeasureCreatePage } from "./pages/root/lab-measure-create";
 import { DoctorDashboardPage } from "./pages/doctor/doctor-dashboard";
 import { PatientLookupPage } from "./pages/doctor/patient-lookup";
 import { PatientDetailPage } from "./pages/doctor/patient-detail";
+import { PharmacyDashboardPage } from "./pages/pharmacy/pharmacy-dashboard";
+import { PharmacyPrescriptionLookupPage } from "./pages/pharmacy/prescription-lookup";
+import { PharmacyPrescriptionDetailPage } from "./pages/pharmacy/prescription-detail";
 
 const App = () => (
   <Routes>
@@ -182,6 +185,36 @@ const App = () => (
           <ProtectedRoute>
             <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["DOCTOR"]}>
               <PatientDetailPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pharmacy"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["PHARMACIST"]}>
+              <PharmacyDashboardPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pharmacy/prescriptions"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["PHARMACIST"]}>
+              <PharmacyPrescriptionLookupPage />
+            </RoleGuard>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pharmacy/prescriptions/:id"
+        element={
+          <ProtectedRoute>
+            <RoleGuard allowGlobal={["ROOT_ADMIN"]} allowOrg={["PHARMACIST"]}>
+              <PharmacyPrescriptionDetailPage />
             </RoleGuard>
           </ProtectedRoute>
         }
