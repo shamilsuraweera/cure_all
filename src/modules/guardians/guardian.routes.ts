@@ -174,4 +174,26 @@ router.post("/guardians/accept", async (req, res, next) => {
   }
 });
 
+router.get("/guardians/patients", requireAuth, async (req, res, next) => {
+  try {
+    const links = await prisma.guardianLink.findMany({
+      where: { guardianId: req.user?.sub ?? "", status: "ACTIVE" },
+      select: { patientId: true },
+    });
+
+    if (links.length === 0) {
+      return sendSuccess(res, 200, { patients: [] });
+    }
+
+    const patientProfiles = await prisma.patientProfile.findMany({
+      where: { userId: { in: links.map((link) => link.patientId) } },
+      include: { user: { select: { id: true, email: true } } },
+    });
+
+    return sendSuccess(res, 200, { patients: patientProfiles });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 export default router;

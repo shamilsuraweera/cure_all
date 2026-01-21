@@ -17,6 +17,12 @@ export default function RootLayout() {
           <Stack.Screen name="login" options={{ title: "Sign in" }} />
           <Stack.Screen name="profile" options={{ title: "Profile" }} />
           <Stack.Screen name="guardian/accept" options={{ title: "Guardian invite" }} />
+          <Stack.Screen name="prescriptions/index" options={{ title: "Prescriptions" }} />
+          <Stack.Screen name="prescriptions/[id]" options={{ title: "Prescription" }} />
+          <Stack.Screen name="dispenses/[id]" options={{ title: "Dispense history" }} />
+          <Stack.Screen name="labs/index" options={{ title: "Lab results" }} />
+          <Stack.Screen name="labs/[id]" options={{ title: "Lab result" }} />
+          <Stack.Screen name="labs/attachment" options={{ title: "Attachment" }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

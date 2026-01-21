@@ -33,6 +33,12 @@ export default function ProfileScreen() {
       <Pressable style={styles.action} onPress={() => router.push("/guardian/accept")}>
         <Text style={styles.actionText}>Accept guardian invite</Text>
       </Pressable>
+      <Pressable style={styles.action} onPress={() => router.push("/prescriptions")}>
+        <Text style={styles.actionText}>View prescriptions</Text>
+      </Pressable>
+      <Pressable style={styles.action} onPress={() => router.push("/labs")}>
+        <Text style={styles.actionText}>View lab results</Text>
+      </Pressable>
       <Pressable style={[styles.action, styles.logout]} onPress={handleLogout}>
         <Text style={styles.actionText}>Logout</Text>
       </Pressable>
