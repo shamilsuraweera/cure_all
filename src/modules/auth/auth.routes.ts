@@ -10,6 +10,7 @@ import {
   verifyRefreshToken,
   type JwtPayload,
 } from "../../utils/jwt.js";
+import { requireAuth } from "../../middlewares/require-auth.js";
 import { verifyPassword } from "../../utils/password.js";
 import { durationToMs } from "../../utils/time.js";
 import { logAuditEvent } from "../../utils/audit.js";
@@ -177,6 +178,27 @@ router.post("/logout", async (req, res) => {
   });
 
   return sendSuccess(res, 200, { message: "Logged out" });
+});
+
+router.get("/me", requireAuth, async (req, res, next) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user?.sub ?? "" },
+      select: {
+        id: true,
+        email: true,
+        globalRole: true,
+      },
+    });
+
+    if (!user) {
+      return sendError(res, 404, "User not found", "USER_NOT_FOUND");
+    }
+
+    return sendSuccess(res, 200, { user });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 export default router;
