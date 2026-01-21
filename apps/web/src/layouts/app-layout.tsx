@@ -42,7 +42,7 @@ export const AppLayout = () => {
           <NavItem to="/" label="Overview" />
           <NavItem to="/dashboard" label="Dashboard" />
           {user?.globalRole === "ROOT_ADMIN" ? (
-            <NavItem to="/dashboard" label="Root Admin" />
+            <NavItem to="/root" label="Root Admin" />
           ) : null}
           <NavItem to="/login" label={isAuthenticated ? "Account" : "Login"} />
           {isAuthenticated ? (
