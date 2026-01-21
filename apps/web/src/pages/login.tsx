@@ -16,15 +16,20 @@ export const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      if (user?.globalRole === "ROOT_ADMIN") {
-        navigate("/root");
-      } else if (user?.orgRoles?.includes("DOCTOR")) {
-        navigate("/doctor");
-      } else {
-        navigate("/dashboard");
-      }
+    if (!isAuthenticated) return;
+    if (user?.globalRole === "ROOT_ADMIN") {
+      navigate("/root");
+      return;
     }
+    if (user?.orgRoles?.includes("DOCTOR")) {
+      navigate("/doctor");
+      return;
+    }
+    if (user?.orgRoles?.includes("PHARMACIST")) {
+      navigate("/pharmacy");
+      return;
+    }
+    navigate("/dashboard");
   }, [isAuthenticated, navigate, user]);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -39,7 +44,7 @@ export const LoginPage = () => {
       return;
     }
 
-    navigate("/dashboard");
+    // Redirect handled by auth effect once user profile is loaded.
   };
 
   return (
