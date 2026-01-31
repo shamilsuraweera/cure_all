@@ -4,5 +4,7 @@ import { env } from "./config/env.js";
 const PORT = env.PORT;
 
 app.listen(PORT, () => {
-  console.log(`API running on http://localhost:${PORT}`);
+  const publicUrl =
+    process.env.RENDER_EXTERNAL_URL ?? `http://localhost:${PORT}`;
+  console.log(`API running on ${publicUrl}`);
 });
