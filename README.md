@@ -70,6 +70,18 @@ npm run dev
 
 API runs at `http://localhost:3000`.
 
+## Dev vs Prod behavior
+
+- `NODE_ENV=development` (local): no proxy trust; rate limits disabled.
+- `NODE_ENV=production` (deploy): trust proxy enabled; auth/invite rate limits enabled.
+- Local URLs live in `.env`; production URLs live in Render/Supabase env settings.
+
+Quick health checks:
+```bash
+curl http://localhost:3000/health
+curl https://<your-render-api>/health
+```
+
 ## Web app (admin)
 
 1) Install dependencies:
