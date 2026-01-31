@@ -1,49 +1,140 @@
-# Cure-All API (development setup)
+# Cure-All (development setup)
 
 ## Tech stack
 
-- Node.js (CommonJS)
+- Node.js (ESM)
 - Express 5 (REST API)
 - Prisma ORM + Prisma Client
 - PostgreSQL
-- dotenv, cors
-- nodemon (dev server)
+- Vite + React (web)
+- Expo Router + React Native (mobile)
 
-## Project initialization (what is currently set up)
+## Repo layout
 
-- Node.js project with `package.json` scripts for dev and start.
-- Express app in `src/app.js` with basic health and root routes.
-- Server entry in `src/server.js` using `app.listen`.
-- Prisma config in `prisma.config.ts` and schema in `prisma/schema.prisma`.
-- SQL bootstrap in `sql/create_db_user.sql` for creating a database and user.
+- `src/` backend API
+- `apps/web` admin web app
+- `apps/mobile` Expo mobile app
+- `packages/api-client` shared API client
+- `sql/` database create/reset scripts
 
-## Development environment setup
+## Prerequisites
 
-1) Install dependencies:
+- Node.js 20+
+- PostgreSQL 16+
+- Android Studio / emulator (for mobile)
+
+## Database setup (dev/test/shadow)
+
+Use the SQL scripts in `sql/` (run as postgres superuser):
+
+```bash
+psql -U postgres -f sql/dev_create.sql
+psql -U postgres -f sql/test_create.sql
+psql -U postgres -f sql/shadow_create.sql
+```
+
+To reset any database (destructive):
+
+```bash
+psql -U postgres -f sql/dev_reset.sql
+psql -U postgres -f sql/test_reset.sql
+psql -U postgres -f sql/shadow_reset.sql
+```
+
+## Backend (API)
+
+1) Install dependencies (repo root):
 
 ```bash
 npm install
 ```
 
-2) Create the database/user in PostgreSQL:
+2) Create `.env` from example and fill secrets:
 
 ```bash
-psql -U postgres -f sql/create_db_user.sql
+cp .env.example .env
 ```
 
-3) Create a `.env` file with your connection string:
+3) Run migrations + seed:
 
 ```bash
-DATABASE_URL="postgresql://cure_all_user:cure_all_db_pass@localhost:5432/cure_all_db"
+npx prisma migrate dev
+npx prisma db seed
 ```
 
-4) Start the dev server:
+4) Start API server:
 
 ```bash
 npm run dev
 ```
 
-## Notes
+API runs at `http://localhost:3000`.
 
-- The Prisma schema currently defines the datasource and client output only.
-- No models or migrations are present yet.
+## Web app (admin)
+
+1) Install dependencies:
+
+```bash
+cd apps/web
+npm install
+```
+
+2) Create env file:
+
+```bash
+cp .env.example .env
+```
+
+3) Start dev server:
+
+```bash
+npm run dev
+```
+
+Web app runs at `http://localhost:5173`.
+
+## Mobile app (Expo)
+
+1) Install dependencies:
+
+```bash
+cd apps/mobile
+npm install
+```
+
+2) Create env file:
+
+```bash
+cp .env.example .env
+```
+
+3) Start Metro:
+
+```bash
+npm start
+```
+
+4) Run on emulator:
+
+```bash
+npm run android
+```
+
+## Tests
+
+Backend:
+```bash
+npm test
+```
+
+Web:
+```bash
+cd apps/web
+npm test
+```
+
+API client:
+```bash
+cd packages/api-client
+npm test
+```
