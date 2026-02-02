@@ -76,6 +76,12 @@ API runs at `http://localhost:3000`.
 - `NODE_ENV=production` (deploy): trust proxy enabled; auth/invite rate limits enabled.
 - Local URLs live in `.env`; production URLs live in Render/Supabase env settings.
 
+### Cookies & auth
+
+- Local dev serves from the same host, so cookies use `SameSite=Strict`.
+- Production deploy must send cookies with `SameSite=None; Secure` so the web app (separate origin) can receive them.
+- The shared API client already sets `credentials: "include"` so the tokens round-trip with those cookies.
+
 Quick health checks:
 ```bash
 curl http://localhost:3000/health

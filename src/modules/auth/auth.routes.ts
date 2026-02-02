@@ -28,9 +28,13 @@ const isProd = env.NODE_ENV === "production";
 const accessCookieMaxAge = durationToMs(env.ACCESS_TOKEN_TTL);
 const refreshCookieMaxAge = durationToMs(env.REFRESH_TOKEN_TTL);
 
-const buildCookieOptions = (maxAge: number, path: string) => ({
+const buildCookieOptions = (
+  maxAge: number,
+  path: string,
+  forceSameSiteNone = false,
+) => ({
   httpOnly: true,
-  sameSite: "strict" as const,
+  sameSite: forceSameSiteNone ? ("none" as const) : ("strict" as const),
   secure: isProd,
   maxAge,
   path,
@@ -63,12 +67,12 @@ router.post("/login", async (req, res, next) => {
     res.cookie(
       "access_token",
       accessToken,
-      buildCookieOptions(accessCookieMaxAge, "/"),
+      buildCookieOptions(accessCookieMaxAge, "/", isProd),
     );
     res.cookie(
       "refresh_token",
       refreshToken,
-      buildCookieOptions(refreshCookieMaxAge, "/auth/refresh"),
+      buildCookieOptions(refreshCookieMaxAge, "/auth/refresh", isProd),
     );
 
     await logAuditEvent({
@@ -139,12 +143,12 @@ router.post("/refresh", async (req, res, next) => {
     res.cookie(
       "access_token",
       accessToken,
-      buildCookieOptions(accessCookieMaxAge, "/"),
+      buildCookieOptions(accessCookieMaxAge, "/", isProd),
     );
     res.cookie(
       "refresh_token",
       refreshToken,
-      buildCookieOptions(refreshCookieMaxAge, "/auth/refresh"),
+      buildCookieOptions(refreshCookieMaxAge, "/auth/refresh", isProd),
     );
 
     await logAuditEvent({
