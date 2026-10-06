@@ -72,8 +72,7 @@ app.use("/medicines", medicineRoutes);
 app.use("/lab-results", labRoutes);
 app.use("/lab-test-types", labCatalogRoutes);
 app.use("/prescriptions", dispenseRoutes);
-
-app.use(errorHandler);
+app.use("/pharmacy", dispenseRoutes);
 
 app.get("/health", (_req, res) => {
   sendSuccess(res, 200, { status: "OK" });
@@ -82,5 +81,16 @@ app.get("/health", (_req, res) => {
 app.get("/", (_req, res) => {
   sendSuccess(res, 200, { message: "Cure-All API running" });
 });
+
+app.use((_req, res) => {
+  res.status(404).json({
+    error: {
+      message: "Endpoint not found",
+      code: "NOT_FOUND",
+    },
+  });
+});
+
+app.use(errorHandler);
 
 export default app;

@@ -182,7 +182,7 @@ router.post("/logout", async (req, res) => {
     try {
       const payload = verifyAccessToken(token);
       actorUserId = payload.sub;
-    } catch (error) {
+    } catch (_error) {
       actorUserId = null;
     }
   }

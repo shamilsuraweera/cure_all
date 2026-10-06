@@ -290,4 +290,91 @@ router.get("/:id/dispenses", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/:id", requireAuth, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const prescription = await prisma.prescription.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            medicine: true,
+          },
+        },
+      },
+    });
+
+    if (!prescription) {
+      return sendError(res, 404, "Prescription not found", "PRESCRIPTION_NOT_FOUND");
+    }
+
+    if (req.user?.globalRole !== GlobalRole.ROOT_ADMIN) {
+      const isPatient = req.user?.sub === prescription.patientId;
+      const isDoctor = req.user?.sub === prescription.doctorId;
+      const hasGuardianAccess = await canAccessPatient(
+        prescription.patientId,
+        req.user?.sub ?? "",
+      );
+      const isPharmacist = await getPharmacyMembership(req.user?.sub ?? "");
+
+      if (!isPatient && !hasGuardianAccess && !isDoctor && !isPharmacist) {
+        return sendError(res, 403, "Forbidden", "FORBIDDEN");
+      }
+    }
+
+    const totals = await getDispensedTotals(prescription.id);
+    const remainingItems = getRemainingByItem(prescription.items, totals);
+
+    return sendSuccess(res, 200, { prescription, remainingItems });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/", requireAuth, async (req, res, next) => {
+  try {
+    const isRoot = req.user?.globalRole === GlobalRole.ROOT_ADMIN;
+    const isPharmacist = await getPharmacyMembership(req.user?.sub ?? "");
+    const isDoctor = await prisma.orgMember.findFirst({
+      where: { userId: req.user?.sub ?? "", role: OrgRole.DOCTOR },
+    });
+
+    if (!isRoot && !isPharmacist && !isDoctor) {
+      return sendError(res, 403, "Forbidden", "FORBIDDEN");
+    }
+
+    const { page, pageSize, skip, take } = getPagination(req.query);
+    const statusParam = req.query.status as PrescriptionStatus | undefined;
+
+    const where = statusParam ? { status: statusParam } : {};
+
+    const [prescriptions, total] = await Promise.all([
+      prisma.prescription.findMany({
+        where,
+        include: {
+          items: {
+            include: {
+              medicine: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+      }),
+      prisma.prescription.count({ where }),
+    ]);
+
+    return sendSuccess(
+      res,
+      200,
+      { prescriptions },
+      buildPageMeta(page, pageSize, total),
+    );
+  } catch (error) {
+    return next(error);
+  }
+});
+
 export default router;

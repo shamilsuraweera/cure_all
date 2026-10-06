@@ -46,7 +46,7 @@ describe("auth endpoints", () => {
 
   it("POST /auth/logout clears cookies", async () => {
     const agent = request.agent(app);
-    const loginRes = await agent.post("/auth/login").send({
+    await agent.post("/auth/login").send({
       email: process.env.ROOT_ADMIN_EMAIL,
       password: process.env.ROOT_ADMIN_PASSWORD,
     });

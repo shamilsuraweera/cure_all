@@ -25,6 +25,7 @@ export type ApiClientOptions = {
     refreshPath?: string;
     logger?: (message: string, meta?: Record<string, unknown>) => void;
     debug?: boolean;
+    defaultHeaders?: Record<string, string>;
 };
 type RequestOptions = {
     headers?: Record<string, string>;

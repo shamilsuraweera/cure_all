@@ -97,4 +97,38 @@ router.post("/accept", async (req, res, next) => {
   }
 });
 
+router.get("/verify/:token", async (req, res, next) => {
+  try {
+    const { token } = req.params;
+
+    const invite = await prisma.orgInvite.findUnique({
+      where: { token },
+      include: {
+        org: {
+          select: { id: true, name: true, type: true, domain: true },
+        },
+      },
+    });
+
+    if (!invite) {
+      return sendError(res, 404, "Invite not found", "INVITE_NOT_FOUND");
+    }
+
+    const isExpired = invite.expiresAt.getTime() < Date.now();
+
+    return sendSuccess(res, 200, {
+      invite: {
+        id: invite.id,
+        email: invite.email,
+        role: invite.role,
+        status: isExpired ? "EXPIRED" : invite.status,
+        expiresAt: invite.expiresAt,
+        org: invite.org,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 export default router;

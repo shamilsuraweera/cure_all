@@ -35,6 +35,8 @@ const App = () => (
     <Route element={<AppLayout />}>
       <Route index element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/invite/accept" element={<InviteAcceptPage />} />
+      <Route path="/accept-invite" element={<InviteAcceptPage />} />
       <Route
         path="/dashboard"
         element={
