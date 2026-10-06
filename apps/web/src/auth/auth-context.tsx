@@ -16,7 +16,7 @@ type AuthState = {
 
 type AuthContextValue = AuthState & {
   refresh: () => Promise<void>;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
 };
 
@@ -84,11 +84,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
 
     if (!result.ok) {
       setState((prev) => ({ ...prev, isReady: true, isAuthenticated: false, user: null }));
-      return false;
+      return { ok: false, error: result.error?.message ?? "Invalid email or password" };
     }
 
     await hydrateUser();
-    return true;
+    return { ok: true };
   }, [hydrateUser]);
 
   const logout = useCallback(async () => {

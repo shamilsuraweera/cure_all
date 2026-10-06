@@ -78,3 +78,16 @@ export const createPrescription = (
     `/patients/${patientProfileId}/prescriptions`,
     payload,
   );
+
+export type DoctorMedicine = {
+  id: string;
+  name: string;
+  genericName?: string | null;
+  strength?: string | null;
+  form: string;
+};
+
+export const fetchMedicines = (query = "") =>
+  apiClient.get<{ items: DoctorMedicine[] }>("/medicines", {
+    query: { q: query || undefined, pageSize: 50 },
+  });

@@ -127,33 +127,53 @@ export const PharmacyPrescriptionDetailPage = () => {
               <div className="space-y-2">
                 {prescription.items.map((item) => {
                   const remaining = remainingById.get(item.id);
+                  const dispensed = remaining?.dispensedQuantity ?? 0;
+                  const remainingQty = remaining?.remainingQuantity ?? item.quantity;
+                  const percent = Math.min(100, Math.round((dispensed / item.quantity) * 100));
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-slate-100 bg-white px-4 py-3"
+                      className="rounded-2xl border border-slate-100 bg-white p-4 space-y-2 shadow-sm"
                     >
-                      <p className="font-medium text-slate-800">
-                        {item.medicine.name}{" "}
-                        {item.medicine.strength ? `· ${item.medicine.strength}` : ""}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {item.dose} · {item.frequency} · {item.durationDays} days
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        Remaining {remaining?.remainingQuantity ?? item.quantity} of{" "}
-                        {item.quantity}
-                      </p>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-slate-800">
+                            {item.medicine.name}{" "}
+                            {item.medicine.strength ? `· ${item.medicine.strength}` : ""}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {item.dose} · {item.frequency} · {item.durationDays} days
+                          </p>
+                        </div>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                          {dispensed} / {item.quantity} dispensed
+                        </span>
+                      </div>
+
+                      <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${
+                            percent === 100 ? "bg-emerald-500" : percent > 0 ? "bg-amber-500" : "bg-slate-300"
+                          }`}
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+
+                      <div className="flex justify-between text-xs text-slate-500 pt-1">
+                        <span>Remaining to dispense:</span>
+                        <strong className="text-slate-800">{remainingQty} units</strong>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             </div>
           ) : (
-            <p>Verify a prescription to continue.</p>
+            <p className="text-sm text-slate-400">Verifying prescription details...</p>
           )}
         </Card>
 
-        <Card title="Dispense" eyebrow="Pharmacy">
+        <Card title="Dispense medication" eyebrow="Pharmacy action">
           <form className="space-y-4" onSubmit={submitDispense}>
             {prescription?.items.map((item) => {
               const remaining = remainingById.get(item.id);
@@ -162,34 +182,49 @@ export const PharmacyPrescriptionDetailPage = () => {
               const numericValue = Number(value || 0);
               const overLimit = numericValue > remainingQty;
               return (
-                <Input
-                  key={item.id}
-                  label={`${item.medicine.name} (${item.quantity} total)`}
-                  value={value}
-                  onChange={(event) => updateQuantity(item.id, event.target.value)}
-                  type="number"
-                  min={0}
-                  max={remainingQty}
-                  helperText={`Remaining: ${remainingQty}`}
-                  className={overLimit ? "border-rose-300 focus:border-rose-400" : ""}
-                />
+                <div key={item.id} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 space-y-2">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="font-medium text-slate-700">{item.medicine.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, String(remainingQty))}
+                      disabled={remainingQty === 0}
+                      className="text-xs font-semibold text-tide hover:underline disabled:opacity-40"
+                    >
+                      Fill Max ({remainingQty})
+                    </button>
+                  </div>
+                  <Input
+                    label=""
+                    placeholder={`Qty to dispense (max ${remainingQty})`}
+                    value={value}
+                    onChange={(event) => updateQuantity(item.id, event.target.value)}
+                    type="number"
+                    min={0}
+                    max={remainingQty}
+                    disabled={remainingQty === 0}
+                    className={overLimit ? "border-rose-400 focus:border-rose-500" : ""}
+                  />
+                </div>
               );
             })}
             <Input
-              label="Notes"
+              label="Dispense Notes / Verification ID"
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
-              placeholder="Optional dispense notes"
+              placeholder="e.g. Batch #4912, patient identity verified."
             />
-            <Button type="submit">Dispense</Button>
+            <Button type="submit">Complete Dispense</Button>
             {status ? (
-              <p
-                className={`text-sm ${
-                  status.tone === "success" ? "text-emerald-600" : "text-rose-500"
+              <div
+                className={`rounded-2xl border p-3.5 text-sm ${
+                  status.tone === "success"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                    : "border-rose-200 bg-rose-50 text-rose-800"
                 }`}
               >
                 {status.message}
-              </p>
+              </div>
             ) : null}
           </form>
         </Card>

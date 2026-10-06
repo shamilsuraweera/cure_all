@@ -31,7 +31,9 @@ export const createApiClient = (options) => {
     const refreshPath = options.refreshPath ?? "/auth/refresh";
     const refreshSession = async () => {
         const url = buildUrl(options.baseUrl, refreshPath);
-        const headers = {};
+        const headers = {
+            ...options.defaultHeaders,
+        };
         if (authMode === "bearer" && options.tokenStorage) {
             const refreshToken = await options.tokenStorage.getRefreshToken();
             if (refreshToken) {
@@ -43,12 +45,24 @@ export const createApiClient = (options) => {
             headers,
             credentials: authMode === "cookie" ? "include" : "omit",
         });
+        if (authMode === "bearer" && options.tokenStorage && res.ok) {
+            const payload = (await res.json().catch(() => ({})));
+            const data = payload.data;
+            if (data?.accessToken) {
+                await options.tokenStorage.setAccessToken(data.accessToken);
+            }
+            if (data?.refreshToken) {
+                await options.tokenStorage.setRefreshToken(data.refreshToken);
+            }
+            return true;
+        }
         return res.ok;
     };
     const request = async (method, path, body, requestOptions = {}, attempt = 0) => {
         const url = buildUrl(options.baseUrl, path, requestOptions.query);
         const headers = {
             "Content-Type": "application/json",
+            ...options.defaultHeaders,
             ...requestOptions.headers,
         };
         if (authMode === "bearer" && options.tokenStorage) {

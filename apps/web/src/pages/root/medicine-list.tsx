@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import { SectionHeader } from "../../components/root/section-header";
@@ -12,17 +13,25 @@ export const MedicineListPage = () => {
 
   const { data, isLoading } = useQuery({
     queryKey: ["medicines", page, query],
-    queryFn: () => fetchMedicines(page, 20, query),
+    queryFn: () => fetchMedicines(page, 50, query),
   });
 
   const medicines = data?.data?.items ?? [];
 
   return (
     <div>
-      <SectionHeader
-        title="Medicines catalog"
-        subtitle="Search and review medicines available for prescriptions."
-      />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <SectionHeader
+          title="Medicines catalog"
+          subtitle="Search and review pharmaceutical items available for clinical prescriptions."
+        />
+        <Link
+          to="/root/medicines/create"
+          className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-glow hover:bg-slate-800 transition"
+        >
+          + Create Medicine
+        </Link>
+      </div>
       <Card title="Catalog" eyebrow="Root admin">
         <div className="mb-4">
           <Input

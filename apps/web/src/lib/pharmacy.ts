@@ -58,3 +58,17 @@ export const fetchDispenseHistory = (prescriptionId: string, page = 1, pageSize 
     `/pharmacy/${prescriptionId}/dispenses`,
     { query: { page, pageSize } },
   );
+
+export const listPrescriptions = (params?: { page?: number; pageSize?: number; status?: string }) =>
+  apiClient.get<{ prescriptions: Prescription[] }>("/prescriptions", {
+    query: {
+      page: params?.page ?? 1,
+      pageSize: params?.pageSize ?? 20,
+      status: params?.status,
+    },
+  });
+
+export const getPrescriptionDetail = (prescriptionId: string) =>
+  apiClient.get<{ prescription: Prescription; remainingItems?: RemainingItem[] }>(
+    `/prescriptions/${prescriptionId}`,
+  );

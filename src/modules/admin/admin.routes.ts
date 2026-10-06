@@ -355,4 +355,50 @@ router.post(
   },
 );
 
+router.get(
+  "/stats",
+  requireAuth,
+  requireGlobalRole([GlobalRole.ROOT_ADMIN]),
+  async (_req, res, next) => {
+    try {
+      const [
+        totalOrgs,
+        activeOrgs,
+        totalPatients,
+        totalMedicines,
+        totalLabTests,
+        totalPrescriptions,
+        dispensedPrescriptions,
+        totalLabResults,
+      ] = await Promise.all([
+        prisma.organization.count(),
+        prisma.organization.count({ where: { status: "ACTIVE" } }),
+        prisma.patientProfile.count(),
+        prisma.medicine.count({ where: { isActive: true } }),
+        prisma.labTestType.count({ where: { isActive: true } }),
+        prisma.prescription.count(),
+        prisma.prescription.count({ where: { status: "DISPENSED" } }),
+        prisma.labResult.count(),
+      ]);
+
+      return sendSuccess(res, 200, {
+        stats: {
+          totalOrgs,
+          activeOrgs,
+          suspendedOrgs: totalOrgs - activeOrgs,
+          totalPatients,
+          totalMedicines,
+          totalLabTests,
+          totalPrescriptions,
+          dispensedPrescriptions,
+          activePrescriptions: totalPrescriptions - dispensedPrescriptions,
+          totalLabResults,
+        },
+      });
+    } catch (error) {
+      return next(error);
+    }
+  },
+);
+
 export default router;

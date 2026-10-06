@@ -133,3 +133,36 @@ export const createLabMeasure = (labTestTypeId: string, payload: {
     `/admin/lab-test-types/${labTestTypeId}/measures`,
     payload,
   );
+
+export type AdminStats = {
+  totalOrgs: number;
+  activeOrgs: number;
+  suspendedOrgs: number;
+  totalPatients: number;
+  totalMedicines: number;
+  totalLabTests: number;
+  totalPrescriptions: number;
+  dispensedPrescriptions: number;
+  activePrescriptions: number;
+  totalLabResults: number;
+};
+
+export const fetchAdminStats = () =>
+  apiClient.get<{ stats: AdminStats }>("/admin/stats");
+
+export type OrgInviteDetails = {
+  id: string;
+  email: string;
+  role: string;
+  status: string;
+  expiresAt: string;
+  org: {
+    id: string;
+    name: string;
+    type: OrgType;
+    domain?: string | null;
+  };
+};
+
+export const verifyOrgInvite = (token: string) =>
+  apiClient.get<{ invite: OrgInviteDetails }>(`/invites/verify/${token}`);
