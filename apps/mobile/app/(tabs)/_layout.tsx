@@ -8,6 +8,7 @@ import { useTheme } from "@/src/theme";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
+// eslint-disable-next-line react/display-name
 const icon =
   (active: IconName, inactive: IconName) =>
   ({
