@@ -14,4 +14,24 @@ const envSchema = z.object({
     .default("http://localhost:5173,http://localhost:3000"),
 });
 
-export const env = envSchema.parse(process.env);
+export const env = envSchema
+  .superRefine((cfg, ctx) => {
+    if (cfg.NODE_ENV !== "production") return;
+    for (const key of ["JWT_SECRET", "JWT_REFRESH_SECRET"] as const) {
+      if (cfg[key].length < 32) {
+        ctx.addIssue({
+          code: "custom",
+          path: [key],
+          message: `${key} must be at least 32 characters in production`,
+        });
+      }
+    }
+    if (cfg.JWT_SECRET === cfg.JWT_REFRESH_SECRET) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["JWT_REFRESH_SECRET"],
+        message: "JWT_REFRESH_SECRET must differ from JWT_SECRET",
+      });
+    }
+  })
+  .parse(process.env);
