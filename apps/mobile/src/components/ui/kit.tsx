@@ -259,6 +259,7 @@ export const Field = ({ label, error, hint, style, ...props }: FieldProps) => {
         onBlur={() => setFocused(false)}
         style={[
           styles.input,
+          props.multiline && styles.multiline,
           {
             backgroundColor: theme.surface,
             color: theme.text,
@@ -496,6 +497,7 @@ export const Segmented = <T extends string>({
   return (
     <ScrollView
       horizontal
+      style={styles.segmented}
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.chips}
     >
@@ -721,6 +723,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
   },
+  multiline: { minHeight: 96, textAlignVertical: "top" },
   hint: { fontSize: 12 },
   badge: {
     alignSelf: "flex-start",
@@ -745,6 +748,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  segmented: { flexGrow: 0, flexShrink: 0 },
   chips: { gap: 8, paddingVertical: 2 },
   chip: {
     paddingHorizontal: 14,
@@ -763,7 +767,7 @@ const styles = StyleSheet.create({
     padding: 18,
     maxHeight: "65%",
   },
-  sheetList: { flexGrow: 0 },
+  sheetList: { flexGrow: 0, flexShrink: 1 },
   grabber: {
     alignSelf: "center",
     width: 44,
