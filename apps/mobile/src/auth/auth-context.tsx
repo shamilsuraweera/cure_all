@@ -25,11 +25,17 @@ type AuthContextValue = AuthState & {
   refresh: () => Promise<void>;
 };
 
+export type Membership = {
+  role: string;
+  org: { id: string; type: string; name: string };
+};
+
 type UserSummary = {
   id: string;
   email: string;
   globalRole: string;
   orgRoles: string[];
+  memberships: Membership[];
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -43,7 +49,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const hydrateUser = useCallback(async () => {
     const profile = await apiClient.get<{
-      user: UserSummary & { orgMemberships?: { role: string }[] };
+      user: Omit<UserSummary, "orgRoles" | "memberships"> & {
+        orgMemberships?: Membership[];
+      };
     }>("/auth/me");
 
     if (profile.ok) {
@@ -52,7 +60,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           (membership) => membership.role,
         ) ?? [];
       const user = profile.data?.user
-        ? { ...profile.data.user, orgRoles }
+        ? {
+            ...profile.data.user,
+            orgRoles,
+            memberships: profile.data.user.orgMemberships ?? [],
+          }
         : null;
       setState({ isReady: true, isAuthenticated: true, user });
       return true;

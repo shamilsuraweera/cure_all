@@ -1,135 +1,117 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Linking } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 
-import { getLabResultDetail } from "@/src/lib/patient-records";
+import { useRoles } from "@/src/auth/roles";
+import {
+  Badge,
+  Body,
+  Button,
+  Card,
+  ListItem,
+  QueryState,
+  Screen,
+  SectionTitle,
+  Subtitle,
+  Title,
+} from "@/src/components/ui";
+import { fetchLabResultDetail } from "@/src/lib/lab";
+import { errorMessage, formatDate, unwrap } from "@/src/lib/query";
+import { useTheme } from "@/src/theme";
+
+const flag = (value: string, min?: number | null, max?: number | null) => {
+  const n = Number(value);
+  if (Number.isNaN(n)) return null;
+  if (min != null && n < min) return "low" as const;
+  if (max != null && n > max) return "high" as const;
+  return "normal" as const;
+};
 
 export default function LabResultDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const roles = useRoles();
+  const theme = useTheme();
 
-  const resultQuery = useQuery({
+  const query = useQuery({
     queryKey: ["lab-result-detail", id],
-    queryFn: () => getLabResultDetail(id ?? ""),
-    enabled: Boolean(id),
+    queryFn: () => unwrap(fetchLabResultDetail(id as string)),
+    enabled: !!id,
   });
-
-  const labResult = resultQuery.data?.ok
-    ? resultQuery.data.data?.labResult
-    : undefined;
-  const attachments = labResult?.attachments ?? [];
+  const result = query.data?.labResult;
+  const attachments = result?.attachments ?? [];
 
   return (
-    <ScrollView style={styles.container}>
-      {resultQuery.isLoading ? (
-        <Text style={styles.helper}>Loading lab result...</Text>
-      ) : resultQuery.data?.ok === false ? (
-        <Text style={styles.helper}>
-          {resultQuery.data.error?.message ?? "Unable to load lab result."}
-        </Text>
-      ) : labResult ? (
-        <View>
-          <Text style={styles.title}>{labResult.labTestType.name}</Text>
-          <Text style={styles.meta}>
-            {new Date(labResult.createdAt).toLocaleString()}
-          </Text>
+    <Screen onRefresh={() => query.refetch()}>
+      <Stack.Screen options={{ title: "Lab result" }} />
+      <QueryState
+        isLoading={query.isLoading}
+        error={errorMessage(query.error)}
+        onRetry={() => query.refetch()}
+      >
+        {result ? (
+          <>
+            <Title>{result.labTestType.name}</Title>
+            <Subtitle>{formatDate(result.createdAt)}</Subtitle>
 
-          <Text style={styles.sectionTitle}>Measures</Text>
-          {labResult.measures.map((measure) => (
-            <View key={measure.labMeasureDef.name} style={styles.card}>
-              <Text style={styles.cardTitle}>{measure.labMeasureDef.name}</Text>
-              <Text style={styles.cardMeta}>
-                {measure.value} {measure.unit ?? ""}
-              </Text>
-            </View>
-          ))}
+            <SectionTitle>Measures</SectionTitle>
+            {result.measures.map((m, i) => {
+              const state = flag(m.value, m.labMeasureDef.normalRangeMin, m.labMeasureDef.normalRangeMax);
+              const range =
+                m.labMeasureDef.normalRangeMin != null || m.labMeasureDef.normalRangeMax != null
+                  ? `Normal: ${m.labMeasureDef.normalRangeMin ?? "–"} to ${m.labMeasureDef.normalRangeMax ?? "–"}`
+                  : null;
+              return (
+                <Card key={m.labMeasureDef.name} index={i}>
+                  <Body>{m.labMeasureDef.name}</Body>
+                  <Title>
+                    {m.value} {m.unit ?? m.labMeasureDef.unit ?? ""}
+                  </Title>
+                  {range ? <Subtitle>{range}</Subtitle> : null}
+                  {state && state !== "normal" ? (
+                    <Badge label={state === "low" ? "Below range" : "Above range"} tone="danger" />
+                  ) : state === "normal" ? (
+                    <Badge label="Within range" tone="success" />
+                  ) : null}
+                </Card>
+              );
+            })}
+            {result.notes ? (
+              <Card>
+                <Subtitle>{result.notes}</Subtitle>
+              </Card>
+            ) : null}
 
-          {labResult.notes ? (
-            <Text style={styles.notes}>Notes: {labResult.notes}</Text>
-          ) : null}
-
-          <Text style={styles.sectionTitle}>Attachments</Text>
-          {attachments.length === 0 ? (
-            <Text style={styles.helper}>No attachments yet.</Text>
-          ) : (
-            attachments.map((attachment) => (
-              <Text
-                key={attachment.id}
-                style={styles.link}
+            <SectionTitle>Attachments</SectionTitle>
+            {attachments.length === 0 ? <Subtitle>No attachments.</Subtitle> : null}
+            {attachments.map((a, i) => (
+              <ListItem
+                key={a.id}
+                index={i}
+                icon="attach"
+                title={a.fileName}
+                subtitle={a.mimeType ?? "File"}
                 onPress={() =>
-                  router.push({
-                    pathname: "/labs/attachment",
-                    params: {
-                      url: attachment.url,
-                      name: attachment.fileName,
-                      mimeType: attachment.mimeType ?? "",
-                    },
-                  })
+                  a.mimeType?.startsWith("image/")
+                    ? router.push({
+                        pathname: "/labs/attachment",
+                        params: { url: a.url, name: a.fileName, mimeType: a.mimeType ?? "" },
+                      })
+                    : void Linking.openURL(a.url)
                 }
-              >
-                {attachment.fileName}
-              </Text>
-            ))
-          )}
-        </View>
-      ) : (
-        <Text style={styles.helper}>Lab result not found.</Text>
-      )}
-    </ScrollView>
+              />
+            ))}
+            {roles.isLabTech ? (
+              <Button
+                title="Add attachment link"
+                icon="link"
+                variant="outline"
+                onPress={() => router.push(`/labs/add-attachment?id=${result.id}`)}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </QueryState>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F0FDFA",
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#134E4A",
-  },
-  meta: {
-    marginTop: 6,
-    fontSize: 12,
-    color: "#5F8F8B",
-  },
-  sectionTitle: {
-    marginTop: 16,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#134E4A",
-  },
-  card: {
-    marginTop: 12,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#CCFBF1",
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#134E4A",
-  },
-  cardMeta: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#3F6B68",
-  },
-  notes: {
-    marginTop: 12,
-    color: "#2F5553",
-  },
-  link: {
-    marginTop: 10,
-    color: "#134E4A",
-    fontWeight: "600",
-  },
-  helper: {
-    marginTop: 12,
-    color: "#3F6B68",
-  },
-});

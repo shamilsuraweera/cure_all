@@ -5,6 +5,8 @@ export type PatientProfile = {
   userId: string;
   nic: string;
   name?: string | null;
+  dob?: string | null;
+  location?: string | null;
   user: { id: string; email: string };
 };
 
@@ -86,3 +88,27 @@ export const getPatientLabResults = (patientProfileId: string) =>
 
 export const getLabResultDetail = (labResultId: string) =>
   apiClient.get<{ labResult: LabResult }>(`/lab-results/${labResultId}`);
+
+export const updatePatientProfile = (
+  patientProfileId: string,
+  payload: { name?: string; dob?: string; location?: string },
+) =>
+  apiClient.patch<{ patient: PatientProfile }, typeof payload>(
+    `/patients/${patientProfileId}`,
+    payload,
+  );
+
+export type GuardianInvite = {
+  id: string;
+  patientId: string;
+  email: string;
+  token: string;
+  status: string;
+  expiresAt: string;
+};
+
+export const inviteGuardian = (patientProfileId: string, email: string) =>
+  apiClient.post<{ invite: GuardianInvite }, { email: string }>(
+    `/patients/${patientProfileId}/guardians/invite`,
+    { email },
+  );
