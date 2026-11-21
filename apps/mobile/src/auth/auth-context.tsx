@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import { apiClient } from "../lib/api-client";
+import { unregisterPush } from "../lib/notifications";
 import { tokenStorage } from "../lib/token-storage";
 
 type AuthState = {
@@ -132,6 +133,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const logout = useCallback(async () => {
+    await unregisterPush();
     await apiClient.post<{ message: string }>("/auth/logout");
     await tokenStorage.clear();
     setState({ isReady: true, isAuthenticated: false, user: null });

@@ -5,6 +5,7 @@ import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "@/src/auth/auth-context";
 import { useRoles } from "@/src/auth/roles";
 import { haptic } from "@/src/components/ui";
+import { usePushNotifications } from "@/src/hooks/use-push-notifications";
 import { useTheme } from "@/src/theme";
 
 type IconName = keyof typeof Ionicons.glyphMap;
@@ -27,6 +28,7 @@ export default function TabsLayout() {
   const { isReady, isAuthenticated, user } = useAuth();
   const roles = useRoles();
   const theme = useTheme();
+  usePushNotifications();
 
   if (isReady && !isAuthenticated) {
     return <Redirect href="/login" />;

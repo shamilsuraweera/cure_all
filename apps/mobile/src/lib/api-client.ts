@@ -22,7 +22,6 @@ export const apiClient = createApiClient({
   debug: process.env.NODE_ENV !== "production",
   defaultHeaders: { "x-client": "mobile" },
   logger: (message, meta) => {
-     
     console.log(message, meta ?? "");
   },
 });

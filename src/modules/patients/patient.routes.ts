@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 
+import { getPatientAudience, sendPush } from "../../utils/push.js";
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/index.js";
@@ -292,6 +293,14 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
       req,
     });
 
+    void getPatientAudience(patient.userId).then((audience) =>
+      sendPush(audience, {
+        title: "New prescription",
+        body: "A new prescription has been added to your records.",
+        data: { type: "prescription", id: prescription.id },
+      }),
+    );
+
     return sendSuccess(res, 201, { prescription });
   } catch (error) {
     return next(error);
@@ -485,6 +494,14 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
       metadata: { patientId: patient.userId, labTestTypeId },
       req,
     });
+
+    void getPatientAudience(patient.userId).then((audience) =>
+      sendPush(audience, {
+        title: "New lab result",
+        body: "A new lab result is available.",
+        data: { type: "lab", id: labResult.id },
+      }),
+    );
 
     return sendSuccess(res, 201, { labResult });
   } catch (error) {

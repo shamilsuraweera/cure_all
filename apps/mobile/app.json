@@ -48,6 +48,12 @@
         {
           "cameraPermission": "Cure-All uses the camera to scan prescription QR codes."
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0D9488"
+        }
       ]
     ],
     "experiments": {
