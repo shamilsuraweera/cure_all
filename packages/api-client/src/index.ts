@@ -89,11 +89,16 @@ export const createApiClient = (options: ApiClientOptions) => {
       }
     }
 
-    const res = await fetcher(url, {
-      method: "POST",
-      headers,
-      credentials: authMode === "cookie" ? "include" : "omit",
-    });
+    let res: Response;
+    try {
+      res = await fetcher(url, {
+        method: "POST",
+        headers,
+        credentials: authMode === "cookie" ? "include" : "omit",
+      });
+    } catch {
+      return false;
+    }
 
     if (authMode === "bearer" && options.tokenStorage && res.ok) {
       const payload = (await res.json().catch(() => ({}))) as ApiEnvelope<{
@@ -139,12 +144,24 @@ export const createApiClient = (options: ApiClientOptions) => {
 
     logDebug(options.logger, options.debug, "api.request", { method, url });
 
-    const res = await fetcher(url, {
-      method,
-      headers,
-      credentials: authMode === "cookie" ? "include" : "omit",
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    let res: Response;
+    try {
+      res = await fetcher(url, {
+        method,
+        headers,
+        credentials: authMode === "cookie" ? "include" : "omit",
+        body: body ? JSON.stringify(body) : undefined,
+      });
+    } catch {
+      // Network failure, CORS rejection, or server down: report instead of throwing.
+      return {
+        ok: false,
+        status: 0,
+        error: {
+          message: "Cannot reach the server. Check that the API is running.",
+        },
+      };
+    }
 
     const payload = (await res.json().catch(() => ({}))) as ApiEnvelope<T>;
 

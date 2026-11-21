@@ -60,18 +60,19 @@ export const DashboardPage = () => {
             Welcome back, {user?.email?.split("@")[0] ?? "Clinician"}
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Coordinating care operations across hospitals, outpatient clinics, diagnostics, and pharmacies.
+            Coordinating care operations across hospitals, outpatient clinics,
+            diagnostics, and pharmacies.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-ink px-3.5 py-1 text-xs font-semibold text-white">
+          <span className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-3.5 py-1 text-xs font-semibold text-white">
             {user?.globalRole ?? "USER"}
           </span>
           {user?.orgRoles?.map((role) => (
             <span
               key={role}
-              className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800"
+              className="rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold text-sky-800"
             >
               {role}
             </span>
@@ -93,7 +94,9 @@ export const DashboardPage = () => {
               {stats ? `${stats.activeOrgs} Active` : "Online"}
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">Hospitals, clinics, labs & pharmacies</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Hospitals, clinics, labs & pharmacies
+          </p>
         </div>
 
         <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm">
@@ -104,11 +107,13 @@ export const DashboardPage = () => {
             <span className="font-display text-3xl font-bold text-ink">
               {stats ? stats.totalPatients : "—"}
             </span>
-            <span className="rounded-full bg-sky-100 px-2 py-0.5 text-xs font-medium text-sky-800">
+            <span className="rounded-full bg-teal-100 px-2 py-0.5 text-xs font-medium text-sky-800">
               National Registry
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">Profiles linked with verified NIC identifiers</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Profiles linked with verified NIC identifiers
+          </p>
         </div>
 
         <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm">
@@ -123,7 +128,9 @@ export const DashboardPage = () => {
               {stats ? `${stats.dispensedPrescriptions} Dispensed` : "Active"}
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">Orders tracked across clinical pharmacies</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Orders tracked across clinical pharmacies
+          </p>
         </div>
 
         <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm">
@@ -138,7 +145,9 @@ export const DashboardPage = () => {
               {stats ? `${stats.totalLabTests} Types` : "Diagnostic"}
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">Laboratory results and measure sets recorded</p>
+          <p className="mt-2 text-xs text-slate-500">
+            Laboratory results and measure sets recorded
+          </p>
         </div>
       </div>
 
@@ -161,17 +170,20 @@ export const DashboardPage = () => {
                       Authorized
                     </span>
                   ) : null}
-                  <span className="rounded-full bg-sky-50 px-2.5 py-0.5 text-xs text-sky-700 font-medium">
+                  <span className="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs text-teal-700 font-medium">
                     Doctor
                   </span>
                 </div>
               </div>
-              <h3 className="mt-3 font-display text-lg font-bold text-ink">Doctor Workspace</h3>
+              <h3 className="mt-3 font-display text-lg font-bold text-ink">
+                Doctor Workspace
+              </h3>
               <p className="mt-2 text-sm text-slate-600">
-                Search patients by National ID or email, inspect medical history, review lab panels, and issue digital prescriptions.
+                Search patients by National ID or email, inspect medical
+                history, review lab panels, and issue digital prescriptions.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-teal-100 flex items-center justify-between">
               <Link
                 to="/doctor/patients"
                 className="text-xs font-semibold text-ink hover:text-sky-600 transition flex items-center gap-1"
@@ -180,7 +192,7 @@ export const DashboardPage = () => {
               </Link>
               <Link
                 to="/doctor"
-                className="rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-slate-800 transition"
+                className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-1.5 text-xs font-semibold text-white shadow hover:from-teal-700 hover:to-teal-600 transition"
               >
                 Doctor Hub
               </Link>
@@ -205,12 +217,15 @@ export const DashboardPage = () => {
                   </span>
                 </div>
               </div>
-              <h3 className="mt-3 font-display text-lg font-bold text-ink">Pharmacy Dispenser</h3>
+              <h3 className="mt-3 font-display text-lg font-bold text-ink">
+                Pharmacy Dispenser
+              </h3>
               <p className="mt-2 text-sm text-slate-600">
-                Verify prescription authenticity, monitor remaining balances, prevent over-dispensing, and record batch transactions.
+                Verify prescription authenticity, monitor remaining balances,
+                prevent over-dispensing, and record batch transactions.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-teal-100 flex items-center justify-between">
               <Link
                 to="/pharmacy/prescriptions"
                 className="text-xs font-semibold text-ink hover:text-emerald-600 transition flex items-center gap-1"
@@ -219,7 +234,7 @@ export const DashboardPage = () => {
               </Link>
               <Link
                 to="/pharmacy"
-                className="rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-slate-800 transition"
+                className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-1.5 text-xs font-semibold text-white shadow hover:from-teal-700 hover:to-teal-600 transition"
               >
                 Pharmacy Hub
               </Link>
@@ -244,12 +259,15 @@ export const DashboardPage = () => {
                   </span>
                 </div>
               </div>
-              <h3 className="mt-3 font-display text-lg font-bold text-ink">Diagnostic Laboratory</h3>
+              <h3 className="mt-3 font-display text-lg font-bold text-ink">
+                Diagnostic Laboratory
+              </h3>
               <p className="mt-2 text-sm text-slate-600">
-                Log patient specimens, input automated measure ranges with standard units, and upload diagnostic report attachments.
+                Log patient specimens, input automated measure ranges with
+                standard units, and upload diagnostic report attachments.
               </p>
             </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+            <div className="mt-6 pt-4 border-t border-teal-100 flex items-center justify-between">
               <Link
                 to="/lab/patients"
                 className="text-xs font-semibold text-ink hover:text-purple-600 transition flex items-center gap-1"
@@ -258,7 +276,7 @@ export const DashboardPage = () => {
               </Link>
               <Link
                 to="/lab"
-                className="rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-slate-800 transition"
+                className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-1.5 text-xs font-semibold text-white shadow hover:from-teal-700 hover:to-teal-600 transition"
               >
                 Lab Hub
               </Link>
@@ -271,7 +289,8 @@ export const DashboardPage = () => {
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <Card title="Quick patient search" eyebrow="Direct Lookup">
           <p className="text-sm text-slate-500 mb-4">
-            Quickly locate patient charts by National Identity Card (NIC) or email address to review treatment history.
+            Quickly locate patient charts by National Identity Card (NIC) or
+            email address to review treatment history.
           </p>
           <form onSubmit={handleQuickSearch} className="flex gap-3">
             <div className="flex-1">
@@ -281,9 +300,7 @@ export const DashboardPage = () => {
                 placeholder="Enter NIC number (e.g. 199012345678 or 901234567V)"
               />
             </div>
-            <Button type="submit">
-              Lookup &rarr;
-            </Button>
+            <Button type="submit">Lookup &rarr;</Button>
           </form>
           <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-400">
             <span>Fast shortcuts:</span>
@@ -297,7 +314,10 @@ export const DashboardPage = () => {
             {isRootAdmin ? (
               <>
                 <span>·</span>
-                <Link to="/root/patients/create" className="underline hover:text-ink">
+                <Link
+                  to="/root/patients/create"
+                  className="underline hover:text-ink"
+                >
                   + Register New Patient
                 </Link>
               </>
@@ -314,8 +334,10 @@ export const DashboardPage = () => {
               </span>
             </div>
             <div className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5 text-xs">
-              <span className="font-medium text-slate-700">Session Security</span>
-              <span className="rounded-full bg-sky-100 px-2 py-0.5 font-bold text-sky-800">
+              <span className="font-medium text-slate-700">
+                Session Security
+              </span>
+              <span className="rounded-full bg-teal-100 px-2 py-0.5 font-bold text-sky-800">
                 HTTP-Only Cookie Rotation
               </span>
             </div>
@@ -329,7 +351,7 @@ export const DashboardPage = () => {
               <div className="pt-2">
                 <Link
                   to="/root"
-                  className="block text-center rounded-2xl border border-slate-200 bg-white py-2 text-xs font-semibold text-slate-700 hover:text-ink shadow-sm transition"
+                  className="block text-center rounded-2xl border border-teal-100 bg-white py-2 text-xs font-semibold text-slate-700 hover:text-ink shadow-sm transition"
                 >
                   Open Root Admin Control Hub &rarr;
                 </Link>

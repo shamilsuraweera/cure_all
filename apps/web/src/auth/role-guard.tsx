@@ -1,5 +1,7 @@
 import React from "react";
 
+import { LinkButton } from "../components/ui/button";
+import { PageLoader } from "../components/ui/skeleton";
 import { useAuth } from "./auth-context";
 
 type RoleGuardProps = {
@@ -8,11 +10,15 @@ type RoleGuardProps = {
   children: React.ReactNode;
 };
 
-export const RoleGuard = ({ allowGlobal, allowOrg, children }: RoleGuardProps) => {
+export const RoleGuard = ({
+  allowGlobal,
+  allowOrg,
+  children,
+}: RoleGuardProps) => {
   const { user, isReady } = useAuth();
 
   if (!isReady) {
-    return <div className="px-6 py-10 text-slate-600">Checking access...</div>;
+    return <PageLoader label="Checking access..." />;
   }
 
   const hasGlobalRole = allowGlobal?.includes(user?.globalRole ?? "") ?? false;
@@ -22,7 +28,12 @@ export const RoleGuard = ({ allowGlobal, allowOrg, children }: RoleGuardProps) =
   if (!user || (!hasGlobalRole && !hasOrgRole)) {
     return (
       <div className="rounded-3xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">
-        You do not have access to this section.
+        <p>You do not have access to this section.</p>
+        <div className="mt-4">
+          <LinkButton to="/dashboard" variant="outline">
+            Back to dashboard
+          </LinkButton>
+        </div>
       </div>
     );
   }

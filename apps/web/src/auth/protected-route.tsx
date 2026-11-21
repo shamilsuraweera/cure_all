@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
 
+import { PageLoader } from "../components/ui/skeleton";
 import { useAuth } from "./auth-context";
 
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
@@ -9,7 +10,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   const { isReady, isAuthenticated } = useAuth();
 
   if (!isReady) {
-    return <div className="px-6 py-10 text-slate-600">Checking session...</div>;
+    return <PageLoader label="Checking session..." />;
   }
 
   if (!isAuthenticated) {

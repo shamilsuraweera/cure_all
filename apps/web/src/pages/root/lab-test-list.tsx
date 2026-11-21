@@ -33,13 +33,13 @@ export const LabTestListPage = () => {
         <div className="flex gap-2">
           <Link
             to="/root/lab-tests/create"
-            className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-glow hover:bg-slate-800 transition"
+            className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow hover:from-teal-700 hover:to-teal-600 transition"
           >
             + Create Test Type
           </Link>
           <Link
             to="/root/lab-tests/measures"
-            className="rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 hover:text-ink transition"
+            className="rounded-full border border-teal-100 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 hover:text-ink transition"
           >
             + Define Measures
           </Link>
@@ -67,7 +67,7 @@ export const LabTestListPage = () => {
             {filteredItems.map((test) => (
               <div
                 key={test.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm hover:shadow transition"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm hover:shadow transition"
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -79,7 +79,9 @@ export const LabTestListPage = () => {
                     ) : null}
                   </div>
                   {test.description ? (
-                    <p className="mt-1 text-xs text-slate-500">{test.description}</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {test.description}
+                    </p>
                   ) : null}
                 </div>
                 <div className="flex items-center gap-2">
@@ -94,7 +96,7 @@ export const LabTestListPage = () => {
                   </span>
                   <Link
                     to={`/root/lab-tests/measures?labTestTypeId=${test.id}`}
-                    className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-100 transition"
+                    className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 hover:bg-teal-100 transition"
                   >
                     + Add Measure
                   </Link>

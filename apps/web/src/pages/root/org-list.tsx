@@ -12,6 +12,7 @@ export const OrgListPage = () => {
   const [page] = useState(1);
   const [search, setSearch] = useState("");
   const [filterType, setFilterType] = useState<string>("ALL");
+  const [pendingOrgId, setPendingOrgId] = useState<string | null>(null);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["orgs", page],
     queryFn: () => fetchOrgs(page),
@@ -37,13 +38,13 @@ export const OrgListPage = () => {
         <div className="flex gap-2">
           <Link
             to="/root/orgs/create"
-            className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-glow hover:bg-slate-800 transition"
+            className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow hover:from-teal-700 hover:to-teal-600 transition"
           >
             + Create Organization
           </Link>
           <Link
             to="/root/orgs/invite"
-            className="rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 hover:text-ink transition"
+            className="rounded-full border border-teal-100 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 hover:text-ink transition"
           >
             Invite Member
           </Link>
@@ -60,7 +61,7 @@ export const OrgListPage = () => {
             />
           </div>
           <select
-            className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-2 text-sm text-slate-700 focus:outline-none"
+            className="rounded-2xl border border-teal-100 bg-white/90 px-4 py-2 text-sm text-slate-700 focus:outline-none"
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
           >
@@ -84,7 +85,7 @@ export const OrgListPage = () => {
             {filteredOrgs.map((org) => (
               <div
                 key={org.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm hover:shadow transition"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm hover:shadow transition"
               >
                 <div>
                   <div className="flex items-center gap-2">
@@ -94,7 +95,10 @@ export const OrgListPage = () => {
                     </span>
                   </div>
                   <p className="mt-1 text-xs text-slate-400">
-                    Domain: <code className="font-mono text-slate-600">{org.domain ?? "None (any email allowed)"}</code>
+                    Domain:{" "}
+                    <code className="font-mono text-slate-600">
+                      {org.domain ?? "None (any email allowed)"}
+                    </code>
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -109,18 +113,27 @@ export const OrgListPage = () => {
                   </span>
                   <Link
                     to={`/root/orgs/invite?orgId=${org.id}`}
-                    className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 hover:bg-sky-100 transition"
+                    className="rounded-full border border-teal-200 bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700 hover:bg-teal-100 transition"
                   >
                     + Invite
                   </Link>
                   <Button
                     variant="outline"
                     className="text-xs py-1 px-3"
+                    loading={pendingOrgId === org.id}
                     onClick={async () => {
                       const nextStatus =
                         org.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
-                      await updateOrgStatus(org.id, nextStatus);
-                      void refetch();
+                      setPendingOrgId(org.id);
+                      try {
+                        await updateOrgStatus(org.id, nextStatus);
+                        await refetch();
+                      } catch {
+                        // Surface failure by refetching the authoritative state.
+                        await refetch();
+                      } finally {
+                        setPendingOrgId(null);
+                      }
                     }}
                   >
                     {org.status === "ACTIVE" ? "Suspend" : "Activate"}

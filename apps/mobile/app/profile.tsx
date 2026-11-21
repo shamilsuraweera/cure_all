@@ -16,7 +16,9 @@ export default function ProfileScreen() {
     <View style={styles.container}>
       <Text style={styles.eyebrow}>PROFILE</Text>
       <Text style={styles.title}>{user?.email ?? "User"}</Text>
-      <Text style={styles.subtitle}>Global role: {user?.globalRole ?? "USER"}</Text>
+      <Text style={styles.subtitle}>
+        Global role: {user?.globalRole ?? "USER"}
+      </Text>
       <View style={styles.roles}>
         <Text style={styles.rolesTitle}>Org roles</Text>
         {user?.orgRoles?.length ? (
@@ -30,16 +32,32 @@ export default function ProfileScreen() {
         )}
       </View>
 
-      <Pressable style={styles.action} onPress={() => router.push("/guardian/accept")}>
+      <Pressable
+        style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+        onPress={() => router.push("/guardian/accept")}
+      >
         <Text style={styles.actionText}>Accept guardian invite</Text>
       </Pressable>
-      <Pressable style={styles.action} onPress={() => router.push("/prescriptions")}>
+      <Pressable
+        style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+        onPress={() => router.push("/prescriptions")}
+      >
         <Text style={styles.actionText}>View prescriptions</Text>
       </Pressable>
-      <Pressable style={styles.action} onPress={() => router.push("/labs")}>
+      <Pressable
+        style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+        onPress={() => router.push("/labs")}
+      >
         <Text style={styles.actionText}>View lab results</Text>
       </Pressable>
-      <Pressable style={[styles.action, styles.logout]} onPress={handleLogout}>
+      <Pressable
+        style={({ pressed }) => [
+          styles.action,
+          styles.logout,
+          pressed && styles.pressed,
+        ]}
+        onPress={handleLogout}
+      >
         <Text style={styles.actionText}>Logout</Text>
       </Pressable>
     </View>
@@ -47,27 +65,30 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
+  pressed: {
+    opacity: 0.75,
+  },
   container: {
     flex: 1,
     padding: 24,
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
   },
   eyebrow: {
     fontSize: 12,
     letterSpacing: 2.8,
     textTransform: "uppercase",
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   title: {
     marginTop: 8,
     fontSize: 24,
     fontWeight: "700",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   subtitle: {
     marginTop: 4,
     fontSize: 14,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   roles: {
     marginTop: 24,
@@ -77,25 +98,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   roleChip: {
-    backgroundColor: "#E2E8F0",
+    backgroundColor: "#CCFBF1",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 999,
     alignSelf: "flex-start",
-    color: "#0F172A",
+    color: "#134E4A",
     fontSize: 12,
     fontWeight: "600",
   },
   roleEmpty: {
     fontSize: 13,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   action: {
     marginTop: 20,
-    backgroundColor: "#0F172A",
+    backgroundColor: "#0D9488",
     paddingVertical: 14,
     borderRadius: 999,
     alignItems: "center",

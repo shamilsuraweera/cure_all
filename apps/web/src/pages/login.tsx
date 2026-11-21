@@ -40,8 +40,14 @@ export const LoginPage = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await login(email, password);
-    setLoading(false);
+    let res: Awaited<ReturnType<typeof login>>;
+    try {
+      res = await login(email, password);
+    } catch {
+      res = { ok: false, error: "Something went wrong. Please try again." };
+    } finally {
+      setLoading(false);
+    }
 
     if (!res.ok) {
       setError(res.error ?? "Login failed. Check your credentials.");
@@ -51,17 +57,13 @@ export const LoginPage = () => {
     // Redirect handled by auth effect once user profile is loaded.
   };
 
-  const fillAdmin = () => {
-    setEmail("admin@example.com");
-    setPassword("ChangeMe@123");
-  };
-
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <Card title="Access Portal" eyebrow="Secure login">
         <p>
-          Sign in with your Root Admin or clinical credentials. This application uses
-          secure HTTP cookies with automated token rotation and audit telemetry.
+          Sign in with your Root Admin or clinical credentials. This application
+          uses secure HTTP cookies with automated token rotation and audit
+          telemetry.
         </p>
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           <Input
@@ -89,19 +91,20 @@ export const LoginPage = () => {
             <Button type="submit" disabled={loading}>
               {loading ? "Signing in..." : "Sign in"}
             </Button>
-            <Button type="button" variant="outline" onClick={fillAdmin}>
-              Fill Root Admin
-            </Button>
           </div>
         </form>
       </Card>
       <Card title="Quick access" eyebrow="Environment">
         <div className="space-y-4 text-sm text-slate-600">
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <p className="font-semibold text-slate-800">Local Dev Credentials</p>
-            <p className="mt-1 font-mono text-xs text-slate-600">admin@example.com / ChangeMe@123</p>
+          <div className="rounded-2xl border border-teal-100 bg-slate-50 p-4">
+            <p className="font-semibold text-slate-800">Who can sign in</p>
+            <p className="mt-2 text-xs text-slate-500">
+              The Root Admin account is created by the database seed
+              (ROOT_ADMIN_EMAIL / ROOT_ADMIN_PASSWORD in the API .env).
+            </p>
             <p className="mt-2 text-xs text-slate-400">
-              Org members (Doctor, Pharmacist, Lab Tech) are invited by Root Admin and accept invitations with their custom password.
+              Org members (Doctor, Pharmacist, Lab Tech) are invited by Root
+              Admin and accept invitations with their custom password.
             </p>
           </div>
           <ul className="space-y-2 text-xs text-slate-500">
@@ -110,7 +113,7 @@ export const LoginPage = () => {
               API Service running on port 3000
             </li>
             <li className="flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
+              <span className="h-1.5 w-1.5 rounded-full bg-teal-500" />
               Cross-origin credential sharing enabled
             </li>
             <li className="flex items-center gap-2">

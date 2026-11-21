@@ -6,19 +6,56 @@
 
 :root {
   color-scheme: light;
-  --ink: #0f172a;
-  --mist: #f4f7ff;
-  --ember: #f97316;
-  --tide: #0ea5e9;
-  --moss: #16a34a;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   font-family: "Work Sans", ui-sans-serif, system-ui, sans-serif;
-  background: var(--mist);
+  background: #f0fdfa;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: #99f6e4;
+  color: #134e4a;
+}
+
+:focus-visible {
+  outline: 2px solid #0d9488;
+  outline-offset: 2px;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease,
+    opacity 150ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

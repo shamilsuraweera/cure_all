@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import { ProtectedRoute } from "./auth/protected-route";
 import { RoleGuard } from "./auth/role-guard";
@@ -265,7 +265,6 @@ const App = () => (
           </ProtectedRoute>
         }
       />
-      <Route path="/" element={<Navigate to="/" replace />} />
       <Route path="*" element={<NotFoundPage />} />
     </Route>
   </Routes>

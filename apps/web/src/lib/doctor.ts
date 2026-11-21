@@ -29,7 +29,11 @@ export type LabResult = {
   id: string;
   createdAt: string;
   labTestType: { name: string };
-  measures: Array<{ value: string; unit?: string | null; labMeasureDef: { name: string } }>;
+  measures: Array<{
+    value: string;
+    unit?: string | null;
+    labMeasureDef: { name: string };
+  }>;
 };
 
 export const searchPatients = (params: {
@@ -48,7 +52,9 @@ export const searchPatients = (params: {
   });
 
 export const getPatientProfile = (patientProfileId: string) =>
-  apiClient.get<{ patient: PatientSearchResult }>(`/patients/${patientProfileId}`);
+  apiClient.get<{ patient: PatientSearchResult }>(
+    `/patients/${patientProfileId}`,
+  );
 
 export const getPatientPrescriptions = (patientProfileId: string) =>
   apiClient.get<{ prescriptions: Prescription[] }>(

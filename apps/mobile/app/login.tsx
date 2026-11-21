@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { useRouter } from "expo-router";
 
 import { useAuth } from "@/src/auth/auth-context";
@@ -33,7 +40,9 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <Text style={styles.eyebrow}>CURE-ALL</Text>
       <Text style={styles.title}>Sign in</Text>
-      <Text style={styles.subtitle}>Use your clinic or guardian credentials.</Text>
+      <Text style={styles.subtitle}>
+        Use your clinic or guardian credentials.
+      </Text>
 
       <View style={styles.form}>
         <Text style={styles.label}>Email</Text>
@@ -57,7 +66,11 @@ export default function LoginScreen() {
 
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
-        <Pressable style={styles.button} onPress={submit} disabled={loading}>
+        <Pressable
+          style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+          onPress={submit}
+          disabled={loading}
+        >
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -70,28 +83,31 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  pressed: {
+    opacity: 0.75,
+  },
   container: {
     flex: 1,
     padding: 24,
     justifyContent: "center",
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
   },
   eyebrow: {
     fontSize: 12,
     letterSpacing: 3,
     textTransform: "uppercase",
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   title: {
     marginTop: 8,
     fontSize: 28,
     fontWeight: "700",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   subtitle: {
     marginTop: 6,
     fontSize: 14,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   form: {
     marginTop: 24,
@@ -101,7 +117,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 1,
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   input: {
     backgroundColor: "#FFFFFF",
@@ -109,12 +125,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#CCFBF1",
     fontSize: 16,
   },
   button: {
     marginTop: 16,
-    backgroundColor: "#0F172A",
+    backgroundColor: "#0D9488",
     paddingVertical: 14,
     borderRadius: 999,
     alignItems: "center",

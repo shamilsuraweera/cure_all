@@ -17,7 +17,7 @@ export default function LabResultsScreen() {
   });
 
   const labResults = labsQuery.data?.ok
-    ? labsQuery.data.data?.labResults ?? []
+    ? (labsQuery.data.data?.labResults ?? [])
     : [];
 
   return (
@@ -74,14 +74,14 @@ export default function LabResultsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
     padding: 24,
   },
   eyebrow: {
     fontSize: 12,
     textTransform: "uppercase",
     letterSpacing: 2,
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   selector: {
     flexDirection: "row",
@@ -90,26 +90,26 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   selectorChip: {
-    backgroundColor: "#E2E8F0",
+    backgroundColor: "#CCFBF1",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
     fontSize: 12,
-    color: "#475569",
+    color: "#2F5553",
   },
   selectorChipActive: {
-    backgroundColor: "#0F172A",
+    backgroundColor: "#0D9488",
     color: "#FFFFFF",
   },
   sectionTitle: {
     marginTop: 12,
     fontSize: 18,
     fontWeight: "700",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   helper: {
     marginTop: 8,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   card: {
     marginTop: 12,
@@ -117,21 +117,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#CCFBF1",
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   cardMeta: {
     marginTop: 4,
     fontSize: 12,
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   link: {
     marginTop: 10,
-    color: "#0F172A",
+    color: "#134E4A",
     fontWeight: "600",
   },
 });

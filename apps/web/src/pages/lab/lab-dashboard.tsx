@@ -1,11 +1,14 @@
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
+import { useAuth } from "../../auth/auth-context";
 import { SectionHeader } from "../../components/root/section-header";
 import { Card } from "../../components/ui/card";
 import { fetchLabTestTypes } from "../../lib/lab";
 
 export const LabDashboardPage = () => {
+  const { user } = useAuth();
+  const isRoot = user?.globalRole === "ROOT_ADMIN";
   const testsQuery = useQuery({
     queryKey: ["lab-dashboard-test-types"],
     queryFn: () => fetchLabTestTypes(),
@@ -36,10 +39,12 @@ export const LabDashboardPage = () => {
               {labTests.slice(0, 6).map((test) => (
                 <div
                   key={test.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 text-xs shadow-sm"
+                  className="flex items-center justify-between rounded-xl border border-teal-100 bg-white p-3 text-xs shadow-sm"
                 >
                   <div>
-                    <span className="font-semibold text-slate-800">{test.name}</span>
+                    <span className="font-semibold text-slate-800">
+                      {test.name}
+                    </span>
                     {test.code ? (
                       <span className="ml-2 font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-600">
                         {test.code}
@@ -56,13 +61,21 @@ export const LabDashboardPage = () => {
               ))}
             </div>
           )}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-            <Link to="/lab/patients" className="font-semibold text-tide hover:underline">
+          <div className="mt-4 pt-3 border-t border-teal-100 flex justify-between items-center text-xs">
+            <Link
+              to="/lab/patients"
+              className="font-semibold text-tide hover:underline"
+            >
               Search Patient to Enter Results &rarr;
             </Link>
-            <Link to="/root/lab-tests" className="text-slate-400 hover:text-ink">
-              View Lab Catalog
-            </Link>
+            {isRoot ? (
+              <Link
+                to="/root/lab-tests"
+                className="text-slate-400 hover:text-ink"
+              >
+                View Lab Catalog
+              </Link>
+            ) : null}
           </div>
         </Card>
 
@@ -72,42 +85,49 @@ export const LabDashboardPage = () => {
               <span>Patient Lookup & Entry</span>
               <Link
                 to="/lab/patients"
-                className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white shadow hover:bg-slate-800 transition"
+                className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-3 py-1 text-xs font-semibold text-white shadow hover:from-teal-700 hover:to-teal-600 transition"
               >
                 Find Patient &rarr;
               </Link>
             </li>
-            <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
-              <span>Test Definitions</span>
-              <Link
-                to="/root/lab-tests"
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
-              >
-                Catalog
-              </Link>
-            </li>
-            <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
-              <span>Define New Measures</span>
-              <Link
-                to="/root/lab-tests/measures"
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
-              >
-                Measures
-              </Link>
-            </li>
+            {isRoot ? (
+              <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span>Test Definitions</span>
+                <Link
+                  to="/root/lab-tests"
+                  className="rounded-full border border-teal-100 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
+                >
+                  Catalog
+                </Link>
+              </li>
+            ) : null}
+            {isRoot ? (
+              <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span>Define New Measures</span>
+                <Link
+                  to="/root/lab-tests/measures"
+                  className="rounded-full border border-teal-100 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
+                >
+                  Measures
+                </Link>
+              </li>
+            ) : null}
           </ul>
         </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="Specimen recording" eyebrow="Diagnostics">
-          Lookup patient by NIC to record specimen values against predefined test definitions and measures.
+          Lookup patient by NIC to record specimen values against predefined
+          test definitions and measures.
         </Card>
         <Card title="Automatic reference ranges" eyebrow="Safety">
-          Normal minimum and maximum range thresholds are presented alongside each measure for quick clinical verification.
+          Normal minimum and maximum range thresholds are presented alongside
+          each measure for quick clinical verification.
         </Card>
         <Card title="Document attachments" eyebrow="Reports">
-          Upload PDF reports or scan images to attach directly to test result cards for physician inspection.
+          Upload PDF reports or scan images to attach directly to test result
+          cards for physician inspection.
         </Card>
       </div>
     </div>

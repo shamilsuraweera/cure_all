@@ -48,13 +48,17 @@ export const PharmacyPrescriptionLookupPage = () => {
               required
             />
             <Button type="submit">Open prescription</Button>
-            {error ? <p className="text-sm text-rose-500 font-medium">{error}</p> : null}
+            {error ? (
+              <p className="text-sm text-rose-500 font-medium">{error}</p>
+            ) : null}
           </form>
         </Card>
 
         <Card title="Pending prescription orders" eyebrow="Queue">
           {queueQuery.isLoading ? (
-            <p className="text-sm text-slate-400">Loading prescription queue...</p>
+            <p className="text-sm text-slate-400">
+              Loading prescription queue...
+            </p>
           ) : (
             <div className="space-y-3">
               {prescriptions.length === 0 ? (
@@ -65,7 +69,7 @@ export const PharmacyPrescriptionLookupPage = () => {
               {prescriptions.map((prescription) => (
                 <div
                   key={prescription.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm hover:shadow transition"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm hover:shadow transition"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
@@ -75,7 +79,7 @@ export const PharmacyPrescriptionLookupPage = () => {
                             ? "bg-emerald-100 text-emerald-800"
                             : prescription.status === "PARTIALLY_DISPENSED"
                               ? "bg-amber-100 text-amber-800"
-                              : "bg-sky-100 text-sky-800"
+                              : "bg-teal-100 text-sky-800"
                         }`}
                       >
                         {prescription.status}
@@ -85,15 +89,18 @@ export const PharmacyPrescriptionLookupPage = () => {
                       </span>
                     </div>
                     <p className="text-xs font-medium text-slate-700">
-                      {prescription.items.map((i) => i.medicine.name).join(", ")}
+                      {prescription.items
+                        .map((i) => i.medicine.name)
+                        .join(", ")}
                     </p>
                     <p className="text-[11px] text-slate-400">
-                      Created: {new Date(prescription.createdAt).toLocaleString()}
+                      Created:{" "}
+                      {new Date(prescription.createdAt).toLocaleString()}
                     </p>
                   </div>
                   <Link
                     to={`/pharmacy/prescriptions/${prescription.id}`}
-                    className="rounded-full bg-ink px-4 py-1.5 text-xs font-semibold text-white shadow-glow hover:bg-slate-800 transition"
+                    className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-1.5 text-xs font-semibold text-white shadow-glow hover:from-teal-700 hover:to-teal-600 transition"
                   >
                     Verify & Dispense &rarr;
                   </Link>

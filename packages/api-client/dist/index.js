@@ -40,11 +40,17 @@ export const createApiClient = (options) => {
                 headers.Authorization = `Bearer ${refreshToken}`;
             }
         }
-        const res = await fetcher(url, {
-            method: "POST",
-            headers,
-            credentials: authMode === "cookie" ? "include" : "omit",
-        });
+        let res;
+        try {
+            res = await fetcher(url, {
+                method: "POST",
+                headers,
+                credentials: authMode === "cookie" ? "include" : "omit",
+            });
+        }
+        catch {
+            return false;
+        }
         if (authMode === "bearer" && options.tokenStorage && res.ok) {
             const payload = (await res.json().catch(() => ({})));
             const data = payload.data;
@@ -72,12 +78,25 @@ export const createApiClient = (options) => {
             }
         }
         logDebug(options.logger, options.debug, "api.request", { method, url });
-        const res = await fetcher(url, {
-            method,
-            headers,
-            credentials: authMode === "cookie" ? "include" : "omit",
-            body: body ? JSON.stringify(body) : undefined,
-        });
+        let res;
+        try {
+            res = await fetcher(url, {
+                method,
+                headers,
+                credentials: authMode === "cookie" ? "include" : "omit",
+                body: body ? JSON.stringify(body) : undefined,
+            });
+        }
+        catch {
+            // Network failure, CORS rejection, or server down: report instead of throwing.
+            return {
+                ok: false,
+                status: 0,
+                error: {
+                    message: "Cannot reach the server. Check that the API is running.",
+                },
+            };
+        }
         const payload = (await res.json().catch(() => ({})));
         if (!res.ok) {
             if (res.status === 401 && attempt === 0) {

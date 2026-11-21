@@ -16,7 +16,11 @@ export const PharmacyPrescriptionDetailPage = () => {
   const { id = "" } = useParams();
   const [notes, setNotes] = useState("");
   const [quantities, setQuantities] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<{ message: string; tone: "error" | "success" } | null>(null);
+  const [status, setStatus] = useState<{
+    message: string;
+    tone: "error" | "success";
+  } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const verifyQuery = useQuery({
     queryKey: ["pharmacy-verify", id],
@@ -35,7 +39,8 @@ export const PharmacyPrescriptionDetailPage = () => {
   const dispenseHistory = historyQuery.data?.data?.dispenseRecords ?? [];
 
   const remainingById = useMemo(
-    () => new Map(remainingItems.map((item) => [item.prescriptionItemId, item])),
+    () =>
+      new Map(remainingItems.map((item) => [item.prescriptionItemId, item])),
     [remainingItems],
   );
 
@@ -46,7 +51,10 @@ export const PharmacyPrescriptionDetailPage = () => {
   const submitDispense = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!prescription) {
-      setStatus({ message: "Verify the prescription before dispensing.", tone: "error" });
+      setStatus({
+        message: "Verify the prescription before dispensing.",
+        tone: "error",
+      });
       return;
     }
 
@@ -58,7 +66,10 @@ export const PharmacyPrescriptionDetailPage = () => {
       .filter((item) => item.quantity > 0);
 
     if (payloadItems.length === 0) {
-      setStatus({ message: "Enter at least one quantity to dispense.", tone: "error" });
+      setStatus({
+        message: "Enter at least one quantity to dispense.",
+        tone: "error",
+      });
       return;
     }
 
@@ -66,7 +77,8 @@ export const PharmacyPrescriptionDetailPage = () => {
       const remaining = remainingById.get(item.prescriptionItemId);
       if (remaining && item.quantity > remaining.remainingQuantity) {
         setStatus({
-          message: "Over-dispensing is not allowed. Check remaining quantities.",
+          message:
+            "Over-dispensing is not allowed. Check remaining quantities.",
           tone: "error",
         });
         return;
@@ -98,6 +110,19 @@ export const PharmacyPrescriptionDetailPage = () => {
       ? verifyQuery.data.error?.message
       : null;
 
+  const guardedSubmit = async (event: React.FormEvent) => {
+    if (submitting) {
+      event.preventDefault();
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await submitDispense(event);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div>
       <SectionHeader
@@ -128,21 +153,28 @@ export const PharmacyPrescriptionDetailPage = () => {
                 {prescription.items.map((item) => {
                   const remaining = remainingById.get(item.id);
                   const dispensed = remaining?.dispensedQuantity ?? 0;
-                  const remainingQty = remaining?.remainingQuantity ?? item.quantity;
-                  const percent = Math.min(100, Math.round((dispensed / item.quantity) * 100));
+                  const remainingQty =
+                    remaining?.remainingQuantity ?? item.quantity;
+                  const percent = Math.min(
+                    100,
+                    Math.round((dispensed / item.quantity) * 100),
+                  );
                   return (
                     <div
                       key={item.id}
-                      className="rounded-2xl border border-slate-100 bg-white p-4 space-y-2 shadow-sm"
+                      className="rounded-2xl border border-teal-100 bg-white p-4 space-y-2 shadow-sm"
                     >
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-semibold text-slate-800">
                             {item.medicine.name}{" "}
-                            {item.medicine.strength ? `· ${item.medicine.strength}` : ""}
+                            {item.medicine.strength
+                              ? `· ${item.medicine.strength}`
+                              : ""}
                           </p>
                           <p className="text-xs text-slate-500">
-                            {item.dose} · {item.frequency} · {item.durationDays} days
+                            {item.dose} · {item.frequency} · {item.durationDays}{" "}
+                            days
                           </p>
                         </div>
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
@@ -153,7 +185,11 @@ export const PharmacyPrescriptionDetailPage = () => {
                       <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all duration-300 ${
-                            percent === 100 ? "bg-emerald-500" : percent > 0 ? "bg-amber-500" : "bg-slate-300"
+                            percent === 100
+                              ? "bg-emerald-500"
+                              : percent > 0
+                                ? "bg-amber-500"
+                                : "bg-slate-300"
                           }`}
                           style={{ width: `${percent}%` }}
                         />
@@ -161,7 +197,9 @@ export const PharmacyPrescriptionDetailPage = () => {
 
                       <div className="flex justify-between text-xs text-slate-500 pt-1">
                         <span>Remaining to dispense:</span>
-                        <strong className="text-slate-800">{remainingQty} units</strong>
+                        <strong className="text-slate-800">
+                          {remainingQty} units
+                        </strong>
                       </div>
                     </div>
                   );
@@ -169,12 +207,17 @@ export const PharmacyPrescriptionDetailPage = () => {
               </div>
             </div>
           ) : (
-            <p className="text-sm text-slate-400">Verifying prescription details...</p>
+            <p className="text-sm text-slate-400">
+              Verifying prescription details...
+            </p>
           )}
         </Card>
 
         <Card title="Dispense medication" eyebrow="Pharmacy action">
-          <form className="space-y-4" onSubmit={submitDispense}>
+          <form
+            className="space-y-4"
+            onSubmit={(event) => void guardedSubmit(event)}
+          >
             {prescription?.items.map((item) => {
               const remaining = remainingById.get(item.id);
               const remainingQty = remaining?.remainingQuantity ?? 0;
@@ -182,12 +225,19 @@ export const PharmacyPrescriptionDetailPage = () => {
               const numericValue = Number(value || 0);
               const overLimit = numericValue > remainingQty;
               return (
-                <div key={item.id} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-3.5 space-y-2">
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-teal-100 bg-slate-50/70 p-3.5 space-y-2"
+                >
                   <div className="flex justify-between items-center text-xs">
-                    <span className="font-medium text-slate-700">{item.medicine.name}</span>
+                    <span className="font-medium text-slate-700">
+                      {item.medicine.name}
+                    </span>
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, String(remainingQty))}
+                      onClick={() =>
+                        updateQuantity(item.id, String(remainingQty))
+                      }
                       disabled={remainingQty === 0}
                       className="text-xs font-semibold text-tide hover:underline disabled:opacity-40"
                     >
@@ -198,12 +248,16 @@ export const PharmacyPrescriptionDetailPage = () => {
                     label=""
                     placeholder={`Qty to dispense (max ${remainingQty})`}
                     value={value}
-                    onChange={(event) => updateQuantity(item.id, event.target.value)}
+                    onChange={(event) =>
+                      updateQuantity(item.id, event.target.value)
+                    }
                     type="number"
                     min={0}
                     max={remainingQty}
                     disabled={remainingQty === 0}
-                    className={overLimit ? "border-rose-400 focus:border-rose-500" : ""}
+                    className={
+                      overLimit ? "border-rose-400 focus:border-rose-500" : ""
+                    }
                   />
                 </div>
               );
@@ -214,7 +268,9 @@ export const PharmacyPrescriptionDetailPage = () => {
               onChange={(event) => setNotes(event.target.value)}
               placeholder="e.g. Batch #4912, patient identity verified."
             />
-            <Button type="submit">Complete Dispense</Button>
+            <Button type="submit" loading={submitting}>
+              Complete Dispense
+            </Button>
             {status ? (
               <div
                 className={`rounded-2xl border p-3.5 text-sm ${
@@ -235,9 +291,14 @@ export const PharmacyPrescriptionDetailPage = () => {
           <p>Loading dispense history...</p>
         ) : (
           <div className="space-y-3">
-            {dispenseHistory.length === 0 ? <p>No dispense records yet.</p> : null}
+            {dispenseHistory.length === 0 ? (
+              <p>No dispense records yet.</p>
+            ) : null}
             {dispenseHistory.map((record) => (
-              <div key={record.id} className="rounded-2xl border border-slate-100 bg-white px-4 py-3">
+              <div
+                key={record.id}
+                className="rounded-2xl border border-teal-100 bg-white px-4 py-3"
+              >
                 <p className="font-medium text-slate-800">
                   {record.status}{" "}
                   <span className="text-xs text-slate-400">

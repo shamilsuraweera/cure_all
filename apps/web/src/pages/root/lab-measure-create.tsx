@@ -10,12 +10,17 @@ import { createLabMeasure, fetchLabTestTypes } from "../../lib/root-admin";
 
 export const LabMeasureCreatePage = () => {
   const [searchParams] = useSearchParams();
-  const [labTestTypeId, setLabTestTypeId] = useState(searchParams.get("labTestTypeId") ?? "");
+  const [labTestTypeId, setLabTestTypeId] = useState(
+    searchParams.get("labTestTypeId") ?? "",
+  );
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("");
   const [normalMin, setNormalMin] = useState("");
   const [normalMax, setNormalMax] = useState("");
-  const [status, setStatus] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const [status, setStatus] = useState<{
+    message: string;
+    tone: "success" | "error";
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const testTypesQuery = useQuery({
@@ -59,7 +64,10 @@ export const LabMeasureCreatePage = () => {
     setLoading(false);
 
     if (result.ok) {
-      setStatus({ message: `Measure "${name}" created successfully.`, tone: "success" });
+      setStatus({
+        message: `Measure "${name}" created successfully.`,
+        tone: "success",
+      });
       setName("");
       setUnit("");
       setNormalMin("");
@@ -67,7 +75,10 @@ export const LabMeasureCreatePage = () => {
       return;
     }
 
-    setStatus({ message: result.error?.message ?? "Failed to create measure", tone: "error" });
+    setStatus({
+      message: result.error?.message ?? "Failed to create measure",
+      tone: "error",
+    });
   };
 
   return (
@@ -81,10 +92,12 @@ export const LabMeasureCreatePage = () => {
           <label className="flex flex-col gap-2 text-sm text-slate-600">
             <span className="font-medium text-slate-700">Lab Test Type</span>
             {testTypesQuery.isLoading ? (
-              <span className="text-xs text-slate-400">Loading lab test types...</span>
+              <span className="text-xs text-slate-400">
+                Loading lab test types...
+              </span>
             ) : testTypes.length > 0 ? (
               <select
-                className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-2 text-base text-slate-900 focus:border-tide focus:outline-none"
+                className="rounded-2xl border border-teal-100 bg-white/90 px-4 py-2 text-base text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
                 value={labTestTypeId}
                 onChange={(e) => setLabTestTypeId(e.target.value)}
                 required

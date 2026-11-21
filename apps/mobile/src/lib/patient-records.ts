@@ -44,7 +44,11 @@ export type LabResult = {
   createdAt: string;
   notes?: string | null;
   labTestType: { name: string };
-  measures: Array<{ value: string; unit?: string | null; labMeasureDef: { name: string } }>;
+  measures: Array<{
+    value: string;
+    unit?: string | null;
+    labMeasureDef: { name: string };
+  }>;
   attachments?: Array<{
     id: string;
     fileName: string;

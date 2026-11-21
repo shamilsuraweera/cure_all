@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import { useAuth } from "../../auth/auth-context";
 import { SectionHeader } from "../../components/root/section-header";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 
 export const DoctorDashboardPage = () => {
+  const { user } = useAuth();
+  const isRoot = user?.globalRole === "ROOT_ADMIN";
   const navigate = useNavigate();
   const [nic, setNic] = useState("");
 
@@ -27,7 +30,8 @@ export const DoctorDashboardPage = () => {
       <div className="grid gap-6 md:grid-cols-[1.2fr_0.8fr]">
         <Card title="Patient lookup" eyebrow="Direct access">
           <p className="text-sm text-slate-500 mb-4">
-            Search patient charts using their National Identity Card (NIC) or email address.
+            Search patient charts using their National Identity Card (NIC) or
+            email address.
           </p>
           <form onSubmit={handleLookup} className="flex gap-3">
             <div className="flex-1">
@@ -40,7 +44,10 @@ export const DoctorDashboardPage = () => {
             <Button type="submit">Open Patient Search</Button>
           </form>
           <div className="mt-4 flex gap-3 text-xs text-slate-500">
-            <Link to="/doctor/patients" className="font-semibold text-tide hover:underline">
+            <Link
+              to="/doctor/patients"
+              className="font-semibold text-tide hover:underline"
+            >
               Open Full Patient Lookup Directory &rarr;
             </Link>
           </div>
@@ -52,42 +59,49 @@ export const DoctorDashboardPage = () => {
               <span>Find Patient & Prescribe</span>
               <Link
                 to="/doctor/patients"
-                className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white shadow hover:bg-slate-800 transition"
+                className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-3 py-1 text-xs font-semibold text-white shadow hover:from-teal-700 hover:to-teal-600 transition"
               >
                 Lookup &rarr;
               </Link>
             </li>
-            <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
-              <span>Medicines Reference</span>
-              <Link
-                to="/root/medicines"
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
-              >
-                Catalog
-              </Link>
-            </li>
-            <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
-              <span>Diagnostic Test Reference</span>
-              <Link
-                to="/root/lab-tests"
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
-              >
-                Lab Tests
-              </Link>
-            </li>
+            {isRoot ? (
+              <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span>Medicines Reference</span>
+                <Link
+                  to="/root/medicines"
+                  className="rounded-full border border-teal-100 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
+                >
+                  Catalog
+                </Link>
+              </li>
+            ) : null}
+            {isRoot ? (
+              <li className="flex items-center justify-between rounded-xl bg-slate-50 p-2.5">
+                <span>Diagnostic Test Reference</span>
+                <Link
+                  to="/root/lab-tests"
+                  className="rounded-full border border-teal-100 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:text-ink transition"
+                >
+                  Lab Tests
+                </Link>
+              </li>
+            ) : null}
           </ul>
         </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="Electronic prescribing" eyebrow="Rx Safety">
-          Issue prescriptions with multi-item capability, standardized dosage frequencies, duration limits, and automated unit tracking.
+          Issue prescriptions with multi-item capability, standardized dosage
+          frequencies, duration limits, and automated unit tracking.
         </Card>
         <Card title="Diagnostic history" eyebrow="Lab data">
-          Review lab panels and test measure sets with normal ranges displayed automatically for each result.
+          Review lab panels and test measure sets with normal ranges displayed
+          automatically for each result.
         </Card>
         <Card title="Tamper-proof audit" eyebrow="Compliance">
-          All prescribing and dispensing events are cryptographically recorded with physician timestamps and actor IDs.
+          All prescribing and dispensing events are cryptographically recorded
+          with physician timestamps and actor IDs.
         </Card>
       </div>
     </div>

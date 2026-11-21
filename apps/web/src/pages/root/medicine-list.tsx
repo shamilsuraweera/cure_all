@@ -27,7 +27,7 @@ export const MedicineListPage = () => {
         />
         <Link
           to="/root/medicines/create"
-          className="rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white shadow-glow hover:bg-slate-800 transition"
+          className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-glow hover:from-teal-700 hover:to-teal-600 transition"
         >
           + Create Medicine
         </Link>
@@ -49,11 +49,13 @@ export const MedicineListPage = () => {
             {medicines.map((medicine) => (
               <div
                 key={medicine.id}
-                className="rounded-2xl border border-slate-100 bg-white px-4 py-3"
+                className="rounded-2xl border border-teal-100 bg-white px-4 py-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-slate-800">{medicine.name}</p>
+                    <p className="font-medium text-slate-800">
+                      {medicine.name}
+                    </p>
                     <p className="text-xs text-slate-400">
                       {medicine.form} · {medicine.strength ?? ""}
                     </p>

@@ -6,7 +6,11 @@ import { SectionHeader } from "../../components/root/section-header";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
-import { fetchOrgs, inviteOrgMember, type OrgInvite } from "../../lib/root-admin";
+import {
+  fetchOrgs,
+  inviteOrgMember,
+  type OrgInvite,
+} from "../../lib/root-admin";
 
 const roles = [
   { value: "DOCTOR", label: "Doctor (Clinical Prescriber)" },
@@ -88,17 +92,20 @@ export const OrgInvitePage = () => {
           <label className="flex flex-col gap-2 text-sm text-slate-600">
             <span className="font-medium text-slate-700">Organization</span>
             {orgsQuery.isLoading ? (
-              <span className="text-xs text-slate-400">Loading organizations...</span>
+              <span className="text-xs text-slate-400">
+                Loading organizations...
+              </span>
             ) : orgList.length > 0 ? (
               <select
-                className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-2 text-base text-slate-900 focus:border-tide focus:outline-none"
+                className="rounded-2xl border border-teal-100 bg-white/90 px-4 py-2 text-base text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
                 value={orgId}
                 onChange={(event) => setOrgId(event.target.value)}
                 required
               >
                 {orgList.map((org) => (
                   <option key={org.id} value={org.id}>
-                    {org.name} ({org.type}) {org.domain ? `· @${org.domain}` : ""}
+                    {org.name} ({org.type}){" "}
+                    {org.domain ? `· @${org.domain}` : ""}
                   </option>
                 ))}
               </select>
@@ -123,9 +130,11 @@ export const OrgInvitePage = () => {
           />
 
           <label className="flex flex-col gap-2 text-sm text-slate-600">
-            <span className="font-medium text-slate-700">Role & Responsibilities</span>
+            <span className="font-medium text-slate-700">
+              Role & Responsibilities
+            </span>
             <select
-              className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-2 text-base text-slate-900 focus:border-tide focus:outline-none"
+              className="rounded-2xl border border-teal-100 bg-white/90 px-4 py-2 text-base text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
               value={role}
               onChange={(event) => setRole(event.target.value)}
             >
@@ -158,7 +167,8 @@ export const OrgInvitePage = () => {
             </div>
 
             <p className="mt-2 text-sm text-slate-700">
-              Share this invite link with <strong>{createdInvite.email}</strong> to set up their password and join the workspace.
+              Share this invite link with <strong>{createdInvite.email}</strong>{" "}
+              to set up their password and join the workspace.
             </p>
 
             <div className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-200 bg-white p-2">
@@ -167,13 +177,22 @@ export const OrgInvitePage = () => {
                 value={inviteLink}
                 className="flex-1 bg-transparent font-mono text-xs text-slate-700 outline-none"
               />
-              <Button variant="outline" className="text-xs py-1 px-3" onClick={copyLink}>
+              <Button
+                variant="outline"
+                className="text-xs py-1 px-3"
+                onClick={copyLink}
+              >
                 {copied ? "Copied!" : "Copy Link"}
               </Button>
             </div>
 
             <div className="mt-3 flex items-center justify-between text-xs text-slate-500">
-              <span>Token: <code className="font-mono text-emerald-900">{createdInvite.token.slice(0, 13)}...</code></span>
+              <span>
+                Token:{" "}
+                <code className="font-mono text-emerald-900">
+                  {createdInvite.token.slice(0, 13)}...
+                </code>
+              </span>
               <Link
                 to={`/invite/accept?token=${createdInvite.token}`}
                 className="font-semibold text-emerald-800 underline hover:text-emerald-900"

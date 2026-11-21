@@ -5,16 +5,25 @@ import { SectionHeader } from "../../components/root/section-header";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
-import { acceptOrgInvite, verifyOrgInvite, type OrgInviteDetails } from "../../lib/root-admin";
+import {
+  acceptOrgInvite,
+  verifyOrgInvite,
+  type OrgInviteDetails,
+} from "../../lib/root-admin";
 
 export const InviteAcceptPage = () => {
   const [searchParams] = useSearchParams();
   const [token, setToken] = useState(searchParams.get("token") ?? "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [status, setStatus] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const [status, setStatus] = useState<{
+    message: string;
+    tone: "success" | "error";
+  } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [inviteDetails, setInviteDetails] = useState<OrgInviteDetails | null>(null);
+  const [inviteDetails, setInviteDetails] = useState<OrgInviteDetails | null>(
+    null,
+  );
   const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
@@ -56,7 +65,10 @@ export const InviteAcceptPage = () => {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (password.length < 8) {
-      setStatus({ message: "Password must be at least 8 characters.", tone: "error" });
+      setStatus({
+        message: "Password must be at least 8 characters.",
+        tone: "error",
+      });
       return;
     }
     if (password !== confirmPassword) {
@@ -71,7 +83,8 @@ export const InviteAcceptPage = () => {
 
     if (result.ok) {
       setStatus({
-        message: "Invite accepted! Your account is created. You can now log in.",
+        message:
+          "Invite accepted! Your account is created. You can now log in.",
         tone: "success",
       });
       setPassword("");
@@ -93,12 +106,16 @@ export const InviteAcceptPage = () => {
       />
 
       {inviteDetails ? (
-        <div className="mb-6 rounded-2xl border border-sky-100 bg-sky-50/80 p-5">
-          <p className="text-xs uppercase tracking-wider font-semibold text-sky-700">Invitation Details</p>
+        <div className="mb-6 rounded-2xl border border-sky-100 bg-teal-50/80 p-5">
+          <p className="text-xs uppercase tracking-wider font-semibold text-teal-700">
+            Invitation Details
+          </p>
           <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
             <div>
               <span className="text-slate-500">Organization:</span>{" "}
-              <strong className="text-slate-900">{inviteDetails.org.name}</strong>
+              <strong className="text-slate-900">
+                {inviteDetails.org.name}
+              </strong>
             </div>
             <div>
               <span className="text-slate-500">Assigned Role:</span>{" "}
@@ -108,11 +125,15 @@ export const InviteAcceptPage = () => {
             </div>
             <div>
               <span className="text-slate-500">Email:</span>{" "}
-              <span className="font-mono text-xs text-slate-800">{inviteDetails.email}</span>
+              <span className="font-mono text-xs text-slate-800">
+                {inviteDetails.email}
+              </span>
             </div>
             <div>
               <span className="text-slate-500">Status:</span>{" "}
-              <span className="font-medium text-emerald-700">{inviteDetails.status}</span>
+              <span className="font-medium text-emerald-700">
+                {inviteDetails.status}
+              </span>
             </div>
           </div>
         </div>

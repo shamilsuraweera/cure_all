@@ -67,7 +67,8 @@ export const createOrg = (payload: {
   name: string;
   type: OrgType;
   domain?: string | null;
-}) => apiClient.post<{ org: Organization }, typeof payload>("/admin/orgs", payload);
+}) =>
+  apiClient.post<{ org: Organization }, typeof payload>("/admin/orgs", payload);
 
 export const updateOrgStatus = (orgId: string, status: OrgStatus) =>
   apiClient.patch<{ org: Organization }, { status: OrgStatus }>(
@@ -75,14 +76,20 @@ export const updateOrgStatus = (orgId: string, status: OrgStatus) =>
     { status },
   );
 
-export const inviteOrgMember = (orgId: string, payload: { email: string; role: string }) =>
+export const inviteOrgMember = (
+  orgId: string,
+  payload: { email: string; role: string },
+) =>
   apiClient.post<{ invite: OrgInvite }, typeof payload>(
     `/admin/orgs/${orgId}/invite`,
     payload,
   );
 
 export const acceptOrgInvite = (payload: { token: string; password: string }) =>
-  apiClient.post<{ userId: string }, typeof payload>("/invites/accept", payload);
+  apiClient.post<{ userId: string }, typeof payload>(
+    "/invites/accept",
+    payload,
+  );
 
 export const createPatient = (payload: {
   email: string;
@@ -92,7 +99,11 @@ export const createPatient = (payload: {
   dob?: string;
   location?: string;
   guardianEmail?: string;
-}) => apiClient.post<{ patient: PatientProfile }, typeof payload>("/admin/patients", payload);
+}) =>
+  apiClient.post<{ patient: PatientProfile }, typeof payload>(
+    "/admin/patients",
+    payload,
+  );
 
 export const fetchMedicines = (page = 1, pageSize = 20, query = "") =>
   apiClient.get<{ items: Medicine[] }>("/medicines", {
@@ -106,7 +117,11 @@ export const createMedicine = (payload: {
   form: MedicineForm;
   manufacturer?: string;
   notes?: string;
-}) => apiClient.post<{ medicine: Medicine }, typeof payload>("/admin/medicines", payload);
+}) =>
+  apiClient.post<{ medicine: Medicine }, typeof payload>(
+    "/admin/medicines",
+    payload,
+  );
 
 export const fetchLabTestTypes = (page = 1, pageSize = 20) =>
   apiClient.get<{ items: LabTestType[] }>("/admin/lab-test-types", {
@@ -123,12 +138,15 @@ export const createLabTestType = (payload: {
     payload,
   );
 
-export const createLabMeasure = (labTestTypeId: string, payload: {
-  name: string;
-  unit?: string;
-  normalRangeMin?: number;
-  normalRangeMax?: number;
-}) =>
+export const createLabMeasure = (
+  labTestTypeId: string,
+  payload: {
+    name: string;
+    unit?: string;
+    normalRangeMin?: number;
+    normalRangeMax?: number;
+  },
+) =>
   apiClient.post<{ measure: { id: string } }, typeof payload>(
     `/admin/lab-test-types/${labTestTypeId}/measures`,
     payload,

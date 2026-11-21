@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import { SectionHeader } from "../../components/root/section-header";
-import { Button } from "../../components/ui/button";
+import { Button, LinkButton } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { searchPatients } from "../../lib/lab";
@@ -76,8 +75,13 @@ export const LabPatientLookupPage = () => {
             ) : null}
 
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Button type="submit" disabled={searchQuery.isLoading || searchQuery.isFetching}>
-                {searchQuery.isLoading || searchQuery.isFetching ? "Searching..." : "Search"}
+              <Button
+                type="submit"
+                disabled={searchQuery.isLoading || searchQuery.isFetching}
+              >
+                {searchQuery.isLoading || searchQuery.isFetching
+                  ? "Searching..."
+                  : "Search"}
               </Button>
               {submitted || nic || email ? (
                 <Button type="button" variant="outline" onClick={handleClear}>
@@ -86,9 +90,10 @@ export const LabPatientLookupPage = () => {
               ) : null}
             </div>
 
-            <div className="border-t border-slate-100 pt-3">
+            <div className="border-t border-teal-100 pt-3">
               <p className="text-xs text-slate-400">
-                Tip: Search matches partial National ID Card (NIC) or email address.
+                Tip: Search matches partial National ID Card (NIC) or email
+                address.
               </p>
             </div>
           </form>
@@ -108,17 +113,21 @@ export const LabPatientLookupPage = () => {
               <p className="mt-3 text-sm">Searching patient database...</p>
             </div>
           ) : !submitted ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-white/50 p-8 text-center text-slate-500">
-              <p className="font-medium text-slate-700">Enter search criteria above</p>
+            <div className="rounded-2xl border border-dashed border-teal-100 bg-white/50 p-8 text-center text-slate-500">
+              <p className="font-medium text-slate-700">
+                Enter search criteria above
+              </p>
               <p className="mt-1 text-xs text-slate-400">
-                Look up a patient to enter lab test values, diagnostic measures, and upload report attachments.
+                Look up a patient to enter lab test values, diagnostic measures,
+                and upload report attachments.
               </p>
             </div>
           ) : patients.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-amber-200 bg-amber-50/60 p-6 text-center text-amber-900">
               <p className="font-medium">No matching patients found</p>
               <p className="mt-1 text-xs text-amber-700">
-                No patient found matching "{nic || email}". Verify the NIC or email address.
+                No patient found matching "{nic || email}". Verify the NIC or
+                email address.
               </p>
             </div>
           ) : (
@@ -134,7 +143,7 @@ export const LabPatientLookupPage = () => {
                 return (
                   <div
                     key={patient.id}
-                    className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:border-slate-200 hover:shadow"
+                    className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100 bg-white p-4 shadow-sm transition hover:border-slate-200 hover:shadow"
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-teal-50 font-bold text-teal-700">
@@ -149,14 +158,18 @@ export const LabPatientLookupPage = () => {
                             NIC: {patient.nic}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400">{patient.user.email}</p>
+                        <p className="text-xs text-slate-400">
+                          {patient.user.email}
+                        </p>
                       </div>
                     </div>
-                    <Link to={`/lab/patients/${patient.id}`}>
-                      <Button variant="outline" className="text-xs font-semibold">
-                        Record Lab &rarr;
-                      </Button>
-                    </Link>
+                    <LinkButton
+                      to={`/lab/patients/${patient.id}`}
+                      variant="outline"
+                      className="text-xs"
+                    >
+                      Record Lab →
+                    </LinkButton>
                   </div>
                 );
               })}

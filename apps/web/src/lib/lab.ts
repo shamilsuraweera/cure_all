@@ -65,13 +65,17 @@ export const searchPatients = (params: {
   });
 
 export const getPatientProfile = (patientProfileId: string) =>
-  apiClient.get<{ patient: PatientSearchResult }>(`/patients/${patientProfileId}`);
+  apiClient.get<{ patient: PatientSearchResult }>(
+    `/patients/${patientProfileId}`,
+  );
 
 export const fetchLabTestTypes = () =>
   apiClient.get<{ items: LabTestType[] }>("/lab-test-types");
 
 export const fetchLabMeasures = (labTestTypeId: string) =>
-  apiClient.get<{ items: LabMeasureDef[] }>(`/lab-test-types/${labTestTypeId}/measures`);
+  apiClient.get<{ items: LabMeasureDef[] }>(
+    `/lab-test-types/${labTestTypeId}/measures`,
+  );
 
 export const createLabResult = (
   patientProfileId: string,
@@ -96,9 +100,14 @@ export const fetchLabResultDetail = (labResultId: string) =>
 
 export const uploadLabAttachment = (
   labResultId: string,
-  payload: { fileName: string; url: string; mimeType?: string; sizeBytes?: number },
+  payload: {
+    fileName: string;
+    url: string;
+    mimeType?: string;
+    sizeBytes?: number;
+  },
 ) =>
-  apiClient.post<{ attachment: LabResult["attachments"][number] }, typeof payload>(
-    `/lab-results/${labResultId}/attachments`,
-    payload,
-  );
+  apiClient.post<
+    { attachment: LabResult["attachments"][number] },
+    typeof payload
+  >(`/lab-results/${labResultId}/attachments`, payload);

@@ -23,23 +23,29 @@ const renderApp = (
 
 describe("auth ui", () => {
   it("shows login form fields", () => {
-    renderApp({ isReady: true, isAuthenticated: false, user: null }, ["/login"]);
+    renderApp({ isReady: true, isAuthenticated: false, user: null }, [
+      "/login",
+    ]);
 
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows root admin nav when authenticated", () => {
     renderApp(
       {
-      isReady: true,
-      isAuthenticated: true,
-      user: { id: "1", email: "root@example.com", globalRole: "ROOT_ADMIN" },
+        isReady: true,
+        isAuthenticated: true,
+        user: { id: "1", email: "root@example.com", globalRole: "ROOT_ADMIN" },
       },
       ["/"],
     );
 
-    expect(screen.getByRole("link", { name: /Root Admin/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Root Admin/i }),
+    ).toBeInTheDocument();
   });
 });
