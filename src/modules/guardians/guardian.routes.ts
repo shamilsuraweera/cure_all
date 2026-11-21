@@ -11,7 +11,7 @@ import { sendError, sendSuccess } from "../../utils/response.js";
 const router = Router();
 
 const inviteGuardianSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
 });
 
 const acceptGuardianSchema = z.object({

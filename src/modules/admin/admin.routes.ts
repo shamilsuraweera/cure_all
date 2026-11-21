@@ -92,18 +92,18 @@ router.patch(
 );
 
 const inviteSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   role: z.nativeEnum(OrgRole),
 });
 
 const createPatientSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(8),
   nic: z.string().min(1),
   name: z.string().min(1).optional(),
   dob: z.coerce.date().optional(),
   location: z.string().min(1).optional(),
-  guardianEmail: z.string().email().optional(),
+  guardianEmail: z.email().optional(),
 });
 
 const createMedicineSchema = z.object({

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { Router } from "express";
 import { z } from "zod";
 
@@ -11,7 +12,8 @@ import {
   type JwtPayload,
 } from "../../utils/jwt.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
-import { verifyPassword } from "../../utils/password.js";
+
+import { hashPassword, verifyPassword } from "../../utils/password.js";
 import { durationToMs } from "../../utils/time.js";
 import { logAuditEvent } from "../../utils/audit.js";
 import { sendError, sendSuccess } from "../../utils/response.js";
@@ -19,9 +21,12 @@ import { sendError, sendSuccess } from "../../utils/response.js";
 const router = Router();
 
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(1),
 });
+
+// Valid argon2id hash of a random value; used only to equalize login timing.
+const DUMMY_HASH = await hashPassword(randomBytes(16).toString("hex"));
 
 const isProd = env.NODE_ENV === "production";
 
@@ -46,12 +51,13 @@ router.post("/login", async (req, res, next) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) {
-      return sendError(res, 401, "Invalid credentials", "INVALID_CREDENTIALS");
-    }
-
-    const passwordOk = await verifyPassword(user.passwordHash, password);
-    if (!passwordOk) {
+    // Always run a hash verification so response time doesn't reveal
+    // whether the account exists.
+    const passwordOk = await verifyPassword(
+      user?.passwordHash ?? DUMMY_HASH,
+      password,
+    );
+    if (!user || !passwordOk) {
       return sendError(res, 401, "Invalid credentials", "INVALID_CREDENTIALS");
     }
 
@@ -96,14 +102,6 @@ router.post("/login", async (req, res, next) => {
 router.post("/refresh", async (req, res, next) => {
   try {
     let token = req.cookies?.refresh_token as string | undefined;
-
-    if (!token && req.headers.cookie) {
-      token = req.headers.cookie
-        .split(";")
-        .map((part) => part.trim())
-        .find((part) => part.startsWith("refresh_token="))
-        ?.split("=")[1];
-    }
 
     if (!token && req.headers.authorization?.startsWith("Bearer ")) {
       token = req.headers.authorization.slice("Bearer ".length);
