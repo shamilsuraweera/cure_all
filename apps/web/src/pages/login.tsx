@@ -51,11 +51,6 @@ export const LoginPage = () => {
     // Redirect handled by auth effect once user profile is loaded.
   };
 
-  const fillAdmin = () => {
-    setEmail("admin@example.com");
-    setPassword("ChangeMe@123");
-  };
-
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
       <Card title="Access Portal" eyebrow="Secure login">
@@ -90,20 +85,16 @@ export const LoginPage = () => {
             <Button type="submit" disabled={loading}>
               {loading ? "Signing in..." : "Sign in"}
             </Button>
-            <Button type="button" variant="outline" onClick={fillAdmin}>
-              Fill Root Admin
-            </Button>
           </div>
         </form>
       </Card>
       <Card title="Quick access" eyebrow="Environment">
         <div className="space-y-4 text-sm text-slate-600">
           <div className="rounded-2xl border border-teal-100 bg-slate-50 p-4">
-            <p className="font-semibold text-slate-800">
-              Local Dev Credentials
-            </p>
-            <p className="mt-1 font-mono text-xs text-slate-600">
-              admin@example.com / ChangeMe@123
+            <p className="font-semibold text-slate-800">Who can sign in</p>
+            <p className="mt-2 text-xs text-slate-500">
+              The Root Admin account is created by the database seed
+              (ROOT_ADMIN_EMAIL / ROOT_ADMIN_PASSWORD in the API .env).
             </p>
             <p className="mt-2 text-xs text-slate-400">
               Org members (Doctor, Pharmacist, Lab Tech) are invited by Root
