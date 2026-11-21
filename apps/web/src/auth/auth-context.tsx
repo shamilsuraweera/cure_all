@@ -16,7 +16,10 @@ type AuthState = {
 
 type AuthContextValue = AuthState & {
   refresh: () => Promise<void>;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
 };
 
@@ -50,7 +53,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
     }>("/auth/me");
     if (profile.ok) {
       const orgRoles =
-        profile.data?.user?.orgMemberships?.map((membership) => membership.role) ?? [];
+        profile.data?.user?.orgMemberships?.map(
+          (membership) => membership.role,
+        ) ?? [];
       const user = profile.data?.user
         ? { ...profile.data.user, orgRoles }
         : null;
@@ -63,37 +68,63 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       return true;
     }
 
-    setState((prev) => ({ ...prev, isReady: true, isAuthenticated: false, user: null }));
+    setState((prev) => ({
+      ...prev,
+      isReady: true,
+      isAuthenticated: false,
+      user: null,
+    }));
     return false;
   }, []);
 
   const refresh = useCallback(async () => {
     const result = await apiClient.post<{ message: string }>("/auth/refresh");
     if (!result.ok) {
-      setState((prev) => ({ ...prev, isReady: true, isAuthenticated: false, user: null }));
+      setState((prev) => ({
+        ...prev,
+        isReady: true,
+        isAuthenticated: false,
+        user: null,
+      }));
       return;
     }
     await hydrateUser();
   }, [hydrateUser]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await apiClient.post<
-      { message: string },
-      { email: string; password: string }
-    >("/auth/login", { email, password });
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await apiClient.post<
+        { message: string },
+        { email: string; password: string }
+      >("/auth/login", { email, password });
 
-    if (!result.ok) {
-      setState((prev) => ({ ...prev, isReady: true, isAuthenticated: false, user: null }));
-      return { ok: false, error: result.error?.message ?? "Invalid email or password" };
-    }
+      if (!result.ok) {
+        setState((prev) => ({
+          ...prev,
+          isReady: true,
+          isAuthenticated: false,
+          user: null,
+        }));
+        return {
+          ok: false,
+          error: result.error?.message ?? "Invalid email or password",
+        };
+      }
 
-    await hydrateUser();
-    return { ok: true };
-  }, [hydrateUser]);
+      await hydrateUser();
+      return { ok: true };
+    },
+    [hydrateUser],
+  );
 
   const logout = useCallback(async () => {
     await apiClient.post<{ message: string }>("/auth/logout");
-    setState((prev) => ({ ...prev, isReady: true, isAuthenticated: false, user: null }));
+    setState((prev) => ({
+      ...prev,
+      isReady: true,
+      isAuthenticated: false,
+      user: null,
+    }));
   }, []);
 
   const value = useMemo(

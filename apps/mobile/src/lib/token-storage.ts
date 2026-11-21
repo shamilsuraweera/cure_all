@@ -21,7 +21,9 @@ const webSet = (key: string, value: string | null) => {
 
 export const tokenStorage = {
   getAccessToken: () =>
-    secureStoreAvailable ? SecureStore.getItemAsync(ACCESS_TOKEN_KEY) : webGet(ACCESS_TOKEN_KEY),
+    secureStoreAvailable
+      ? SecureStore.getItemAsync(ACCESS_TOKEN_KEY)
+      : webGet(ACCESS_TOKEN_KEY),
   setAccessToken: (token: string | null) =>
     secureStoreAvailable
       ? token
@@ -29,7 +31,9 @@ export const tokenStorage = {
         : SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY)
       : webSet(ACCESS_TOKEN_KEY, token),
   getRefreshToken: () =>
-    secureStoreAvailable ? SecureStore.getItemAsync(REFRESH_TOKEN_KEY) : webGet(REFRESH_TOKEN_KEY),
+    secureStoreAvailable
+      ? SecureStore.getItemAsync(REFRESH_TOKEN_KEY)
+      : webGet(REFRESH_TOKEN_KEY),
   setRefreshToken: (token: string | null) =>
     secureStoreAvailable
       ? token

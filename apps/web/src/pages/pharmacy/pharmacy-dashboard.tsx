@@ -28,13 +28,15 @@ export const PharmacyDashboardPage = () => {
           {queueQuery.isLoading ? (
             <p className="text-xs text-slate-400">Loading queue...</p>
           ) : recentPrescriptions.length === 0 ? (
-            <p className="text-sm text-slate-400 italic">No pending prescriptions in the queue.</p>
+            <p className="text-sm text-slate-400 italic">
+              No pending prescriptions in the queue.
+            </p>
           ) : (
             <div className="space-y-2.5">
               {recentPrescriptions.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 text-xs shadow-sm"
+                  className="flex items-center justify-between rounded-xl border border-teal-100 bg-white p-3 text-xs shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2">
@@ -46,12 +48,13 @@ export const PharmacyDashboardPage = () => {
                       </span>
                     </div>
                     <span className="text-[11px] text-slate-400">
-                      ID: {p.id.slice(0, 16)}... · {new Date(p.createdAt).toLocaleDateString()}
+                      ID: {p.id.slice(0, 16)}... ·{" "}
+                      {new Date(p.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <Link
                     to={`/pharmacy/prescriptions/${p.id}`}
-                    className="rounded-full bg-ink px-3 py-1 text-xs font-semibold text-white shadow hover:bg-slate-800 transition"
+                    className="rounded-full bg-gradient-to-r from-teal-600 to-teal-500 px-3 py-1 text-xs font-semibold text-white shadow hover:from-teal-700 hover:to-teal-600 transition"
                   >
                     Dispense &rarr;
                   </Link>
@@ -59,7 +62,7 @@ export const PharmacyDashboardPage = () => {
               ))}
             </div>
           )}
-          <div className="mt-4 pt-3 border-t border-slate-100">
+          <div className="mt-4 pt-3 border-t border-teal-100">
             <Link
               to="/pharmacy/prescriptions"
               className="text-xs font-semibold text-tide hover:underline"
@@ -74,19 +77,24 @@ export const PharmacyDashboardPage = () => {
             <li className="flex items-start gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mt-1 shrink-0" />
               <span>
-                <strong>Verification Step:</strong> Every prescription is verified against the database to guarantee it has not been cancelled or fully dispensed.
+                <strong>Verification Step:</strong> Every prescription is
+                verified against the database to guarantee it has not been
+                cancelled or fully dispensed.
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-amber-500 mt-1 shrink-0" />
               <span>
-                <strong>Partial Dispensing:</strong> If stock is low, record partial quantities. The remaining balance remains active for later fulfillment.
+                <strong>Partial Dispensing:</strong> If stock is low, record
+                partial quantities. The remaining balance remains active for
+                later fulfillment.
               </span>
             </li>
             <li className="flex items-start gap-2">
               <span className="h-1.5 w-1.5 rounded-full bg-rose-500 mt-1 shrink-0" />
               <span>
-                <strong>Over-dispense Guard:</strong> The system strictly rejects attempts to dispense greater quantities than prescribed.
+                <strong>Over-dispense Guard:</strong> The system strictly
+                rejects attempts to dispense greater quantities than prescribed.
               </span>
             </li>
           </ul>
@@ -95,13 +103,16 @@ export const PharmacyDashboardPage = () => {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card title="Prescription verification" eyebrow="Workflow">
-          Lookup by ID or barcode to inspect authorized medicine names, dosages, duration, and instructions.
+          Lookup by ID or barcode to inspect authorized medicine names, dosages,
+          duration, and instructions.
         </Card>
         <Card title="Over-dispense safeguard" eyebrow="Safety">
-          Line-item tracking ensures each medication item cannot exceed the doctor-authorized total quantity.
+          Line-item tracking ensures each medication item cannot exceed the
+          doctor-authorized total quantity.
         </Card>
         <Card title="Audit history" eyebrow="Traceability">
-          Each dispense event documents dispensing pharmacist, pharmacy organization ID, and timestamp.
+          Each dispense event documents dispensing pharmacist, pharmacy
+          organization ID, and timestamp.
         </Card>
       </div>
     </div>

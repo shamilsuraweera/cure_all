@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import { apiClient } from "../lib/api-client";
 import { tokenStorage } from "../lib/token-storage";
@@ -38,7 +45,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     if (profile.ok) {
       const orgRoles =
-        profile.data?.user?.orgMemberships?.map((membership) => membership.role) ?? [];
+        profile.data?.user?.orgMemberships?.map(
+          (membership) => membership.role,
+        ) ?? [];
       const user = profile.data?.user
         ? { ...profile.data.user, orgRoles }
         : null;
@@ -72,27 +81,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setState({ isReady: true, isAuthenticated: false, user: null });
   }, [hydrateUser]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await apiClient.post<
-      { message: string; accessToken?: string; refreshToken?: string },
-      { email: string; password: string }
-    >("/auth/login", { email, password });
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await apiClient.post<
+        { message: string; accessToken?: string; refreshToken?: string },
+        { email: string; password: string }
+      >("/auth/login", { email, password });
 
-    if (!result.ok) {
-      setState({ isReady: true, isAuthenticated: false, user: null });
-      return false;
-    }
+      if (!result.ok) {
+        setState({ isReady: true, isAuthenticated: false, user: null });
+        return false;
+      }
 
-    if (result.data?.accessToken) {
-      await tokenStorage.setAccessToken(result.data.accessToken);
-    }
-    if (result.data?.refreshToken) {
-      await tokenStorage.setRefreshToken(result.data.refreshToken);
-    }
+      if (result.data?.accessToken) {
+        await tokenStorage.setAccessToken(result.data.accessToken);
+      }
+      if (result.data?.refreshToken) {
+        await tokenStorage.setRefreshToken(result.data.refreshToken);
+      }
 
-    await hydrateUser();
-    return true;
-  }, [hydrateUser]);
+      await hydrateUser();
+      return true;
+    },
+    [hydrateUser],
+  );
 
   const logout = useCallback(async () => {
     await apiClient.post<{ message: string }>("/auth/logout");

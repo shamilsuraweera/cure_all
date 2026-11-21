@@ -4,7 +4,9 @@ import { Platform } from "react-native";
 
 import { tokenStorage } from "./token-storage";
 
-const extra = Constants.expoConfig?.extra as { apiBaseUrl?: string } | undefined;
+const extra = Constants.expoConfig?.extra as
+  | { apiBaseUrl?: string }
+  | undefined;
 const nativeBaseUrl =
   process.env.EXPO_PUBLIC_API_BASE_URL ??
   extra?.apiBaseUrl ??

@@ -17,7 +17,11 @@ export default function AttachmentViewerScreen() {
 
       {url ? (
         isImage ? (
-          <Image source={{ uri: url }} style={styles.image} resizeMode="contain" />
+          <Image
+            source={{ uri: url }}
+            style={styles.image}
+            resizeMode="contain"
+          />
         ) : (
           <View style={styles.card}>
             <Text style={styles.helper}>Preview not available.</Text>
@@ -37,18 +41,18 @@ export default function AttachmentViewerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
     padding: 24,
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   meta: {
     marginTop: 6,
     fontSize: 12,
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   image: {
     marginTop: 16,
@@ -63,14 +67,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#CCFBF1",
   },
   helper: {
     marginTop: 6,
-    color: "#475569",
+    color: "#2F5553",
   },
   link: {
     marginTop: 8,
-    color: "#0F172A",
+    color: "#134E4A",
   },
 });

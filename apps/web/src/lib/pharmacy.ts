@@ -40,26 +40,38 @@ export type DispenseRecord = {
 };
 
 export const verifyPrescription = (prescriptionId: string) =>
-  apiClient.post<{ prescription: Prescription; remainingItems: RemainingItem[] }>(
-    `/pharmacy/${prescriptionId}/verify`,
-  );
+  apiClient.post<{
+    prescription: Prescription;
+    remainingItems: RemainingItem[];
+  }>(`/pharmacy/${prescriptionId}/verify`);
 
 export const dispensePrescription = (
   prescriptionId: string,
-  payload: { notes?: string; items: Array<{ prescriptionItemId: string; quantity: number }> },
+  payload: {
+    notes?: string;
+    items: Array<{ prescriptionItemId: string; quantity: number }>;
+  },
 ) =>
   apiClient.post<{ dispenseRecord: DispenseRecord }, typeof payload>(
     `/pharmacy/${prescriptionId}/dispense`,
     payload,
   );
 
-export const fetchDispenseHistory = (prescriptionId: string, page = 1, pageSize = 10) =>
+export const fetchDispenseHistory = (
+  prescriptionId: string,
+  page = 1,
+  pageSize = 10,
+) =>
   apiClient.get<{ dispenseRecords: DispenseRecord[] }>(
     `/pharmacy/${prescriptionId}/dispenses`,
     { query: { page, pageSize } },
   );
 
-export const listPrescriptions = (params?: { page?: number; pageSize?: number; status?: string }) =>
+export const listPrescriptions = (params?: {
+  page?: number;
+  pageSize?: number;
+  status?: string;
+}) =>
   apiClient.get<{ prescriptions: Prescription[] }>("/prescriptions", {
     query: {
       page: params?.page ?? 1,
@@ -69,6 +81,7 @@ export const listPrescriptions = (params?: { page?: number; pageSize?: number; s
   });
 
 export const getPrescriptionDetail = (prescriptionId: string) =>
-  apiClient.get<{ prescription: Prescription; remainingItems?: RemainingItem[] }>(
-    `/prescriptions/${prescriptionId}`,
-  );
+  apiClient.get<{
+    prescription: Prescription;
+    remainingItems?: RemainingItem[];
+  }>(`/prescriptions/${prescriptionId}`);

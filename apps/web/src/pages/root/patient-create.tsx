@@ -15,6 +15,7 @@ export const PatientCreatePage = () => {
   const [location, setLocation] = useState("");
   const [guardianEmail, setGuardianEmail] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,6 +44,19 @@ export const PatientCreatePage = () => {
     setStatus(result.error?.message ?? "Failed to create patient");
   };
 
+  const guardedSubmit = async (event: React.FormEvent) => {
+    if (submitting) {
+      event.preventDefault();
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await submit(event);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div>
       <SectionHeader
@@ -50,8 +64,17 @@ export const PatientCreatePage = () => {
         subtitle="Register a new patient and optionally link a guardian."
       />
       <Card title="Patient details" eyebrow="Intake">
-        <form className="space-y-4" onSubmit={submit}>
-          <Input label="Patient email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" required />
+        <form
+          className="space-y-4"
+          onSubmit={(event) => void guardedSubmit(event)}
+        >
+          <Input
+            label="Patient email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            required
+          />
           <Input
             label="Temporary password"
             value={password}
@@ -59,22 +82,37 @@ export const PatientCreatePage = () => {
             type="password"
             required
           />
-          <Input label="NIC" value={nic} onChange={(e) => setNic(e.target.value)} required />
-          <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input
+            label="NIC"
+            value={nic}
+            onChange={(e) => setNic(e.target.value)}
+            required
+          />
+          <Input
+            label="Full name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
           <Input
             label="Date of birth"
             value={dob}
             onChange={(e) => setDob(e.target.value)}
             type="date"
           />
-          <Input label="Location" value={location} onChange={(e) => setLocation(e.target.value)} />
+          <Input
+            label="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
           <Input
             label="Guardian email (optional)"
             value={guardianEmail}
             onChange={(e) => setGuardianEmail(e.target.value)}
             type="email"
           />
-          <Button type="submit">Create patient</Button>
+          <Button type="submit" loading={submitting}>
+            Create patient
+          </Button>
           {status ? <p className="text-sm text-slate-500">{status}</p> : null}
         </form>
       </Card>

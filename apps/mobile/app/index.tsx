@@ -19,7 +19,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#0F172A" />
+      <ActivityIndicator size="large" color="#134E4A" />
       <Text style={styles.subtitle}>Preparing your session...</Text>
     </View>
   );
@@ -31,11 +31,11 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
   },
   subtitle: {
     marginTop: 16,
     fontSize: 15,
-    color: "#475569",
+    color: "#2F5553",
   },
 });

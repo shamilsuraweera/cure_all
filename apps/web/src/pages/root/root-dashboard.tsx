@@ -34,7 +34,9 @@ export const RootDashboardPage = () => {
               {stats ? `${stats.activeOrgs} Active` : "Active"}
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-400">Hospitals, clinics, pharmacies & labs</p>
+          <p className="mt-2 text-xs text-slate-400">
+            Hospitals, clinics, pharmacies & labs
+          </p>
         </div>
 
         <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm">
@@ -45,11 +47,13 @@ export const RootDashboardPage = () => {
             <span className="font-display text-3xl font-bold text-ink">
               {stats ? stats.totalMedicines : "—"}
             </span>
-            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
+            <span className="rounded-full bg-teal-100 px-2.5 py-0.5 text-xs font-semibold text-sky-800">
               Medicines
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-400">Available pharmaceutical catalog items</p>
+          <p className="mt-2 text-xs text-slate-400">
+            Available pharmaceutical catalog items
+          </p>
         </div>
 
         <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm">
@@ -64,7 +68,9 @@ export const RootDashboardPage = () => {
               Test Types
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-400">Standardized diagnostic procedures</p>
+          <p className="mt-2 text-xs text-slate-400">
+            Standardized diagnostic procedures
+          </p>
         </div>
 
         <div className="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-sm">
@@ -79,7 +85,9 @@ export const RootDashboardPage = () => {
               Profiles
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-400">Validated National ID records</p>
+          <p className="mt-2 text-xs text-slate-400">
+            Validated National ID records
+          </p>
         </div>
       </div>
 
@@ -88,7 +96,8 @@ export const RootDashboardPage = () => {
         {/* Organizations Section */}
         <Card title="Organization control" eyebrow="Branches">
           <p className="text-xs text-slate-500 mb-4">
-            Manage provider organizations, configure domain locks, and issue member invites.
+            Manage provider organizations, configure domain locks, and issue
+            member invites.
           </p>
           <div className="space-y-2">
             <Link
@@ -118,7 +127,8 @@ export const RootDashboardPage = () => {
         {/* Clinical Catalogs Section */}
         <Card title="Formulary & Diagnostics" eyebrow="Catalogs">
           <p className="text-xs text-slate-500 mb-4">
-            Maintain the national medicines directory and lab test measurement definitions.
+            Maintain the national medicines directory and lab test measurement
+            definitions.
           </p>
           <div className="space-y-2">
             <Link
@@ -155,7 +165,8 @@ export const RootDashboardPage = () => {
         {/* Patient Intake & Compliance */}
         <Card title="Intake & Operations" eyebrow="Administration">
           <p className="text-xs text-slate-500 mb-4">
-            Patient registration, guardian linkage, and compliance operational checklist.
+            Patient registration, guardian linkage, and compliance operational
+            checklist.
           </p>
           <div className="space-y-2">
             <Link

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
+import { useAuth } from "../../auth/auth-context";
 import { SectionHeader } from "../../components/root/section-header";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
@@ -20,12 +21,18 @@ type MeasureInput = {
 };
 
 export const LabPatientDetailPage = () => {
+  const { user } = useAuth();
+  const isRoot = user?.globalRole === "ROOT_ADMIN";
   const { id = "" } = useParams();
   const [labTestTypeId, setLabTestTypeId] = useState("");
   const [notes, setNotes] = useState("");
-  const [measureInputs, setMeasureInputs] = useState<Record<string, MeasureInput>>({});
+  const [measureInputs, setMeasureInputs] = useState<
+    Record<string, MeasureInput>
+  >({});
   const [status, setStatus] = useState<string | null>(null);
-  const [statusType, setStatusType] = useState<"success" | "error" | null>(null);
+  const [statusType, setStatusType] = useState<"success" | "error" | null>(
+    null,
+  );
 
   const patientQuery = useQuery({
     queryKey: ["lab-patient", id],
@@ -91,7 +98,9 @@ export const LabPatientDetailPage = () => {
       return;
     }
 
-    const measures = measurePayload.filter((measure) => measure.value.trim().length > 0);
+    const measures = measurePayload.filter(
+      (measure) => measure.value.trim().length > 0,
+    );
     if (measures.length === 0) {
       setStatus("Enter at least one measure value.");
       setStatusType("error");
@@ -121,7 +130,11 @@ export const LabPatientDetailPage = () => {
     <div className="space-y-6">
       <SectionHeader
         title={patient?.name ?? "Patient Profile"}
-        subtitle={patient ? `NIC: ${patient.nic} · ${patient.user.email}` : "Loading patient..."}
+        subtitle={
+          patient
+            ? `NIC: ${patient.nic} · ${patient.user.email}`
+            : "Loading patient..."
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -130,7 +143,7 @@ export const LabPatientDetailPage = () => {
             <label className="flex flex-col gap-2 text-sm text-slate-600">
               <span className="font-medium text-slate-700">Lab test type</span>
               <select
-                className="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 shadow-sm focus:border-tide focus:outline-none"
+                className="rounded-2xl border border-teal-100 bg-white px-4 py-2.5 text-base text-slate-900 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
                 value={labTestTypeId}
                 onChange={(event) => {
                   setLabTestTypeId(event.target.value);
@@ -149,48 +162,65 @@ export const LabPatientDetailPage = () => {
             </label>
 
             {!labTestTypeId ? (
-              <p className="rounded-xl border border-dashed border-slate-200 bg-white/50 p-4 text-xs text-slate-500 text-center">
-                Select a lab test type above to load its defined measurement parameters.
+              <p className="rounded-xl border border-dashed border-teal-100 bg-white/50 p-4 text-xs text-slate-500 text-center">
+                Select a lab test type above to load its defined measurement
+                parameters.
               </p>
             ) : null}
 
-            {labTestTypeId && !labMeasuresQuery.isLoading && labMeasures.length === 0 ? (
+            {labTestTypeId &&
+            !labMeasuresQuery.isLoading &&
+            labMeasures.length === 0 ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
                 <p className="font-semibold text-amber-800">
-                  No measure parameters defined for {selectedTestType?.name ?? "this test"}.
+                  No measure parameters defined for{" "}
+                  {selectedTestType?.name ?? "this test"}.
                 </p>
                 <p className="mt-1 text-slate-600">
-                  Standard measure definitions (e.g. Hemoglobin, Platelets) must be defined before entering values.
+                  Standard measure definitions (e.g. Hemoglobin, Platelets) must
+                  be defined before entering values.
                 </p>
-                <Link
-                  to={`/root/lab-measures/new?testTypeId=${labTestTypeId}`}
-                  className="mt-3 inline-flex items-center gap-1 font-semibold text-tide hover:underline"
-                >
-                  + Define measures for this test &rarr;
-                </Link>
+                {isRoot ? (
+                  <Link
+                    to={`/root/lab-tests/measures?labTestTypeId=${labTestTypeId}`}
+                    className="mt-3 inline-flex items-center gap-1 font-semibold text-tide hover:underline"
+                  >
+                    + Define measures for this test &rarr;
+                  </Link>
+                ) : (
+                  <p className="mt-3 font-semibold text-amber-800">
+                    Ask a root administrator to define measures for this test.
+                  </p>
+                )}
               </div>
             ) : null}
 
             {labMeasuresQuery.isLoading ? (
-              <div className="py-4 text-center text-xs text-slate-400">Loading test parameters...</div>
+              <div className="py-4 text-center text-xs text-slate-400">
+                Loading test parameters...
+              </div>
             ) : null}
 
             {labMeasures.length > 0 ? (
-              <div className="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+              <div className="space-y-4 rounded-2xl border border-teal-100 bg-slate-50/50 p-4">
                 <div className="flex items-center justify-between border-b border-slate-200/60 pb-2">
                   <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                     Test Parameters ({labMeasures.length})
                   </span>
-                  <span className="text-[11px] text-slate-400">Values & Reference Ranges</span>
+                  <span className="text-[11px] text-slate-400">
+                    Values & Reference Ranges
+                  </span>
                 </div>
 
                 {labMeasures.map((measure) => {
                   const valStr = measureInputs[measure.id]?.value ?? "";
                   const valNum = parseFloat(valStr);
                   const hasMin =
-                    measure.normalRangeMin !== null && measure.normalRangeMin !== undefined;
+                    measure.normalRangeMin !== null &&
+                    measure.normalRangeMin !== undefined;
                   const hasMax =
-                    measure.normalRangeMax !== null && measure.normalRangeMax !== undefined;
+                    measure.normalRangeMax !== null &&
+                    measure.normalRangeMax !== undefined;
                   const isOutOfRange =
                     valStr.trim() !== "" &&
                     !isNaN(valNum) &&
@@ -207,7 +237,7 @@ export const LabPatientDetailPage = () => {
                   return (
                     <div
                       key={measure.id}
-                      className="rounded-xl border border-slate-200 bg-white p-3 shadow-xs transition"
+                      className="rounded-xl border border-teal-100 bg-white p-3 shadow-xs transition"
                     >
                       <div className="grid gap-3 md:grid-cols-[1.4fr_0.6fr]">
                         <Input
@@ -218,7 +248,8 @@ export const LabPatientDetailPage = () => {
                               ...prev,
                               [measure.id]: {
                                 value: event.target.value,
-                                unit: prev[measure.id]?.unit ?? measure.unit ?? "",
+                                unit:
+                                  prev[measure.id]?.unit ?? measure.unit ?? "",
                               },
                             }))
                           }
@@ -235,7 +266,11 @@ export const LabPatientDetailPage = () => {
                         />
                         <Input
                           label="Unit"
-                          value={measureInputs[measure.id]?.unit ?? measure.unit ?? ""}
+                          value={
+                            measureInputs[measure.id]?.unit ??
+                            measure.unit ??
+                            ""
+                          }
                           onChange={(event) =>
                             setMeasureInputs((prev) => ({
                               ...prev,
@@ -253,7 +288,9 @@ export const LabPatientDetailPage = () => {
                         <div className="mt-2 flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-800">
                           <span>⚠️</span>
                           <span>
-                            Value is outside reference range ({measure.normalRangeMin} - {measure.normalRangeMax} {measure.unit ?? ""})
+                            Value is outside reference range (
+                            {measure.normalRangeMin} - {measure.normalRangeMax}{" "}
+                            {measure.unit ?? ""})
                           </span>
                         </div>
                       ) : isNormal ? (
@@ -275,7 +312,10 @@ export const LabPatientDetailPage = () => {
               placeholder="e.g. Fasting sample collected at 08:30 AM. No hemolysis observed."
             />
 
-            <Button type="submit" disabled={!labTestTypeId || labMeasures.length === 0}>
+            <Button
+              type="submit"
+              disabled={!labTestTypeId || labMeasures.length === 0}
+            >
               Save lab result
             </Button>
 
@@ -299,29 +339,44 @@ export const LabPatientDetailPage = () => {
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-tide/10 text-lg font-bold text-tide">
-                    {(patient.name || patient.nic || "P").slice(0, 2).toUpperCase()}
+                    {(patient.name || patient.nic || "P")
+                      .slice(0, 2)
+                      .toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800">{patient.name ?? "Patient"}</p>
+                    <p className="font-semibold text-slate-800">
+                      {patient.name ?? "Patient"}
+                    </p>
                     <p className="text-xs text-slate-400">NIC: {patient.nic}</p>
                   </div>
                 </div>
-                <div className="border-t border-slate-100 pt-2 text-xs text-slate-500">
+                <div className="border-t border-teal-100 pt-2 text-xs text-slate-500">
                   <p>Email: {patient.user.email}</p>
-                  <p className="mt-1">ID: <span className="font-mono text-[11px] text-slate-400">{patient.id}</span></p>
+                  <p className="mt-1">
+                    ID:{" "}
+                    <span className="font-mono text-[11px] text-slate-400">
+                      {patient.id}
+                    </span>
+                  </p>
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-slate-400">Loading patient profile...</p>
+              <p className="text-xs text-slate-400">
+                Loading patient profile...
+              </p>
             )}
           </Card>
 
           <Card
             title="Recent lab results"
-            eyebrow={labResults.length > 0 ? `${labResults.length} records` : "History"}
+            eyebrow={
+              labResults.length > 0 ? `${labResults.length} records` : "History"
+            }
           >
             {labResultsQuery.isLoading ? (
-              <div className="py-6 text-center text-xs text-slate-400">Loading lab history...</div>
+              <div className="py-6 text-center text-xs text-slate-400">
+                Loading lab history...
+              </div>
             ) : (
               <div className="space-y-3">
                 {labResults.length === 0 ? (
@@ -332,23 +387,29 @@ export const LabPatientDetailPage = () => {
                 {labResults.map((result) => (
                   <div
                     key={result.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-xs transition hover:border-slate-200"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-teal-100 bg-white p-3.5 shadow-xs transition hover:border-slate-200"
                   >
                     <div>
-                      <p className="font-medium text-slate-800">{result.labTestType.name}</p>
+                      <p className="font-medium text-slate-800">
+                        {result.labTestType.name}
+                      </p>
                       <div className="flex items-center gap-2 text-xs text-slate-400">
-                        <span>{new Date(result.createdAt).toLocaleDateString()}</span>
+                        <span>
+                          {new Date(result.createdAt).toLocaleDateString()}
+                        </span>
                         {result.measures?.length ? (
                           <span>· {result.measures.length} measures</span>
                         ) : null}
                         {result.attachments?.length ? (
-                          <span>· {result.attachments.length} attachment(s)</span>
+                          <span>
+                            · {result.attachments.length} attachment(s)
+                          </span>
                         ) : null}
                       </div>
                     </div>
                     <Link
                       to={`/lab/results/${result.id}`}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:text-ink"
+                      className="rounded-full border border-teal-100 bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-xs hover:border-slate-300 hover:text-ink"
                     >
                       View details &rarr;
                     </Link>

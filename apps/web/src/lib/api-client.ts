@@ -1,6 +1,7 @@
 import { createApiClient } from "@cure-all/api-client";
 
-const baseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+const baseUrl =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   "http://localhost:3000";
 
 export const apiClient = createApiClient({

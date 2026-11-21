@@ -14,7 +14,7 @@ export default function DispenseHistoryScreen() {
   });
 
   const records = historyQuery.data?.ok
-    ? historyQuery.data.data?.dispenseRecords ?? []
+    ? (historyQuery.data.data?.dispenseRecords ?? [])
     : [];
 
   return (
@@ -24,7 +24,8 @@ export default function DispenseHistoryScreen() {
         <Text style={styles.helper}>Loading dispense history...</Text>
       ) : historyQuery.data?.ok === false ? (
         <Text style={styles.helper}>
-          {historyQuery.data.error?.message ?? "Unable to load dispense history."}
+          {historyQuery.data.error?.message ??
+            "Unable to load dispense history."}
         </Text>
       ) : records.length === 0 ? (
         <Text style={styles.helper}>No dispense records yet.</Text>
@@ -53,17 +54,17 @@ export default function DispenseHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
     padding: 24,
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   helper: {
     marginTop: 12,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   card: {
     marginTop: 12,
@@ -71,21 +72,21 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#CCFBF1",
   },
   cardTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   cardMeta: {
     marginTop: 4,
     fontSize: 12,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   item: {
     marginTop: 6,
     fontSize: 12,
-    color: "#475569",
+    color: "#2F5553",
   },
 });

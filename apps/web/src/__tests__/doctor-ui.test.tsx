@@ -9,11 +9,19 @@ import App from "../app";
 vi.mock("../lib/doctor", () => ({
   searchPatients: vi.fn(async () => ({ data: { patients: [] } })),
   getPatientProfile: vi.fn(async () => ({
-    data: { patient: { id: "1", nic: "123", user: { id: "u1", email: "doc@example.com" } } },
+    data: {
+      patient: {
+        id: "1",
+        nic: "123",
+        user: { id: "u1", email: "doc@example.com" },
+      },
+    },
   })),
   getPatientPrescriptions: vi.fn(async () => ({ data: { prescriptions: [] } })),
   getPatientLabResults: vi.fn(async () => ({ data: { labResults: [] } })),
-  createPrescription: vi.fn(async () => ({ data: { prescription: { id: "p1" } } })),
+  createPrescription: vi.fn(async () => ({
+    data: { prescription: { id: "p1" } },
+  })),
 }));
 
 const renderApp = (initialEntries: string[]) => {

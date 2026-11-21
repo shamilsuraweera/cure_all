@@ -23,6 +23,7 @@ export const MedicineCreatePage = () => {
   const [manufacturer, setManufacturer] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -53,6 +54,19 @@ export const MedicineCreatePage = () => {
     setStatus(result.error?.message ?? "Failed to create medicine");
   };
 
+  const guardedSubmit = async (event: React.FormEvent) => {
+    if (submitting) {
+      event.preventDefault();
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await submit(event);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div>
       <SectionHeader
@@ -60,8 +74,16 @@ export const MedicineCreatePage = () => {
         subtitle="Add a new medicine to the catalog."
       />
       <Card title="Medicine details" eyebrow="Catalogs">
-        <form className="space-y-4" onSubmit={submit}>
-          <Input label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <form
+          className="space-y-4"
+          onSubmit={(event) => void guardedSubmit(event)}
+        >
+          <Input
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
           <Input
             label="Generic name"
             value={genericName}
@@ -75,7 +97,7 @@ export const MedicineCreatePage = () => {
           <label className="flex flex-col gap-2 text-sm text-slate-600">
             <span className="font-medium text-slate-700">Form</span>
             <select
-              className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-2 text-base text-slate-900"
+              className="rounded-2xl border border-teal-100 bg-white/90 px-4 py-2 text-base text-slate-900"
               value={form}
               onChange={(e) => setForm(e.target.value as MedicineForm)}
             >
@@ -91,8 +113,14 @@ export const MedicineCreatePage = () => {
             value={manufacturer}
             onChange={(e) => setManufacturer(e.target.value)}
           />
-          <Input label="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
-          <Button type="submit">Create medicine</Button>
+          <Input
+            label="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+          <Button type="submit" loading={submitting}>
+            Create medicine
+          </Button>
           {status ? <p className="text-sm text-slate-500">{status}</p> : null}
         </form>
       </Card>

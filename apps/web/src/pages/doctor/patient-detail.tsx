@@ -46,8 +46,13 @@ const initialItem: PrescriptionDraftItem = {
 export const PatientDetailPage = () => {
   const { id = "" } = useParams();
   const [note, setNote] = useState("");
-  const [items, setItems] = useState<PrescriptionDraftItem[]>([{ ...initialItem }]);
-  const [status, setStatus] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const [items, setItems] = useState<PrescriptionDraftItem[]>([
+    { ...initialItem },
+  ]);
+  const [status, setStatus] = useState<{
+    message: string;
+    tone: "success" | "error";
+  } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const patientQuery = useQuery({
@@ -83,7 +88,11 @@ export const PatientDetailPage = () => {
   const labResults = labResultsQuery.data?.data?.labResults ?? [];
   const medicineCatalog = medicinesQuery.data?.data?.items ?? [];
 
-  const updateItem = (index: number, field: keyof PrescriptionDraftItem, value: string) => {
+  const updateItem = (
+    index: number,
+    field: keyof PrescriptionDraftItem,
+    value: string,
+  ) => {
     setItems((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], [field]: value };
@@ -114,7 +123,8 @@ export const PatientDetailPage = () => {
 
     if (invalidItem) {
       setStatus({
-        message: "Please fill in all medication fields (medicine, dose, frequency, duration, quantity).",
+        message:
+          "Please fill in all medication fields (medicine, dose, frequency, duration, quantity).",
         tone: "error",
       });
       return;
@@ -136,7 +146,10 @@ export const PatientDetailPage = () => {
     setLoading(false);
 
     if (result.ok) {
-      setStatus({ message: "Prescription successfully created and signed.", tone: "success" });
+      setStatus({
+        message: "Prescription successfully created and signed.",
+        tone: "success",
+      });
       setItems([{ ...initialItem }]);
       setNote("");
       void prescriptionsQuery.refetch();
@@ -153,7 +166,9 @@ export const PatientDetailPage = () => {
     <div>
       <SectionHeader
         title={patient?.name ?? "Patient profile"}
-        subtitle={patient ? `NIC: ${patient.nic} · Email: ${patient.user.email}` : ""}
+        subtitle={
+          patient ? `NIC: ${patient.nic} · Email: ${patient.user.email}` : ""
+        }
       />
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
@@ -182,18 +197,26 @@ export const PatientDetailPage = () => {
 
                   <div className="space-y-3">
                     <label className="flex flex-col gap-1 text-sm text-slate-600">
-                      <span className="font-medium text-slate-700">Medicine</span>
+                      <span className="font-medium text-slate-700">
+                        Medicine
+                      </span>
                       {medicineCatalog.length > 0 ? (
                         <select
-                          className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-tide focus:outline-none"
+                          className="rounded-2xl border border-teal-100 bg-white px-4 py-2 text-sm text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
                           value={item.medicineId}
-                          onChange={(e) => updateItem(idx, "medicineId", e.target.value)}
+                          onChange={(e) =>
+                            updateItem(idx, "medicineId", e.target.value)
+                          }
                           required
                         >
-                          <option value="">-- Select medicine from catalog --</option>
+                          <option value="">
+                            -- Select medicine from catalog --
+                          </option>
                           {medicineCatalog.map((med) => (
                             <option key={med.id} value={med.id}>
-                              {med.name} {med.strength ? `(${med.strength})` : ""} · {med.form}
+                              {med.name}{" "}
+                              {med.strength ? `(${med.strength})` : ""} ·{" "}
+                              {med.form}
                             </option>
                           ))}
                         </select>
@@ -203,7 +226,9 @@ export const PatientDetailPage = () => {
                           aria-label="Medicine ID"
                           placeholder="Select or enter medicine ID"
                           value={item.medicineId}
-                          onChange={(e) => updateItem(idx, "medicineId", e.target.value)}
+                          onChange={(e) =>
+                            updateItem(idx, "medicineId", e.target.value)
+                          }
                           required
                         />
                       )}
@@ -213,16 +238,22 @@ export const PatientDetailPage = () => {
                       <Input
                         label="Dose"
                         value={item.dose}
-                        onChange={(e) => updateItem(idx, "dose", e.target.value)}
+                        onChange={(e) =>
+                          updateItem(idx, "dose", e.target.value)
+                        }
                         placeholder="e.g. 500mg, 1 tablet"
                         required
                       />
                       <label className="flex flex-col gap-1 text-sm text-slate-600">
-                        <span className="font-medium text-slate-700">Frequency</span>
+                        <span className="font-medium text-slate-700">
+                          Frequency
+                        </span>
                         <select
-                          className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 focus:border-tide focus:outline-none"
+                          className="rounded-2xl border border-teal-100 bg-white px-4 py-2 text-sm text-slate-900 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
                           value={item.frequency}
-                          onChange={(e) => updateItem(idx, "frequency", e.target.value)}
+                          onChange={(e) =>
+                            updateItem(idx, "frequency", e.target.value)
+                          }
                         >
                           {frequencyOptions.map((f) => (
                             <option key={f} value={f}>
@@ -237,7 +268,9 @@ export const PatientDetailPage = () => {
                       <Input
                         label="Duration (days)"
                         value={item.durationDays}
-                        onChange={(e) => updateItem(idx, "durationDays", e.target.value)}
+                        onChange={(e) =>
+                          updateItem(idx, "durationDays", e.target.value)
+                        }
                         type="number"
                         min="1"
                         required
@@ -245,7 +278,9 @@ export const PatientDetailPage = () => {
                       <Input
                         label="Quantity"
                         value={item.quantity}
-                        onChange={(e) => updateItem(idx, "quantity", e.target.value)}
+                        onChange={(e) =>
+                          updateItem(idx, "quantity", e.target.value)
+                        }
                         type="number"
                         min="1"
                         required
@@ -255,7 +290,9 @@ export const PatientDetailPage = () => {
                     <Input
                       label="Instructions for patient"
                       value={item.instructions}
-                      onChange={(e) => updateItem(idx, "instructions", e.target.value)}
+                      onChange={(e) =>
+                        updateItem(idx, "instructions", e.target.value)
+                      }
                       placeholder="e.g. Take with water after meals."
                     />
                   </div>
@@ -303,22 +340,29 @@ export const PatientDetailPage = () => {
           ) : (
             <div className="space-y-3">
               {labResults.length === 0 ? (
-                <p className="text-sm text-slate-400 italic">No lab results on file for this patient.</p>
+                <p className="text-sm text-slate-400 italic">
+                  No lab results on file for this patient.
+                </p>
               ) : null}
               {labResults.map((result) => (
                 <div
                   key={result.id}
-                  className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+                  className="rounded-2xl border border-teal-100 bg-white p-4 shadow-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold text-slate-800">{result.labTestType.name}</p>
+                    <p className="font-semibold text-slate-800">
+                      {result.labTestType.name}
+                    </p>
                     <span className="text-xs text-slate-400">
                       {new Date(result.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                   <div className="mt-3 divide-y divide-slate-100 text-xs">
                     {result.measures.map((measure, i) => (
-                      <div key={i} className="flex justify-between py-1 text-slate-600">
+                      <div
+                        key={i}
+                        className="flex justify-between py-1 text-slate-600"
+                      >
                         <span>{measure.labMeasureDef.name}</span>
                         <strong className="font-mono text-slate-900">
                           {measure.value} {measure.unit ?? ""}
@@ -340,20 +384,23 @@ export const PatientDetailPage = () => {
           ) : (
             <div className="space-y-4">
               {prescriptions.length === 0 ? (
-                <p className="text-sm text-slate-400 italic">No past prescriptions recorded.</p>
+                <p className="text-sm text-slate-400 italic">
+                  No past prescriptions recorded.
+                </p>
               ) : null}
               {prescriptions.map((prescription) => (
                 <div
                   key={prescription.id}
-                  className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm"
+                  className="rounded-2xl border border-teal-100 bg-white p-4 shadow-sm"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-teal-100 pb-3">
                     <div>
                       <span className="text-xs font-mono text-slate-400">
                         Rx ID: {prescription.id}
                       </span>
                       <p className="text-xs text-slate-400">
-                        Issued: {new Date(prescription.createdAt).toLocaleString()}
+                        Issued:{" "}
+                        {new Date(prescription.createdAt).toLocaleString()}
                       </p>
                     </div>
                     <span
@@ -361,7 +408,7 @@ export const PatientDetailPage = () => {
                         prescription.status === "ACTIVE"
                           ? "bg-emerald-100 text-emerald-800"
                           : prescription.status === "DISPENSED"
-                            ? "bg-sky-100 text-sky-800"
+                            ? "bg-teal-100 text-sky-800"
                             : prescription.status === "PARTIALLY_DISPENSED"
                               ? "bg-amber-100 text-amber-800"
                               : "bg-slate-100 text-slate-700"
@@ -382,7 +429,8 @@ export const PatientDetailPage = () => {
                             {item.medicine.name} {item.medicine.strength ?? ""}
                           </strong>
                           <p className="text-slate-500">
-                            {item.dose} · {item.frequency} · {item.durationDays} days
+                            {item.dose} · {item.frequency} · {item.durationDays}{" "}
+                            days
                           </p>
                         </div>
                         <span className="font-semibold text-slate-700">

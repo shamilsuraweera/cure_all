@@ -63,24 +63,24 @@ export default function PrescriptionDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F7FB",
+    backgroundColor: "#F0FDFA",
     padding: 24,
   },
   title: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   meta: {
     marginTop: 6,
     fontSize: 12,
-    color: "#94A3B8",
+    color: "#5F8F8B",
   },
   sectionTitle: {
     marginTop: 16,
     fontSize: 16,
     fontWeight: "600",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   card: {
     marginTop: 12,
@@ -88,25 +88,25 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: "#CCFBF1",
   },
   cardTitle: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   cardMeta: {
     marginTop: 4,
     fontSize: 12,
-    color: "#64748B",
+    color: "#3F6B68",
   },
   link: {
     marginTop: 20,
     fontWeight: "600",
-    color: "#0F172A",
+    color: "#134E4A",
   },
   helper: {
     marginTop: 12,
-    color: "#64748B",
+    color: "#3F6B68",
   },
 });
