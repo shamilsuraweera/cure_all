@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 
@@ -8,7 +9,6 @@ import { useTheme } from "@/src/theme";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
-// eslint-disable-next-line react/display-name
 const icon =
   (active: IconName, inactive: IconName) =>
   ({
