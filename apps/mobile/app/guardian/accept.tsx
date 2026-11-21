@@ -1,152 +1,81 @@
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 
+import {
+  Button,
+  Field,
+  Screen,
+  Subtitle,
+  Title,
+  useToast,
+} from "@/src/components/ui";
 import { apiClient } from "@/src/lib/api-client";
 
 export default function GuardianAcceptScreen() {
   const router = useRouter();
-  const [token, setToken] = useState("");
+  const toast = useToast();
+  const params = useLocalSearchParams<{ token?: string }>();
+  const [token, setToken] = useState(params.token ?? "");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{ token?: string; password?: string }>(
+    {},
+  );
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
     if (loading) return;
+    const next: typeof errors = {};
+    if (!token.trim()) next.token = "Paste the invite token";
+    if (password.length < 8) next.password = "Use at least 8 characters";
+    setErrors(next);
+    if (Object.keys(next).length) return;
+
     setLoading(true);
-    setStatus(null);
-    const result = await apiClient
-      .post<
-        { patientId: string; guardianId: string },
-        { token: string; password: string }
-      >("/guardians/accept", { token, password })
-      .finally(() => setLoading(false));
+    const result = await apiClient.post<
+      { patientId: string; guardianId: string },
+      { token: string; password: string }
+    >("/guardians/accept", { token: token.trim(), password });
+    setLoading(false);
 
     if (result.ok) {
-      setStatus("Invite accepted. You can now view patient info.");
-      setToken("");
-      setPassword("");
+      toast.show("Invite accepted. You can now sign in.", "success");
+      router.replace("/login");
       return;
     }
-
-    setStatus(result.error?.message ?? "Failed to accept invite.");
+    toast.show(result.error?.message ?? "Failed to accept invite.", "error");
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.eyebrow}>GUARDIAN</Text>
-      <Text style={styles.title}>Accept invite</Text>
-      <Text style={styles.subtitle}>
-        Paste the invite token and create a password for guardian access.
-      </Text>
-
-      <View style={styles.form}>
-        <Text style={styles.label}>Invite token</Text>
-        <TextInput
-          value={token}
-          onChangeText={setToken}
-          autoCapitalize="none"
-          style={styles.input}
-          placeholder="Token from email"
-        />
-
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-          placeholder="Create a password"
-        />
-
-        {status ? <Text style={styles.status}>{status}</Text> : null}
-
-        <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-          onPress={submit}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Submitting..." : "Accept invite"}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.link, pressed && styles.pressed]}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.linkText}>Back</Text>
-        </Pressable>
-      </View>
-    </View>
+    <Screen>
+      <Stack.Screen options={{ title: "Guardian invite" }} />
+      <Title>Accept invite</Title>
+      <Subtitle>
+        Paste the invite token and choose a password for guardian access.
+      </Subtitle>
+      <Field
+        label="Invite token"
+        value={token}
+        onChangeText={setToken}
+        autoCapitalize="none"
+        autoCorrect={false}
+        placeholder="Token from your patient"
+        error={errors.token}
+      />
+      <Field
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize="none"
+        placeholder="At least 8 characters"
+        error={errors.password}
+      />
+      <Button
+        title="Accept invite"
+        icon="checkmark"
+        onPress={submit}
+        loading={loading}
+      />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  pressed: {
-    opacity: 0.75,
-  },
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: "#F0FDFA",
-  },
-  eyebrow: {
-    fontSize: 12,
-    letterSpacing: 2.8,
-    textTransform: "uppercase",
-    color: "#5F8F8B",
-  },
-  title: {
-    marginTop: 8,
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#134E4A",
-  },
-  subtitle: {
-    marginTop: 6,
-    fontSize: 14,
-    color: "#3F6B68",
-  },
-  form: {
-    marginTop: 24,
-    gap: 12,
-  },
-  label: {
-    fontSize: 12,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-    color: "#5F8F8B",
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: "#CCFBF1",
-    fontSize: 16,
-  },
-  status: {
-    marginTop: 8,
-    color: "#134E4A",
-  },
-  button: {
-    marginTop: 16,
-    backgroundColor: "#0D9488",
-    paddingVertical: 14,
-    borderRadius: 999,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  link: {
-    alignItems: "center",
-    paddingVertical: 10,
-  },
-  linkText: {
-    color: "#2F5553",
-  },
-});

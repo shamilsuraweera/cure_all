@@ -5,6 +5,8 @@ export type PatientProfile = {
   userId: string;
   nic: string;
   name?: string | null;
+  dob?: string | null;
+  location?: string | null;
   user: { id: string; email: string };
 };
 
@@ -13,7 +15,7 @@ export type Prescription = {
   status: string;
   createdAt: string;
   notes?: string | null;
-  items: Array<{
+  items: {
     id: string;
     dose: string;
     frequency: string;
@@ -21,7 +23,7 @@ export type Prescription = {
     quantity: number;
     instructions?: string | null;
     medicine: { name: string; strength?: string | null };
-  }>;
+  }[];
 };
 
 export type DispenseRecord = {
@@ -29,13 +31,13 @@ export type DispenseRecord = {
   status: string;
   createdAt: string;
   notes?: string | null;
-  items: Array<{
+  items: {
     id: string;
     quantity: number;
     prescriptionItem: {
       medicine: { name: string; strength?: string | null };
     };
-  }>;
+  }[];
   pharmacyOrg?: { name: string };
 };
 
@@ -44,18 +46,18 @@ export type LabResult = {
   createdAt: string;
   notes?: string | null;
   labTestType: { name: string };
-  measures: Array<{
+  measures: {
     value: string;
     unit?: string | null;
     labMeasureDef: { name: string };
-  }>;
-  attachments?: Array<{
+  }[];
+  attachments?: {
     id: string;
     fileName: string;
     url: string;
     mimeType?: string | null;
     sizeBytes?: number | null;
-  }>;
+  }[];
 };
 
 export const getSelfPatientProfile = () =>
@@ -86,3 +88,27 @@ export const getPatientLabResults = (patientProfileId: string) =>
 
 export const getLabResultDetail = (labResultId: string) =>
   apiClient.get<{ labResult: LabResult }>(`/lab-results/${labResultId}`);
+
+export const updatePatientProfile = (
+  patientProfileId: string,
+  payload: { name?: string; dob?: string; location?: string },
+) =>
+  apiClient.patch<{ patient: PatientProfile }, typeof payload>(
+    `/patients/${patientProfileId}`,
+    payload,
+  );
+
+export type GuardianInvite = {
+  id: string;
+  patientId: string;
+  email: string;
+  token: string;
+  status: string;
+  expiresAt: string;
+};
+
+export const inviteGuardian = (patientProfileId: string, email: string) =>
+  apiClient.post<{ invite: GuardianInvite }, { email: string }>(
+    `/patients/${patientProfileId}/guardians/invite`,
+    { email },
+  );

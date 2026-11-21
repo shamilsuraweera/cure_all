@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 
+import { getPatientAudience, sendPush } from "../../utils/push.js";
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
 import { GlobalRole, GuardianStatus, OrgRole } from "../../generated/prisma/index.js";
@@ -121,6 +122,28 @@ router.get("/search", requireAuth, async (req, res, next) => {
   }
 });
 
+// Must be registered before "/:id" so "me" is not treated as an id.
+router.get("/me", requireAuth, async (req, res, next) => {
+  try {
+    const patient = await prisma.patientProfile.findUnique({
+      where: { userId: req.user?.sub ?? "" },
+      include: {
+        user: {
+          select: { id: true, email: true },
+        },
+      },
+    });
+
+    if (!patient) {
+      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
+    }
+
+    return sendSuccess(res, 200, { patient });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.get("/:id", requireAuth, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -158,27 +181,6 @@ router.get("/:id", requireAuth, async (req, res, next) => {
       if (!membership) {
         return sendError(res, 403, "Forbidden", "FORBIDDEN");
       }
-    }
-
-    return sendSuccess(res, 200, { patient });
-  } catch (error) {
-    return next(error);
-  }
-});
-
-router.get("/me", requireAuth, async (req, res, next) => {
-  try {
-    const patient = await prisma.patientProfile.findUnique({
-      where: { userId: req.user?.sub ?? "" },
-      include: {
-        user: {
-          select: { id: true, email: true },
-        },
-      },
-    });
-
-    if (!patient) {
-      return sendError(res, 404, "Patient not found", "PATIENT_NOT_FOUND");
     }
 
     return sendSuccess(res, 200, { patient });
@@ -290,6 +292,14 @@ router.post("/:id/prescriptions", requireAuth, async (req, res, next) => {
       metadata: { patientId: patient.userId },
       req,
     });
+
+    void getPatientAudience(patient.userId).then((audience) =>
+      sendPush(audience, {
+        title: "New prescription",
+        body: "A new prescription has been added to your records.",
+        data: { type: "prescription", id: prescription.id },
+      }),
+    );
 
     return sendSuccess(res, 201, { prescription });
   } catch (error) {
@@ -484,6 +494,14 @@ router.post("/:id/lab-results", requireAuth, async (req, res, next) => {
       metadata: { patientId: patient.userId, labTestTypeId },
       req,
     });
+
+    void getPatientAudience(patient.userId).then((audience) =>
+      sendPush(audience, {
+        title: "New lab result",
+        body: "A new lab result is available.",
+        data: { type: "lab", id: labResult.id },
+      }),
+    );
 
     return sendSuccess(res, 201, { labResult });
   } catch (error) {

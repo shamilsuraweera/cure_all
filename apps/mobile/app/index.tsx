@@ -1,41 +1,31 @@
-import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { ActivityIndicator, Text, View } from "react-native";
+import { Redirect } from "expo-router";
 
 import { useAuth } from "@/src/auth/auth-context";
+import { useTheme } from "@/src/theme";
 
-export default function HomeScreen() {
+export default function Entry() {
   const { isReady, isAuthenticated } = useAuth();
-  const router = useRouter();
+  const theme = useTheme();
 
-  useEffect(() => {
-    if (!isReady) return;
-    if (isAuthenticated) {
-      router.replace("/profile");
-    } else {
-      router.replace("/login");
-    }
-  }, [isAuthenticated, isReady, router]);
+  if (!isReady) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: theme.background,
+          gap: 12,
+        }}
+      >
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={{ color: theme.textMuted }}>
+          Preparing your session...
+        </Text>
+      </View>
+    );
+  }
 
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color="#134E4A" />
-      <Text style={styles.subtitle}>Preparing your session...</Text>
-    </View>
-  );
+  return <Redirect href={isAuthenticated ? "/(tabs)" : "/login"} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F0FDFA",
-  },
-  subtitle: {
-    marginTop: 16,
-    fontSize: 15,
-    color: "#2F5553",
-  },
-});

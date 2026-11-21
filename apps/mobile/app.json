@@ -40,6 +40,20 @@
             "backgroundColor": "#134E4A"
           }
         }
+      ],
+      "expo-font",
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cure-All uses the camera to scan prescription QR codes."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#0D9488"
+        }
       ]
     ],
     "experiments": {

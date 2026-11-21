@@ -1,65 +1,56 @@
-import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { AppProviders } from "@/src/providers/app-providers";
-import { palette } from "@/src/theme/colors";
+import { useTheme } from "@/src/theme";
 
-// All screens are styled for the light teal theme, so the navigation chrome is
-// pinned to light as well (previously dark nav chrome sat on light screens).
-const navTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    primary: palette.primary,
-    background: palette.background,
-    card: palette.surface,
-    text: palette.ink,
-    border: palette.border,
-  },
+const ThemedStack = () => {
+  const theme = useTheme();
+  const base = theme.isDark ? DarkTheme : DefaultTheme;
+  const navTheme = {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: theme.primary,
+      background: theme.background,
+      card: theme.surface,
+      text: theme.text,
+      border: theme.border,
+    },
+  };
+
+  return (
+    <ThemeProvider value={navTheme}>
+      <Stack
+        screenOptions={{
+          headerTintColor: theme.primary,
+          headerTitleStyle: { color: theme.text, fontWeight: "700" },
+          headerStyle: { backgroundColor: theme.surface },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: theme.background },
+          animation: "slide_from_right",
+          headerBackButtonDisplayMode: "minimal",
+        }}
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+      <StatusBar style={theme.isDark ? "light" : "dark"} />
+    </ThemeProvider>
+  );
 };
 
 export default function RootLayout() {
   return (
     <AppProviders>
-      <ThemeProvider value={navTheme}>
-        <Stack
-          screenOptions={{
-            headerTintColor: palette.primaryDark,
-            headerTitleStyle: { color: palette.ink, fontWeight: "700" },
-            headerShadowVisible: false,
-            animation: "slide_from_right",
-          }}
-        >
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ title: "Sign in" }} />
-          <Stack.Screen name="profile" options={{ title: "Profile" }} />
-          <Stack.Screen
-            name="guardian/accept"
-            options={{ title: "Guardian invite" }}
-          />
-          <Stack.Screen
-            name="prescriptions/index"
-            options={{ title: "Prescriptions" }}
-          />
-          <Stack.Screen
-            name="prescriptions/[id]"
-            options={{ title: "Prescription" }}
-          />
-          <Stack.Screen
-            name="dispenses/[id]"
-            options={{ title: "Dispense history" }}
-          />
-          <Stack.Screen name="labs/index" options={{ title: "Lab results" }} />
-          <Stack.Screen name="labs/[id]" options={{ title: "Lab result" }} />
-          <Stack.Screen
-            name="labs/attachment"
-            options={{ title: "Attachment" }}
-          />
-        </Stack>
-        <StatusBar style="dark" />
-      </ThemeProvider>
+      <ThemedStack />
     </AppProviders>
   );
 }

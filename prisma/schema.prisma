@@ -39,35 +39,36 @@ enum OrgStatus {
 }
 
 model User {
-  id           String     @id @default(uuid())
-  email        String     @unique
-  passwordHash String
-  globalRole   GlobalRole @default(USER)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  orgMemberships OrgMember[]
-  providerProfile ProviderProfile?
-  patientProfile PatientProfile?
-  guardianLinks GuardianLink[] @relation("GuardianUser")
-  patientLinks  GuardianLink[] @relation("GuardianPatient")
-  guardianInvites GuardianInvite[] @relation("GuardianInvitePatient")
-  prescriptionsAsPatient Prescription[] @relation("PrescriptionPatient")
-  prescriptionsAsDoctor  Prescription[] @relation("PrescriptionDoctor")
-  labResultsAsPatient   LabResult[] @relation("LabResultPatient")
-  labResultsAsPerformer LabResult[] @relation("LabResultPerformer")
-  dispenseRecords DispenseRecord[]
+  id                     String           @id @default(uuid())
+  email                  String           @unique
+  passwordHash           String
+  globalRole             GlobalRole       @default(USER)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  orgMemberships         OrgMember[]
+  providerProfile        ProviderProfile?
+  patientProfile         PatientProfile?
+  guardianLinks          GuardianLink[]   @relation("GuardianUser")
+  patientLinks           GuardianLink[]   @relation("GuardianPatient")
+  guardianInvites        GuardianInvite[] @relation("GuardianInvitePatient")
+  prescriptionsAsPatient Prescription[]   @relation("PrescriptionPatient")
+  prescriptionsAsDoctor  Prescription[]   @relation("PrescriptionDoctor")
+  labResultsAsPatient    LabResult[]      @relation("LabResultPatient")
+  labResultsAsPerformer  LabResult[]      @relation("LabResultPerformer")
+  dispenseRecords        DispenseRecord[]
+  deviceTokens           DeviceToken[]
 }
 
 model Organization {
-  id        String    @id @default(uuid())
-  name      String
-  type      OrgType
-  domain    String?
-  status    OrgStatus @default(ACTIVE)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  members   OrgMember[]
-  invites   OrgInvite[]
+  id              String           @id @default(uuid())
+  name            String
+  type            OrgType
+  domain          String?
+  status          OrgStatus        @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  members         OrgMember[]
+  invites         OrgInvite[]
   dispenseRecords DispenseRecord[]
 }
 
@@ -96,14 +97,14 @@ model ProviderProfile {
 }
 
 model PatientProfile {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  nic       String   @unique
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  nic       String    @unique
   name      String?
   dob       DateTime?
   location  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id])
 }
@@ -135,14 +136,14 @@ model GuardianLink {
 }
 
 model GuardianInvite {
-  id        String              @id @default(uuid())
+  id        String               @id @default(uuid())
   patientId String
   email     String
-  token     String              @unique
+  token     String               @unique
   status    GuardianInviteStatus @default(PENDING)
   expiresAt DateTime
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
 
   patient User @relation("GuardianInvitePatient", fields: [patientId], references: [id])
 
@@ -195,16 +196,16 @@ model OrgInvite {
 }
 
 model Medicine {
-  id           String       @id @default(uuid())
-  name         String
-  genericName  String?
-  strength     String?
-  form         MedicineForm
-  manufacturer String?
-  notes        String?
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id                String             @id @default(uuid())
+  name              String
+  genericName       String?
+  strength          String?
+  form              MedicineForm
+  manufacturer      String?
+  notes             String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   prescriptionItems PrescriptionItem[]
 }
 
@@ -217,9 +218,9 @@ model Prescription {
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
 
-  patient User @relation("PrescriptionPatient", fields: [patientId], references: [id])
-  doctor  User @relation("PrescriptionDoctor", fields: [doctorId], references: [id])
-  items   PrescriptionItem[]
+  patient         User               @relation("PrescriptionPatient", fields: [patientId], references: [id])
+  doctor          User               @relation("PrescriptionDoctor", fields: [doctorId], references: [id])
+  items           PrescriptionItem[]
   dispenseRecords DispenseRecord[]
 
   @@index([patientId])
@@ -238,8 +239,8 @@ model PrescriptionItem {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  prescription Prescription @relation(fields: [prescriptionId], references: [id])
-  medicine     Medicine     @relation(fields: [medicineId], references: [id])
+  prescription  Prescription   @relation(fields: [prescriptionId], references: [id])
+  medicine      Medicine       @relation(fields: [medicineId], references: [id])
   dispenseItems DispenseItem[]
 
   @@index([prescriptionId])
@@ -247,17 +248,17 @@ model PrescriptionItem {
 }
 
 model DispenseRecord {
-  id            String         @id @default(uuid())
+  id             String         @id @default(uuid())
   prescriptionId String
-  dispensedById String
-  pharmacyOrgId String
-  status        DispenseStatus
-  notes         String?
-  createdAt     DateTime       @default(now())
+  dispensedById  String
+  pharmacyOrgId  String
+  status         DispenseStatus
+  notes          String?
+  createdAt      DateTime       @default(now())
 
-  prescription Prescription @relation(fields: [prescriptionId], references: [id])
-  dispensedBy  User         @relation(fields: [dispensedById], references: [id])
-  pharmacyOrg  Organization @relation(fields: [pharmacyOrgId], references: [id])
+  prescription Prescription   @relation(fields: [prescriptionId], references: [id])
+  dispensedBy  User           @relation(fields: [dispensedById], references: [id])
+  pharmacyOrg  Organization   @relation(fields: [pharmacyOrgId], references: [id])
   items        DispenseItem[]
 
   @@index([prescriptionId])
@@ -266,11 +267,11 @@ model DispenseRecord {
 }
 
 model DispenseItem {
-  id              String   @id @default(uuid())
-  dispenseRecordId String
+  id                 String   @id @default(uuid())
+  dispenseRecordId   String
   prescriptionItemId String
-  quantity        Int
-  createdAt       DateTime @default(now())
+  quantity           Int
+  createdAt          DateTime @default(now())
 
   dispenseRecord   DispenseRecord   @relation(fields: [dispenseRecordId], references: [id])
   prescriptionItem PrescriptionItem @relation(fields: [prescriptionItemId], references: [id])
@@ -303,7 +304,7 @@ model LabMeasureDef {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
+  labTestType LabTestType       @relation(fields: [labTestTypeId], references: [id])
   values      LabMeasureValue[]
 
   @@index([labTestTypeId])
@@ -318,9 +319,9 @@ model LabResult {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  patient     User        @relation("LabResultPatient", fields: [patientId], references: [id])
-  labTestType LabTestType @relation(fields: [labTestTypeId], references: [id])
-  performedBy User        @relation("LabResultPerformer", fields: [performedById], references: [id])
+  patient     User              @relation("LabResultPatient", fields: [patientId], references: [id])
+  labTestType LabTestType       @relation(fields: [labTestTypeId], references: [id])
+  performedBy User              @relation("LabResultPerformer", fields: [performedById], references: [id])
   measures    LabMeasureValue[]
   attachments LabAttachment[]
 
@@ -376,4 +377,17 @@ model AuditLog {
   @@index([targetType])
   @@index([targetId])
   @@index([createdAt])
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  platform  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

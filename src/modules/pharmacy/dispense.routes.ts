@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { prisma } from "../../config/prisma.js";
 import { requireAuth } from "../../middlewares/require-auth.js";
+import { getPatientAudience, sendPush } from "../../utils/push.js";
 import { logAuditEvent } from "../../utils/audit.js";
 import { sendError, sendSuccess } from "../../utils/response.js";
 import { buildPageMeta, getPagination } from "../../utils/pagination.js";
@@ -218,6 +219,17 @@ router.post("/:id/dispense", requireAuth, async (req, res, next) => {
       metadata: { prescriptionId: prescription.id },
       req,
     });
+
+    void getPatientAudience(prescription.patientId).then((audience) =>
+      sendPush(audience, {
+        title: "Prescription dispensed",
+        body:
+          result.status === "FULL"
+            ? "Your prescription has been fully dispensed."
+            : "Part of your prescription has been dispensed.",
+        data: { type: "prescription", id: prescription.id },
+      }),
+    );
 
     return sendSuccess(res, 201, { dispenseRecord: result });
   } catch (error) {

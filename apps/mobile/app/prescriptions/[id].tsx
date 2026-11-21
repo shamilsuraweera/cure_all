@@ -1,112 +1,140 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import QRCode from "react-native-qrcode-svg";
 
-import { getPrescriptionDetail } from "@/src/lib/patient-records";
+import { useAuth } from "@/src/auth/auth-context";
+import {
+  Badge,
+  Body,
+  Button,
+  Card,
+  KeyValue,
+  QueryState,
+  Screen,
+  SectionTitle,
+  statusTone,
+  Subtitle,
+  Title,
+} from "@/src/components/ui";
+import { errorMessage, formatDate, unwrap } from "@/src/lib/query";
+import { getPrescriptionDetail } from "@/src/lib/pharmacy";
+import { useTheme } from "@/src/theme";
 
 export default function PrescriptionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const theme = useTheme();
+  const { user } = useAuth();
+  const isPharmacist = Boolean(user?.orgRoles?.includes("PHARMACIST"));
 
-  const detailQuery = useQuery({
+  const query = useQuery({
     queryKey: ["prescription-detail", id],
-    queryFn: () => getPrescriptionDetail(id ?? ""),
-    enabled: Boolean(id),
+    queryFn: () => unwrap(getPrescriptionDetail(id as string)),
+    enabled: !!id,
   });
 
-  const prescription = detailQuery.data?.ok
-    ? detailQuery.data.data?.prescription
-    : undefined;
+  const prescription = query.data?.prescription;
+  const remaining = new Map(
+    (query.data?.remainingItems ?? []).map((r) => [
+      r.prescriptionItemId,
+      r.remainingQuantity,
+    ]),
+  );
+  const canShowQr =
+    prescription &&
+    ["ACTIVE", "PARTIALLY_DISPENSED"].includes(prescription.status);
 
   return (
-    <ScrollView style={styles.container}>
-      {detailQuery.isLoading ? (
-        <Text style={styles.helper}>Loading prescription...</Text>
-      ) : detailQuery.data?.ok === false ? (
-        <Text style={styles.helper}>
-          {detailQuery.data.error?.message ?? "Unable to load prescription."}
-        </Text>
-      ) : prescription ? (
-        <View>
-          <Text style={styles.title}>{prescription.status}</Text>
-          <Text style={styles.meta}>
-            {new Date(prescription.createdAt).toLocaleString()}
-          </Text>
-
-          <Text style={styles.sectionTitle}>Items</Text>
-          {prescription.items.map((item) => (
-            <View key={item.id} style={styles.card}>
-              <Text style={styles.cardTitle}>
-                {item.medicine.name} {item.medicine.strength ?? ""}
-              </Text>
-              <Text style={styles.cardMeta}>
-                {item.dose} · {item.frequency} · {item.durationDays} days
-              </Text>
-              <Text style={styles.cardMeta}>Qty: {item.quantity}</Text>
+    <Screen onRefresh={() => query.refetch()}>
+      <Stack.Screen options={{ title: "Prescription" }} />
+      <QueryState
+        isLoading={query.isLoading}
+        error={errorMessage(query.error)}
+        onRetry={() => query.refetch()}
+      >
+        {prescription ? (
+          <>
+            <View style={{ gap: 6 }}>
+              <Title>Prescription</Title>
+              <Subtitle>{formatDate(prescription.createdAt)}</Subtitle>
+              <Badge
+                label={prescription.status.replace("_", " ")}
+                tone={statusTone(prescription.status)}
+              />
             </View>
-          ))}
 
-          <Text
-            style={styles.link}
-            onPress={() => router.push(`/dispenses/${prescription.id}`)}
-          >
-            View dispense history
-          </Text>
-        </View>
-      ) : (
-        <Text style={styles.helper}>Prescription not found.</Text>
-      )}
-    </ScrollView>
+            <SectionTitle>Medicines</SectionTitle>
+            {prescription.items.map((item, i) => (
+              <Card key={item.id} index={i}>
+                <Body>
+                  {item.medicine.name} {item.medicine.strength ?? ""}
+                </Body>
+                <Subtitle>
+                  {item.dose} · {item.frequency} · {item.durationDays} days
+                </Subtitle>
+                <KeyValue label="Quantity" value={item.quantity} />
+                {remaining.has(item.id) ? (
+                  <KeyValue
+                    label="Remaining to dispense"
+                    value={remaining.get(item.id)}
+                  />
+                ) : null}
+                {item.instructions ? (
+                  <Subtitle>{item.instructions}</Subtitle>
+                ) : null}
+              </Card>
+            ))}
+
+            {canShowQr ? (
+              <>
+                <SectionTitle>Show at the pharmacy</SectionTitle>
+                <Card>
+                  <View
+                    style={{
+                      alignItems: "center",
+                      gap: 10,
+                      paddingVertical: 8,
+                    }}
+                  >
+                    <View
+                      style={{
+                        padding: 12,
+                        backgroundColor: "#FFFFFF",
+                        borderRadius: 16,
+                      }}
+                    >
+                      <QRCode
+                        value={prescription.id}
+                        size={170}
+                        color={theme.text}
+                        backgroundColor="#FFFFFF"
+                      />
+                    </View>
+                    <Subtitle>
+                      The pharmacist scans this code to find your prescription.
+                    </Subtitle>
+                  </View>
+                </Card>
+              </>
+            ) : null}
+
+            <Button
+              title="Dispense history"
+              icon="time-outline"
+              variant="outline"
+              onPress={() => router.push(`/dispenses/${prescription.id}`)}
+            />
+            {isPharmacist && canShowQr ? (
+              <Button
+                title="Verify & dispense"
+                icon="checkmark-done"
+                onPress={() => router.push(`/pharmacy/${prescription.id}`)}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </QueryState>
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F0FDFA",
-    padding: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#134E4A",
-  },
-  meta: {
-    marginTop: 6,
-    fontSize: 12,
-    color: "#5F8F8B",
-  },
-  sectionTitle: {
-    marginTop: 16,
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#134E4A",
-  },
-  card: {
-    marginTop: 12,
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#CCFBF1",
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#134E4A",
-  },
-  cardMeta: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#3F6B68",
-  },
-  link: {
-    marginTop: 20,
-    fontWeight: "600",
-    color: "#134E4A",
-  },
-  helper: {
-    marginTop: 12,
-    color: "#3F6B68",
-  },
-});

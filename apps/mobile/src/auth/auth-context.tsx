@@ -8,6 +8,7 @@ import React, {
 } from "react";
 
 import { apiClient } from "../lib/api-client";
+import { unregisterPush } from "../lib/notifications";
 import { tokenStorage } from "../lib/token-storage";
 
 type AuthState = {
@@ -17,9 +18,17 @@ type AuthState = {
 };
 
 type AuthContextValue = AuthState & {
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+};
+
+export type Membership = {
+  role: string;
+  org: { id: string; type: string; name: string };
 };
 
 type UserSummary = {
@@ -27,6 +36,7 @@ type UserSummary = {
   email: string;
   globalRole: string;
   orgRoles: string[];
+  memberships: Membership[];
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -40,7 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const hydrateUser = useCallback(async () => {
     const profile = await apiClient.get<{
-      user: UserSummary & { orgMemberships?: { role: string }[] };
+      user: Omit<UserSummary, "orgRoles" | "memberships"> & {
+        orgMemberships?: Membership[];
+      };
     }>("/auth/me");
 
     if (profile.ok) {
@@ -49,7 +61,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           (membership) => membership.role,
         ) ?? [];
       const user = profile.data?.user
-        ? { ...profile.data.user, orgRoles }
+        ? {
+            ...profile.data.user,
+            orgRoles,
+            memberships: profile.data.user.orgMemberships ?? [],
+          }
         : null;
       setState({ isReady: true, isAuthenticated: true, user });
       return true;
@@ -90,7 +106,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!result.ok) {
         setState({ isReady: true, isAuthenticated: false, user: null });
-        return false;
+        return {
+          ok: false,
+          error:
+            result.status === 401
+              ? "Invalid email or password."
+              : result.status === 400
+                ? "Enter a valid email and password."
+                : (result.error?.message ?? "Login failed."),
+        };
       }
 
       if (result.data?.accessToken) {
@@ -100,13 +124,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await tokenStorage.setRefreshToken(result.data.refreshToken);
       }
 
-      await hydrateUser();
-      return true;
+      const hydrated = await hydrateUser();
+      return hydrated
+        ? { ok: true }
+        : { ok: false, error: "Signed in, but could not load your profile." };
     },
     [hydrateUser],
   );
 
   const logout = useCallback(async () => {
+    await unregisterPush();
     await apiClient.post<{ message: string }>("/auth/logout");
     await tokenStorage.clear();
     setState({ isReady: true, isAuthenticated: false, user: null });
