@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, { FadeInUp, FadeOutUp } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -9,9 +16,9 @@ import { haptic } from "./haptics";
 type ToastKind = "success" | "error" | "info";
 type ToastState = { id: number; kind: ToastKind; message: string } | null;
 
-const ToastContext = createContext<{ show: (message: string, kind?: ToastKind) => void } | null>(
-  null,
-);
+const ToastContext = createContext<{
+  show: (message: string, kind?: ToastKind) => void;
+} | null>(null);
 
 export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
   const theme = useTheme();
@@ -29,7 +36,11 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
 
   const value = useMemo(() => ({ show }), [show]);
   const color =
-    toast?.kind === "success" ? theme.success : toast?.kind === "error" ? theme.danger : theme.primary;
+    toast?.kind === "success"
+      ? theme.success
+      : toast?.kind === "error"
+        ? theme.danger
+        : theme.primary;
 
   return (
     <ToastContext.Provider value={value}>
@@ -42,9 +53,16 @@ export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
           pointerEvents="none"
           style={[styles.wrap, { top: insets.top + 8 }]}
         >
-          <View style={[styles.toast, { backgroundColor: theme.surface, borderColor: color }]}>
+          <View
+            style={[
+              styles.toast,
+              { backgroundColor: theme.surface, borderColor: color },
+            ]}
+          >
             <View style={[styles.dot, { backgroundColor: color }]} />
-            <Text style={[styles.text, { color: theme.text }]}>{toast.message}</Text>
+            <Text style={[styles.text, { color: theme.text }]}>
+              {toast.message}
+            </Text>
           </View>
         </Animated.View>
       ) : null}

@@ -3,7 +3,16 @@ import { useRouter } from "expo-router";
 
 import { useAuth } from "@/src/auth/auth-context";
 import { useRoles } from "@/src/auth/roles";
-import { Badge, Button, Card, KeyValue, ListItem, Screen, SectionTitle, haptic } from "@/src/components/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  KeyValue,
+  ListItem,
+  Screen,
+  SectionTitle,
+  haptic,
+} from "@/src/components/ui";
 import { usePatientContext } from "@/src/hooks/use-patient-context";
 
 export default function ProfileTab() {
@@ -31,9 +40,15 @@ export default function ProfileTab() {
     <Screen>
       <Card>
         <KeyValue label="Email" value={user?.email} />
-        <KeyValue label="Account type" value={roles.isRoot ? "Root administrator" : "Standard"} />
+        <KeyValue
+          label="Account type"
+          value={roles.isRoot ? "Root administrator" : "Standard"}
+        />
         {(user?.memberships ?? []).map((m) => (
-          <View key={`${m.org.id}-${m.role}`} style={{ gap: 4, marginBottom: 6 }}>
+          <View
+            key={`${m.org.id}-${m.role}`}
+            style={{ gap: 4, marginBottom: 6 }}
+          >
             <KeyValue label={m.org.name} value={m.org.type} />
             <Badge label={m.role.replace("_", " ")} tone="success" />
           </View>
@@ -71,7 +86,12 @@ export default function ProfileTab() {
         onPress={() => router.push("/guardian/accept")}
       />
 
-      <Button title="Sign out" variant="danger" icon="log-out-outline" onPress={confirmLogout} />
+      <Button
+        title="Sign out"
+        variant="danger"
+        icon="log-out-outline"
+        onPress={confirmLogout}
+      />
     </Screen>
   );
 }

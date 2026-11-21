@@ -2,8 +2,23 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 
-import { Button, Card, EmptyState, Field, PickerField, Screen, SectionTitle, SkeletonList, Subtitle, useToast } from "@/src/components/ui";
-import { createLabResult, fetchLabMeasures, fetchLabTestTypes } from "@/src/lib/lab";
+import {
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  PickerField,
+  Screen,
+  SectionTitle,
+  SkeletonList,
+  Subtitle,
+  useToast,
+} from "@/src/components/ui";
+import {
+  createLabResult,
+  fetchLabMeasures,
+  fetchLabTestTypes,
+} from "@/src/lib/lab";
 import { unwrap } from "@/src/lib/query";
 
 export default function LabEntryScreen() {
@@ -17,7 +32,10 @@ export default function LabEntryScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
-  const types = useQuery({ queryKey: ["lab-test-types"], queryFn: () => unwrap(fetchLabTestTypes()) });
+  const types = useQuery({
+    queryKey: ["lab-test-types"],
+    queryFn: () => unwrap(fetchLabTestTypes()),
+  });
   const measuresQuery = useQuery({
     queryKey: ["lab-measures", testTypeId],
     queryFn: () => unwrap(fetchLabMeasures(testTypeId)),
@@ -46,7 +64,10 @@ export default function LabEntryScreen() {
     });
     setSaving(false);
     if (!result.ok) {
-      toast.show(result.error?.message ?? "Could not save the lab result.", "error");
+      toast.show(
+        result.error?.message ?? "Could not save the lab result.",
+        "error",
+      );
       return;
     }
     void qc.invalidateQueries({ queryKey: ["patient-labs", patientId] });
@@ -59,7 +80,11 @@ export default function LabEntryScreen() {
       <Stack.Screen options={{ title: "Record lab result" }} />
       <PickerField
         label="Test type"
-        options={(types.data?.items ?? []).map((t) => ({ label: t.name, value: t.id, subtitle: t.code ?? undefined }))}
+        options={(types.data?.items ?? []).map((t) => ({
+          label: t.name,
+          value: t.id,
+          subtitle: t.code ?? undefined,
+        }))}
         value={testTypeId}
         onChange={(v) => {
           setTestTypeId(v);
@@ -71,7 +96,10 @@ export default function LabEntryScreen() {
         measuresQuery.isLoading ? (
           <SkeletonList count={3} height={64} />
         ) : measures.length === 0 ? (
-          <EmptyState title="No measures defined" message="A root administrator must define measures for this test." />
+          <EmptyState
+            title="No measures defined"
+            message="A root administrator must define measures for this test."
+          />
         ) : (
           <Card>
             <SectionTitle>Measures</SectionTitle>
@@ -80,7 +108,9 @@ export default function LabEntryScreen() {
                 key={m.id}
                 label={`${m.name}${m.unit ? ` (${m.unit})` : ""}`}
                 value={values[m.id] ?? ""}
-                onChangeText={(v) => setValues((prev) => ({ ...prev, [m.id]: v }))}
+                onChangeText={(v) =>
+                  setValues((prev) => ({ ...prev, [m.id]: v }))
+                }
                 keyboardType="decimal-pad"
                 hint={
                   m.normalRangeMin != null || m.normalRangeMax != null
@@ -93,8 +123,18 @@ export default function LabEntryScreen() {
           </Card>
         )
       ) : null}
-      <Field label="Notes (optional)" value={notes} onChangeText={setNotes} multiline />
-      <Button title="Save result" icon="checkmark" onPress={submit} loading={saving} />
+      <Field
+        label="Notes (optional)"
+        value={notes}
+        onChangeText={setNotes}
+        multiline
+      />
+      <Button
+        title="Save result"
+        icon="checkmark"
+        onPress={submit}
+        loading={saving}
+      />
     </Screen>
   );
 }

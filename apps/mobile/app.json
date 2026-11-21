@@ -42,7 +42,13 @@
         }
       ],
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Cure-All uses the camera to scan prescription QR codes."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

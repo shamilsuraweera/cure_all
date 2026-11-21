@@ -8,9 +8,11 @@ export const haptic = {
     if (enabled) void Haptics.selectionAsync();
   },
   success: () => {
-    if (enabled) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (enabled)
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   },
   error: () => {
-    if (enabled) void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    if (enabled)
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
   },
 };

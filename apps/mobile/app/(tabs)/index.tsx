@@ -17,25 +17,50 @@ import {
   Title,
 } from "@/src/components/ui";
 import { usePatientContext } from "@/src/hooks/use-patient-context";
-import { getPatientLabResults, getPatientPrescriptions } from "@/src/lib/patient-records";
+import {
+  getPatientLabResults,
+  getPatientPrescriptions,
+} from "@/src/lib/patient-records";
 import { listPrescriptions } from "@/src/lib/pharmacy";
 import { fetchAdminStats } from "@/src/lib/root-admin";
 import { formatDate, unwrap } from "@/src/lib/query";
 import { useTheme } from "@/src/theme";
 
-type Action = { title: string; subtitle: string; icon: keyof typeof Ionicons.glyphMap; href: Href };
+type Action = {
+  title: string;
+  subtitle: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  href: Href;
+};
 
 const greeting = () => {
   const hour = new Date().getHours();
-  return hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  return hour < 12
+    ? "Good morning"
+    : hour < 18
+      ? "Good afternoon"
+      : "Good evening";
 };
 
-const StatTile = ({ label, value }: { label: string; value: string | number }) => {
+const StatTile = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number;
+}) => {
   const theme = useTheme();
   return (
-    <View style={[styles.tile, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+    <View
+      style={[
+        styles.tile,
+        { backgroundColor: theme.surface, borderColor: theme.border },
+      ]}
+    >
       <Text style={[styles.tileValue, { color: theme.primary }]}>{value}</Text>
-      <Text style={[styles.tileLabel, { color: theme.textMuted }]}>{label}</Text>
+      <Text style={[styles.tileLabel, { color: theme.textMuted }]}>
+        {label}
+      </Text>
     </View>
   );
 };
@@ -61,7 +86,8 @@ export default function HomeTab() {
   });
   const queueQuery = useQuery({
     queryKey: ["home-queue"],
-    queryFn: () => unwrap(listPrescriptions({ pageSize: 50, status: "ACTIVE" })),
+    queryFn: () =>
+      unwrap(listPrescriptions({ pageSize: 50, status: "ACTIVE" })),
     enabled: isPharmacyMember,
   });
   const statsQuery = useQuery({
@@ -142,8 +168,14 @@ export default function HomeTab() {
           ) : (
             <>
               <View style={styles.tiles}>
-                <StatTile label="Active prescriptions" value={activeRx.length} />
-                <StatTile label="Lab results" value={labQuery.data?.labResults?.length ?? 0} />
+                <StatTile
+                  label="Active prescriptions"
+                  value={activeRx.length}
+                />
+                <StatTile
+                  label="Lab results"
+                  value={labQuery.data?.labResults?.length ?? 0}
+                />
               </View>
               <ListItem
                 index={0}
@@ -168,7 +200,10 @@ export default function HomeTab() {
                 onPress={() => router.push("/(tabs)/records")}
               />
               {selectedPatient ? (
-                <Subtitle>Viewing records for {selectedPatient.name ?? selectedPatient.user.email}</Subtitle>
+                <Subtitle>
+                  Viewing records for{" "}
+                  {selectedPatient.name ?? selectedPatient.user.email}
+                </Subtitle>
               ) : null}
             </>
           )}
@@ -194,10 +229,22 @@ export default function HomeTab() {
             <SkeletonList count={1} height={90} />
           ) : statsQuery.data?.stats ? (
             <View style={styles.tiles}>
-              <StatTile label="Organizations" value={statsQuery.data.stats.totalOrgs} />
-              <StatTile label="Patients" value={statsQuery.data.stats.totalPatients} />
-              <StatTile label="Active Rx" value={statsQuery.data.stats.activePrescriptions} />
-              <StatTile label="Lab results" value={statsQuery.data.stats.totalLabResults} />
+              <StatTile
+                label="Organizations"
+                value={statsQuery.data.stats.totalOrgs}
+              />
+              <StatTile
+                label="Patients"
+                value={statsQuery.data.stats.totalPatients}
+              />
+              <StatTile
+                label="Active Rx"
+                value={statsQuery.data.stats.activePrescriptions}
+              />
+              <StatTile
+                label="Lab results"
+                value={statsQuery.data.stats.totalLabResults}
+              />
             </View>
           ) : null}
         </>
@@ -222,7 +269,13 @@ const styles = StyleSheet.create({
   header: { gap: 4 },
   badges: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 },
   tiles: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  tile: { flexGrow: 1, flexBasis: "45%", borderWidth: 1, borderRadius: 18, padding: 14 },
+  tile: {
+    flexGrow: 1,
+    flexBasis: "45%",
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+  },
   tileValue: { fontSize: 28, fontWeight: "800" },
   tileLabel: { fontSize: 12, marginTop: 2 },
 });

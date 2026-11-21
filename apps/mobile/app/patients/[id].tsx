@@ -15,7 +15,11 @@ import {
   Subtitle,
   Title,
 } from "@/src/components/ui";
-import { getPatientLabResults, getPatientPrescriptions, getPatientProfile } from "@/src/lib/doctor";
+import {
+  getPatientLabResults,
+  getPatientPrescriptions,
+  getPatientProfile,
+} from "@/src/lib/doctor";
 import { errorMessage, formatDate, unwrap } from "@/src/lib/query";
 
 export default function PatientChartScreen() {
@@ -42,7 +46,11 @@ export default function PatientChartScreen() {
   const patient = profile.data?.patient;
 
   return (
-    <Screen onRefresh={() => Promise.all([profile.refetch(), rx.refetch(), labs.refetch()])}>
+    <Screen
+      onRefresh={() =>
+        Promise.all([profile.refetch(), rx.refetch(), labs.refetch()])
+      }
+    >
       <Stack.Screen options={{ title: "Patient chart" }} />
       <QueryState
         isLoading={profile.isLoading}
@@ -90,7 +98,12 @@ export default function PatientChartScreen() {
                       icon="medkit"
                       title={p.items.map((it) => it.medicine.name).join(", ")}
                       subtitle={formatDate(p.createdAt)}
-                      right={<Badge label={p.status.replace("_", " ")} tone={statusTone(p.status)} />}
+                      right={
+                        <Badge
+                          label={p.status.replace("_", " ")}
+                          tone={statusTone(p.status)}
+                        />
+                      }
                       onPress={() => router.push(`/prescriptions/${p.id}`)}
                     />
                   ))}

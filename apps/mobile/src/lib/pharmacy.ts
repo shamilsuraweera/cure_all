@@ -29,13 +29,13 @@ export type DispenseRecord = {
   status: string;
   notes?: string | null;
   createdAt: string;
-  items: Array<{
+  items: {
     id: string;
     quantity: number;
     prescriptionItem: {
       medicine: { name: string; strength?: string | null };
     };
-  }>;
+  }[];
   pharmacyOrg?: { name: string };
 };
 
@@ -49,7 +49,7 @@ export const dispensePrescription = (
   prescriptionId: string,
   payload: {
     notes?: string;
-    items: Array<{ prescriptionItemId: string; quantity: number }>;
+    items: { prescriptionItemId: string; quantity: number }[];
   },
 ) =>
   apiClient.post<{ dispenseRecord: DispenseRecord }, typeof payload>(

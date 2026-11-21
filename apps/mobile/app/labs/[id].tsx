@@ -17,7 +17,6 @@ import {
 } from "@/src/components/ui";
 import { fetchLabResultDetail } from "@/src/lib/lab";
 import { errorMessage, formatDate, unwrap } from "@/src/lib/query";
-import { useTheme } from "@/src/theme";
 
 const flag = (value: string, min?: number | null, max?: number | null) => {
   const n = Number(value);
@@ -31,7 +30,6 @@ export default function LabResultDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const roles = useRoles();
-  const theme = useTheme();
 
   const query = useQuery({
     queryKey: ["lab-result-detail", id],
@@ -56,9 +54,14 @@ export default function LabResultDetailScreen() {
 
             <SectionTitle>Measures</SectionTitle>
             {result.measures.map((m, i) => {
-              const state = flag(m.value, m.labMeasureDef.normalRangeMin, m.labMeasureDef.normalRangeMax);
+              const state = flag(
+                m.value,
+                m.labMeasureDef.normalRangeMin,
+                m.labMeasureDef.normalRangeMax,
+              );
               const range =
-                m.labMeasureDef.normalRangeMin != null || m.labMeasureDef.normalRangeMax != null
+                m.labMeasureDef.normalRangeMin != null ||
+                m.labMeasureDef.normalRangeMax != null
                   ? `Normal: ${m.labMeasureDef.normalRangeMin ?? "–"} to ${m.labMeasureDef.normalRangeMax ?? "–"}`
                   : null;
               return (
@@ -69,7 +72,10 @@ export default function LabResultDetailScreen() {
                   </Title>
                   {range ? <Subtitle>{range}</Subtitle> : null}
                   {state && state !== "normal" ? (
-                    <Badge label={state === "low" ? "Below range" : "Above range"} tone="danger" />
+                    <Badge
+                      label={state === "low" ? "Below range" : "Above range"}
+                      tone="danger"
+                    />
                   ) : state === "normal" ? (
                     <Badge label="Within range" tone="success" />
                   ) : null}
@@ -83,7 +89,9 @@ export default function LabResultDetailScreen() {
             ) : null}
 
             <SectionTitle>Attachments</SectionTitle>
-            {attachments.length === 0 ? <Subtitle>No attachments.</Subtitle> : null}
+            {attachments.length === 0 ? (
+              <Subtitle>No attachments.</Subtitle>
+            ) : null}
             {attachments.map((a, i) => (
               <ListItem
                 key={a.id}
@@ -95,7 +103,11 @@ export default function LabResultDetailScreen() {
                   a.mimeType?.startsWith("image/")
                     ? router.push({
                         pathname: "/labs/attachment",
-                        params: { url: a.url, name: a.fileName, mimeType: a.mimeType ?? "" },
+                        params: {
+                          url: a.url,
+                          name: a.fileName,
+                          mimeType: a.mimeType ?? "",
+                        },
                       })
                     : void Linking.openURL(a.url)
                 }
@@ -106,7 +118,9 @@ export default function LabResultDetailScreen() {
                 title="Add attachment link"
                 icon="link"
                 variant="outline"
-                onPress={() => router.push(`/labs/add-attachment?id=${result.id}`)}
+                onPress={() =>
+                  router.push(`/labs/add-attachment?id=${result.id}`)
+                }
               />
             ) : null}
           </>

@@ -2,7 +2,15 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 
-import { Button, Field, ListItem, QueryState, Screen, Segmented, Subtitle } from "@/src/components/ui";
+import {
+  Button,
+  Field,
+  ListItem,
+  QueryState,
+  Screen,
+  Segmented,
+  Subtitle,
+} from "@/src/components/ui";
 import { searchPatients } from "@/src/lib/doctor";
 import { errorMessage, unwrap } from "@/src/lib/query";
 
@@ -10,14 +18,21 @@ export default function PatientsTab() {
   const router = useRouter();
   const [mode, setMode] = useState<"nic" | "email">("nic");
   const [value, setValue] = useState("");
-  const [submitted, setSubmitted] = useState<{ mode: "nic" | "email"; value: string } | null>(null);
+  const [submitted, setSubmitted] = useState<{
+    mode: "nic" | "email";
+    value: string;
+  } | null>(null);
   const [error, setError] = useState<string>();
 
   const query = useQuery({
     queryKey: ["patient-search", submitted],
     queryFn: () =>
       unwrap(
-        searchPatients(submitted?.mode === "nic" ? { nic: submitted.value } : { email: submitted?.value }),
+        searchPatients(
+          submitted?.mode === "nic"
+            ? { nic: submitted.value }
+            : { email: submitted?.value },
+        ),
       ),
     enabled: !!submitted,
   });
@@ -35,7 +50,9 @@ export default function PatientsTab() {
 
   return (
     <Screen onRefresh={submitted ? () => query.refetch() : undefined}>
-      <Subtitle>Find a patient to view their chart, prescribe or record lab results.</Subtitle>
+      <Subtitle>
+        Find a patient to view their chart, prescribe or record lab results.
+      </Subtitle>
       <Segmented
         options={[
           { label: "By NIC", value: "nic" },
@@ -57,10 +74,17 @@ export default function PatientsTab() {
         keyboardType={mode === "email" ? "email-address" : "default"}
         onSubmitEditing={search}
         returnKeyType="search"
-        placeholder={mode === "nic" ? "e.g. 200012345678" : "patient@example.com"}
+        placeholder={
+          mode === "nic" ? "e.g. 200012345678" : "patient@example.com"
+        }
         error={error}
       />
-      <Button title="Search" icon="search" onPress={search} loading={query.isFetching && !!submitted} />
+      <Button
+        title="Search"
+        icon="search"
+        onPress={search}
+        loading={query.isFetching && !!submitted}
+      />
 
       {submitted ? (
         <QueryState

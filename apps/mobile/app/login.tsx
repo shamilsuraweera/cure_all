@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -56,19 +63,31 @@ export default function LoginScreen() {
       style={{ flex: 1, backgroundColor: theme.background }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Animated.View entering={FadeInDown.duration(400)} style={styles.header}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View
+          entering={FadeInDown.duration(400)}
+          style={styles.header}
+        >
           <View style={[styles.logo, { backgroundColor: theme.primary }]}>
             <Ionicons name="medical" size={34} color={theme.onPrimary} />
           </View>
           <Text style={[styles.brand, { color: theme.accent }]}>CURE-ALL</Text>
-          <Text style={[styles.title, { color: theme.text }]}>Welcome back</Text>
+          <Text style={[styles.title, { color: theme.text }]}>
+            Welcome back
+          </Text>
           <Text style={[styles.subtitle, { color: theme.textMuted }]}>
-            Sign in with your clinic, pharmacy, lab, patient or guardian account.
+            Sign in with your clinic, pharmacy, lab, patient or guardian
+            account.
           </Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(120).duration(400)} style={styles.form}>
+        <Animated.View
+          entering={FadeInDown.delay(120).duration(400)}
+          style={styles.form}
+        >
           <Field
             label="Email"
             value={email}
@@ -92,8 +111,15 @@ export default function LoginScreen() {
             onSubmitEditing={submit}
             placeholder="••••••••"
           />
-          {error ? <Text style={[styles.error, { color: theme.danger }]}>{error}</Text> : null}
-          <Button title="Sign in" icon="log-in-outline" onPress={submit} loading={loading} />
+          {error ? (
+            <Text style={[styles.error, { color: theme.danger }]}>{error}</Text>
+          ) : null}
+          <Button
+            title="Sign in"
+            icon="log-in-outline"
+            onPress={submit}
+            loading={loading}
+          />
           <Button
             title="I have a staff invite"
             variant="ghost"
@@ -113,10 +139,22 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: { flexGrow: 1, padding: 24, justifyContent: "center", gap: 28 },
   header: { alignItems: "center", gap: 8 },
-  logo: { width: 72, height: 72, borderRadius: 36, alignItems: "center", justifyContent: "center", marginBottom: 6 },
+  logo: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
   brand: { fontSize: 12, letterSpacing: 4, fontWeight: "800" },
   title: { fontSize: 30, fontWeight: "800" },
-  subtitle: { fontSize: 14, textAlign: "center", lineHeight: 20, maxWidth: 300 },
+  subtitle: {
+    fontSize: 14,
+    textAlign: "center",
+    lineHeight: 20,
+    maxWidth: 300,
+  },
   form: { gap: 14 },
   error: { fontSize: 13, fontWeight: "600" },
 });

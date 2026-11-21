@@ -36,9 +36,14 @@ export default function PrescriptionDetailScreen() {
 
   const prescription = query.data?.prescription;
   const remaining = new Map(
-    (query.data?.remainingItems ?? []).map((r) => [r.prescriptionItemId, r.remainingQuantity]),
+    (query.data?.remainingItems ?? []).map((r) => [
+      r.prescriptionItemId,
+      r.remainingQuantity,
+    ]),
   );
-  const canShowQr = prescription && ["ACTIVE", "PARTIALLY_DISPENSED"].includes(prescription.status);
+  const canShowQr =
+    prescription &&
+    ["ACTIVE", "PARTIALLY_DISPENSED"].includes(prescription.status);
 
   return (
     <Screen onRefresh={() => query.refetch()}>
@@ -53,7 +58,10 @@ export default function PrescriptionDetailScreen() {
             <View style={{ gap: 6 }}>
               <Title>Prescription</Title>
               <Subtitle>{formatDate(prescription.createdAt)}</Subtitle>
-              <Badge label={prescription.status.replace("_", " ")} tone={statusTone(prescription.status)} />
+              <Badge
+                label={prescription.status.replace("_", " ")}
+                tone={statusTone(prescription.status)}
+              />
             </View>
 
             <SectionTitle>Medicines</SectionTitle>
@@ -67,9 +75,14 @@ export default function PrescriptionDetailScreen() {
                 </Subtitle>
                 <KeyValue label="Quantity" value={item.quantity} />
                 {remaining.has(item.id) ? (
-                  <KeyValue label="Remaining to dispense" value={remaining.get(item.id)} />
+                  <KeyValue
+                    label="Remaining to dispense"
+                    value={remaining.get(item.id)}
+                  />
                 ) : null}
-                {item.instructions ? <Subtitle>{item.instructions}</Subtitle> : null}
+                {item.instructions ? (
+                  <Subtitle>{item.instructions}</Subtitle>
+                ) : null}
               </Card>
             ))}
 
@@ -77,11 +90,30 @@ export default function PrescriptionDetailScreen() {
               <>
                 <SectionTitle>Show at the pharmacy</SectionTitle>
                 <Card>
-                  <View style={{ alignItems: "center", gap: 10, paddingVertical: 8 }}>
-                    <View style={{ padding: 12, backgroundColor: "#FFFFFF", borderRadius: 16 }}>
-                      <QRCode value={prescription.id} size={170} color={theme.text} backgroundColor="#FFFFFF" />
+                  <View
+                    style={{
+                      alignItems: "center",
+                      gap: 10,
+                      paddingVertical: 8,
+                    }}
+                  >
+                    <View
+                      style={{
+                        padding: 12,
+                        backgroundColor: "#FFFFFF",
+                        borderRadius: 16,
+                      }}
+                    >
+                      <QRCode
+                        value={prescription.id}
+                        size={170}
+                        color={theme.text}
+                        backgroundColor="#FFFFFF"
+                      />
                     </View>
-                    <Subtitle>The pharmacist scans this code to find your prescription.</Subtitle>
+                    <Subtitle>
+                      The pharmacist scans this code to find your prescription.
+                    </Subtitle>
                   </View>
                 </Card>
               </>

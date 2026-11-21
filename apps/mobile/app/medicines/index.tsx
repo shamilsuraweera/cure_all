@@ -3,7 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { Stack, useRouter } from "expo-router";
 
 import { useRoles } from "@/src/auth/roles";
-import { Badge, Button, Field, ListItem, QueryState, Screen } from "@/src/components/ui";
+import {
+  Badge,
+  Button,
+  Field,
+  ListItem,
+  QueryState,
+  Screen,
+} from "@/src/components/ui";
 import { errorMessage, unwrap } from "@/src/lib/query";
 import { fetchMedicines } from "@/src/lib/root-admin";
 
@@ -27,9 +34,20 @@ export default function MedicinesScreen() {
   return (
     <Screen onRefresh={() => query.refetch()}>
       <Stack.Screen options={{ title: "Medicines" }} />
-      <Field label="Search" value={text} onChangeText={setText} placeholder="Name or generic name" autoCapitalize="none" />
+      <Field
+        label="Search"
+        value={text}
+        onChangeText={setText}
+        placeholder="Name or generic name"
+        autoCapitalize="none"
+      />
       {roles.isRoot ? (
-        <Button title="Add medicine" icon="add" variant="outline" onPress={() => router.push("/admin/medicine-create")} />
+        <Button
+          title="Add medicine"
+          icon="add"
+          variant="outline"
+          onPress={() => router.push("/admin/medicine-create")}
+        />
       ) : null}
       <QueryState
         isLoading={query.isLoading}
@@ -46,7 +64,9 @@ export default function MedicinesScreen() {
             icon="medical"
             title={`${m.name}${m.strength ? ` ${m.strength}` : ""}`}
             subtitle={[m.genericName, m.form].filter(Boolean).join(" · ")}
-            right={m.isActive ? undefined : <Badge label="Inactive" tone="muted" />}
+            right={
+              m.isActive ? undefined : <Badge label="Inactive" tone="muted" />
+            }
           />
         ))}
       </QueryState>

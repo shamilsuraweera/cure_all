@@ -1,7 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams } from "expo-router";
 
-import { Badge, Card, KeyValue, QueryState, Screen, statusTone, Subtitle, Body } from "@/src/components/ui";
+import {
+  Badge,
+  Card,
+  KeyValue,
+  QueryState,
+  Screen,
+  statusTone,
+  Subtitle,
+  Body,
+} from "@/src/components/ui";
 import { fetchDispenseHistory } from "@/src/lib/pharmacy";
 import { errorMessage, formatDate, unwrap } from "@/src/lib/query";
 
@@ -29,7 +38,9 @@ export default function DispenseHistoryScreen() {
           <Card key={record.id} index={i}>
             <Body>{formatDate(record.createdAt)}</Body>
             <Badge label={record.status} tone={statusTone(record.status)} />
-            {record.pharmacyOrg?.name ? <Subtitle>{record.pharmacyOrg.name}</Subtitle> : null}
+            {record.pharmacyOrg?.name ? (
+              <Subtitle>{record.pharmacyOrg.name}</Subtitle>
+            ) : null}
             {record.items.map((item) => (
               <KeyValue
                 key={item.id}

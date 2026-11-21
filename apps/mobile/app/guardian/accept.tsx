@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 
-import { Button, Field, Screen, Subtitle, Title, useToast } from "@/src/components/ui";
+import {
+  Button,
+  Field,
+  Screen,
+  Subtitle,
+  Title,
+  useToast,
+} from "@/src/components/ui";
 import { apiClient } from "@/src/lib/api-client";
 
 export default function GuardianAcceptScreen() {
@@ -10,7 +17,9 @@ export default function GuardianAcceptScreen() {
   const params = useLocalSearchParams<{ token?: string }>();
   const [token, setToken] = useState(params.token ?? "");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ token?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ token?: string; password?: string }>(
+    {},
+  );
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
@@ -40,7 +49,9 @@ export default function GuardianAcceptScreen() {
     <Screen>
       <Stack.Screen options={{ title: "Guardian invite" }} />
       <Title>Accept invite</Title>
-      <Subtitle>Paste the invite token and choose a password for guardian access.</Subtitle>
+      <Subtitle>
+        Paste the invite token and choose a password for guardian access.
+      </Subtitle>
       <Field
         label="Invite token"
         value={token}
@@ -59,7 +70,12 @@ export default function GuardianAcceptScreen() {
         placeholder="At least 8 characters"
         error={errors.password}
       />
-      <Button title="Accept invite" icon="checkmark" onPress={submit} loading={loading} />
+      <Button
+        title="Accept invite"
+        icon="checkmark"
+        onPress={submit}
+        loading={loading}
+      />
     </Screen>
   );
 }

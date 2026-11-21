@@ -30,7 +30,7 @@ export type LabResult = {
   createdAt: string;
   notes?: string | null;
   labTestType: { name: string };
-  measures: Array<{
+  measures: {
     value: string;
     unit?: string | null;
     labMeasureDef: {
@@ -39,14 +39,14 @@ export type LabResult = {
       normalRangeMin?: number | null;
       normalRangeMax?: number | null;
     };
-  }>;
-  attachments?: Array<{
+  }[];
+  attachments?: {
     id: string;
     fileName: string;
     url: string;
     mimeType?: string | null;
     sizeBytes?: number | null;
-  }>;
+  }[];
 };
 
 export const searchPatients = (params: {
@@ -82,7 +82,7 @@ export const createLabResult = (
   payload: {
     labTestTypeId: string;
     notes?: string;
-    measures: Array<{ labMeasureDefId: string; value: string; unit?: string }>;
+    measures: { labMeasureDefId: string; value: string; unit?: string }[];
   },
 ) =>
   apiClient.post<{ labResult: LabResult }, typeof payload>(

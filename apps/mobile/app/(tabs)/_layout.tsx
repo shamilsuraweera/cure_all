@@ -10,7 +10,15 @@ type IconName = keyof typeof Ionicons.glyphMap;
 
 const icon =
   (active: IconName, inactive: IconName) =>
-  ({ color, focused, size }: { color: string; focused: boolean; size: number }) => (
+  ({
+    color,
+    focused,
+    size,
+  }: {
+    color: string;
+    focused: boolean;
+    size: number;
+  }) => (
     <Ionicons name={focused ? active : inactive} size={size} color={color} />
   );
 
@@ -32,7 +40,10 @@ export default function TabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: theme.primary,
         tabBarInactiveTintColor: theme.textMuted,
-        tabBarStyle: { backgroundColor: theme.surface, borderTopColor: theme.border },
+        tabBarStyle: {
+          backgroundColor: theme.surface,
+          borderTopColor: theme.border,
+        },
         tabBarLabelStyle: { fontWeight: "600", fontSize: 11 },
         headerStyle: { backgroundColor: theme.surface },
         headerTitleStyle: { color: theme.text, fontWeight: "700" },
@@ -40,7 +51,10 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: theme.background },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: icon("home", "home-outline") }} />
+      <Tabs.Screen
+        name="index"
+        options={{ title: "Home", tabBarIcon: icon("home", "home-outline") }}
+      />
       <Tabs.Screen
         name="records"
         options={{
@@ -75,7 +89,10 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="profile"
-        options={{ title: "Profile", tabBarIcon: icon("person-circle", "person-circle-outline") }}
+        options={{
+          title: "Profile",
+          tabBarIcon: icon("person-circle", "person-circle-outline"),
+        }}
       />
     </Tabs>
   );

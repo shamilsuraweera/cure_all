@@ -3,7 +3,16 @@ import { View } from "react-native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 
-import { Button, Card, Field, PickerField, Screen, SectionTitle, Subtitle, useToast } from "@/src/components/ui";
+import {
+  Button,
+  Card,
+  Field,
+  PickerField,
+  Screen,
+  SectionTitle,
+  Subtitle,
+  useToast,
+} from "@/src/components/ui";
 import { createPrescription, fetchMedicines } from "@/src/lib/doctor";
 import { unwrap } from "@/src/lib/query";
 
@@ -46,7 +55,9 @@ export default function PrescribeScreen() {
   }));
 
   const update = (index: number, patch: Partial<Draft>) =>
-    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+    setItems((prev) =>
+      prev.map((item, i) => (i === index ? { ...item, ...patch } : item)),
+    );
 
   const validate = () => {
     const next: Record<string, string> = {};
@@ -54,8 +65,10 @@ export default function PrescribeScreen() {
       if (!item.medicineId) next[`${i}.medicine`] = "Select a medicine";
       if (!item.dose.trim()) next[`${i}.dose`] = "Required";
       if (!item.frequency.trim()) next[`${i}.frequency`] = "Required";
-      if (!(Number.parseInt(item.durationDays, 10) > 0)) next[`${i}.duration`] = "Enter days > 0";
-      if (!(Number.parseInt(item.quantity, 10) > 0)) next[`${i}.quantity`] = "Enter quantity > 0";
+      if (!(Number.parseInt(item.durationDays, 10) > 0))
+        next[`${i}.duration`] = "Enter days > 0";
+      if (!(Number.parseInt(item.quantity, 10) > 0))
+        next[`${i}.quantity`] = "Enter quantity > 0";
     });
     setErrors(next);
     return Object.keys(next).length === 0;
@@ -77,7 +90,10 @@ export default function PrescribeScreen() {
     });
     setSaving(false);
     if (!result.ok) {
-      toast.show(result.error?.message ?? "Could not create the prescription.", "error");
+      toast.show(
+        result.error?.message ?? "Could not create the prescription.",
+        "error",
+      );
       return;
     }
     void qc.invalidateQueries({ queryKey: ["patient-rx", patientId] });
@@ -88,7 +104,10 @@ export default function PrescribeScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: "New prescription" }} />
-      <Subtitle>Add one or more medicines. The patient can show a QR code at the pharmacy.</Subtitle>
+      <Subtitle>
+        Add one or more medicines. The patient can show a QR code at the
+        pharmacy.
+      </Subtitle>
       {items.map((item, i) => (
         <Card key={i}>
           <SectionTitle>{`Medicine ${i + 1}`}</SectionTitle>
@@ -99,25 +118,77 @@ export default function PrescribeScreen() {
             onChange={(v) => update(i, { medicineId: v })}
             error={errors[`${i}.medicine`]}
           />
-          <Field label="Dose" value={item.dose} onChangeText={(v) => update(i, { dose: v })} placeholder="1 tablet" error={errors[`${i}.dose`]} />
-          <Field label="Frequency" value={item.frequency} onChangeText={(v) => update(i, { frequency: v })} placeholder="2x daily" error={errors[`${i}.frequency`]} />
+          <Field
+            label="Dose"
+            value={item.dose}
+            onChangeText={(v) => update(i, { dose: v })}
+            placeholder="1 tablet"
+            error={errors[`${i}.dose`]}
+          />
+          <Field
+            label="Frequency"
+            value={item.frequency}
+            onChangeText={(v) => update(i, { frequency: v })}
+            placeholder="2x daily"
+            error={errors[`${i}.frequency`]}
+          />
           <View style={{ flexDirection: "row", gap: 10 }}>
             <View style={{ flex: 1 }}>
-              <Field label="Days" value={item.durationDays} onChangeText={(v) => update(i, { durationDays: v })} keyboardType="number-pad" error={errors[`${i}.duration`]} />
+              <Field
+                label="Days"
+                value={item.durationDays}
+                onChangeText={(v) => update(i, { durationDays: v })}
+                keyboardType="number-pad"
+                error={errors[`${i}.duration`]}
+              />
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Quantity" value={item.quantity} onChangeText={(v) => update(i, { quantity: v })} keyboardType="number-pad" error={errors[`${i}.quantity`]} />
+              <Field
+                label="Quantity"
+                value={item.quantity}
+                onChangeText={(v) => update(i, { quantity: v })}
+                keyboardType="number-pad"
+                error={errors[`${i}.quantity`]}
+              />
             </View>
           </View>
-          <Field label="Instructions (optional)" value={item.instructions} onChangeText={(v) => update(i, { instructions: v })} placeholder="After meals" />
+          <Field
+            label="Instructions (optional)"
+            value={item.instructions}
+            onChangeText={(v) => update(i, { instructions: v })}
+            placeholder="After meals"
+          />
           {items.length > 1 ? (
-            <Button title="Remove" variant="ghost" icon="trash-outline" onPress={() => setItems((prev) => prev.filter((_, idx) => idx !== i))} />
+            <Button
+              title="Remove"
+              variant="ghost"
+              icon="trash-outline"
+              onPress={() =>
+                setItems((prev) => prev.filter((_, idx) => idx !== i))
+              }
+            />
           ) : null}
         </Card>
       ))}
-      <Button title="Add another medicine" icon="add" variant="outline" onPress={() => setItems((prev) => [...prev, emptyItem()])} />
-      <Field label="Notes (optional)" value={notes} onChangeText={setNotes} multiline placeholder="Clinical notes" />
-      <Button title="Create prescription" icon="checkmark" onPress={submit} loading={saving} />
+      <Button
+        title="Add another medicine"
+        icon="add"
+        variant="outline"
+        onPress={() => setItems((prev) => [...prev, emptyItem()])}
+      />
+      <Field
+        label="Notes (optional)"
+        value={notes}
+        onChangeText={setNotes}
+        multiline
+        placeholder="Clinical notes"
+      />
+      <Button
+        title="Create prescription"
+        icon="checkmark"
+        onPress={submit}
+        loading={saving}
+      />
     </Screen>
   );
 }

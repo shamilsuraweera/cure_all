@@ -22,7 +22,7 @@ export const apiClient = createApiClient({
   debug: process.env.NODE_ENV !== "production",
   defaultHeaders: { "x-client": "mobile" },
   logger: (message, meta) => {
-    // eslint-disable-next-line no-console
+     
     console.log(message, meta ?? "");
   },
 });

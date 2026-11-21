@@ -14,7 +14,7 @@ export type Prescription = {
   id: string;
   status: string;
   createdAt: string;
-  items: Array<{
+  items: {
     id: string;
     dose: string;
     frequency: string;
@@ -22,18 +22,18 @@ export type Prescription = {
     quantity: number;
     instructions?: string | null;
     medicine: { name: string; strength?: string | null };
-  }>;
+  }[];
 };
 
 export type LabResult = {
   id: string;
   createdAt: string;
   labTestType: { name: string };
-  measures: Array<{
+  measures: {
     value: string;
     unit?: string | null;
     labMeasureDef: { name: string };
-  }>;
+  }[];
 };
 
 export const searchPatients = (params: {
@@ -70,14 +70,14 @@ export const createPrescription = (
   patientProfileId: string,
   payload: {
     notes?: string;
-    items: Array<{
+    items: {
       medicineId: string;
       dose: string;
       frequency: string;
       durationDays: number;
       quantity: number;
       instructions?: string;
-    }>;
+    }[];
   },
 ) =>
   apiClient.post<{ prescription: Prescription }, typeof payload>(

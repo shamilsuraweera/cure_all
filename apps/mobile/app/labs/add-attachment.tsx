@@ -20,7 +20,8 @@ export default function AddAttachmentScreen() {
     if (saving) return;
     const next: typeof errors = {};
     if (!fileName.trim()) next.fileName = "Required";
-    if (!/^https?:\/\/\S+$/i.test(url.trim())) next.url = "Enter a valid http(s) URL";
+    if (!/^https?:\/\/\S+$/i.test(url.trim()))
+      next.url = "Enter a valid http(s) URL";
     setErrors(next);
     if (Object.keys(next).length) return;
     setSaving(true);
@@ -31,7 +32,10 @@ export default function AddAttachmentScreen() {
     });
     setSaving(false);
     if (!result.ok) {
-      toast.show(result.error?.message ?? "Could not add the attachment.", "error");
+      toast.show(
+        result.error?.message ?? "Could not add the attachment.",
+        "error",
+      );
       return;
     }
     void qc.invalidateQueries({ queryKey: ["lab-result-detail", id] });
@@ -42,11 +46,39 @@ export default function AddAttachmentScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: "Add attachment" }} />
-      <Subtitle>Attach a link to the report file (for example a PDF or image hosted by your lab).</Subtitle>
-      <Field label="File name" value={fileName} onChangeText={setFileName} placeholder="report.pdf" error={errors.fileName} />
-      <Field label="File URL" value={url} onChangeText={setUrl} autoCapitalize="none" keyboardType="url" placeholder="https://..." error={errors.url} />
-      <Field label="MIME type (optional)" value={mimeType} onChangeText={setMimeType} autoCapitalize="none" placeholder="application/pdf" />
-      <Button title="Add attachment" icon="attach" onPress={submit} loading={saving} />
+      <Subtitle>
+        Attach a link to the report file (for example a PDF or image hosted by
+        your lab).
+      </Subtitle>
+      <Field
+        label="File name"
+        value={fileName}
+        onChangeText={setFileName}
+        placeholder="report.pdf"
+        error={errors.fileName}
+      />
+      <Field
+        label="File URL"
+        value={url}
+        onChangeText={setUrl}
+        autoCapitalize="none"
+        keyboardType="url"
+        placeholder="https://..."
+        error={errors.url}
+      />
+      <Field
+        label="MIME type (optional)"
+        value={mimeType}
+        onChangeText={setMimeType}
+        autoCapitalize="none"
+        placeholder="application/pdf"
+      />
+      <Button
+        title="Add attachment"
+        icon="attach"
+        onPress={submit}
+        loading={saving}
+      />
     </Screen>
   );
 }

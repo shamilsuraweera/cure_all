@@ -15,7 +15,7 @@ export type Prescription = {
   status: string;
   createdAt: string;
   notes?: string | null;
-  items: Array<{
+  items: {
     id: string;
     dose: string;
     frequency: string;
@@ -23,7 +23,7 @@ export type Prescription = {
     quantity: number;
     instructions?: string | null;
     medicine: { name: string; strength?: string | null };
-  }>;
+  }[];
 };
 
 export type DispenseRecord = {
@@ -31,13 +31,13 @@ export type DispenseRecord = {
   status: string;
   createdAt: string;
   notes?: string | null;
-  items: Array<{
+  items: {
     id: string;
     quantity: number;
     prescriptionItem: {
       medicine: { name: string; strength?: string | null };
     };
-  }>;
+  }[];
   pharmacyOrg?: { name: string };
 };
 
@@ -46,18 +46,18 @@ export type LabResult = {
   createdAt: string;
   notes?: string | null;
   labTestType: { name: string };
-  measures: Array<{
+  measures: {
     value: string;
     unit?: string | null;
     labMeasureDef: { name: string };
-  }>;
-  attachments?: Array<{
+  }[];
+  attachments?: {
     id: string;
     fileName: string;
     url: string;
     mimeType?: string | null;
     sizeBytes?: number | null;
-  }>;
+  }[];
 };
 
 export const getSelfPatientProfile = () =>

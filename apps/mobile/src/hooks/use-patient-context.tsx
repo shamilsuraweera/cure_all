@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { useAuth } from "../auth/auth-context";
@@ -22,9 +28,15 @@ type PatientContextValue = {
 
 const PatientContext = createContext<PatientContextValue | null>(null);
 
-export const PatientContextProvider = ({ children }: { children: React.ReactNode }) => {
+export const PatientContextProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const { isAuthenticated, user } = useAuth();
-  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
+    null,
+  );
 
   const selfQuery = useQuery({
     queryKey: ["patient-self", user?.id],
@@ -42,7 +54,9 @@ export const PatientContextProvider = ({ children }: { children: React.ReactNode
     const items: PatientProfile[] = [];
     const self = selfQuery.data?.ok ? selfQuery.data.data?.patient : undefined;
     if (self) items.push(self);
-    const guardianPatients = guardianQuery.data?.ok ? (guardianQuery.data.data?.patients ?? []) : [];
+    const guardianPatients = guardianQuery.data?.ok
+      ? (guardianQuery.data.data?.patients ?? [])
+      : [];
     guardianPatients.forEach((patient) => {
       if (!items.find((item) => item.id === patient.id)) items.push(patient);
     });
@@ -54,7 +68,10 @@ export const PatientContextProvider = ({ children }: { children: React.ReactNode
       setSelectedPatientId(null);
       return;
     }
-    if (patients.length > 0 && !patients.some((p) => p.id === selectedPatientId)) {
+    if (
+      patients.length > 0 &&
+      !patients.some((p) => p.id === selectedPatientId)
+    ) {
       setSelectedPatientId(patients[0].id);
     }
   }, [patients, selectedPatientId, isAuthenticated]);
@@ -64,19 +81,33 @@ export const PatientContextProvider = ({ children }: { children: React.ReactNode
       patients,
       selectedPatientId,
       setSelectedPatientId,
-      isLoading: isAuthenticated && (selfQuery.isLoading || guardianQuery.isLoading),
+      isLoading:
+        isAuthenticated && (selfQuery.isLoading || guardianQuery.isLoading),
       isPatient: patients.some((p) => p.userId === user?.id),
       isGuardian: patients.some((p) => p.userId !== user?.id),
-      refetch: () => Promise.all([selfQuery.refetch(), guardianQuery.refetch()]),
+      refetch: () =>
+        Promise.all([selfQuery.refetch(), guardianQuery.refetch()]),
     }),
-    [patients, selectedPatientId, isAuthenticated, selfQuery, guardianQuery, user?.id],
+    [
+      patients,
+      selectedPatientId,
+      isAuthenticated,
+      selfQuery,
+      guardianQuery,
+      user?.id,
+    ],
   );
 
-  return <PatientContext.Provider value={value}>{children}</PatientContext.Provider>;
+  return (
+    <PatientContext.Provider value={value}>{children}</PatientContext.Provider>
+  );
 };
 
 export const usePatientContext = () => {
   const ctx = useContext(PatientContext);
-  if (!ctx) throw new Error("usePatientContext must be used within PatientContextProvider");
+  if (!ctx)
+    throw new Error(
+      "usePatientContext must be used within PatientContextProvider",
+    );
   return ctx;
 };

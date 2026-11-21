@@ -47,7 +47,10 @@ export default function ProfileEditScreen() {
     const result = await updatePatientProfile(self.id, payload);
     setSaving(false);
     if (!result.ok) {
-      toast.show(result.error?.message ?? "Could not save your details.", "error");
+      toast.show(
+        result.error?.message ?? "Could not save your details.",
+        "error",
+      );
       return;
     }
     await refetch();
@@ -59,8 +62,15 @@ export default function ProfileEditScreen() {
   return (
     <Screen>
       <Stack.Screen options={{ title: "Edit details" }} />
-      <Subtitle>Keep your details up to date so clinicians can identify you.</Subtitle>
-      <Field label="Full name" value={name} onChangeText={setName} placeholder="Your name" />
+      <Subtitle>
+        Keep your details up to date so clinicians can identify you.
+      </Subtitle>
+      <Field
+        label="Full name"
+        value={name}
+        onChangeText={setName}
+        placeholder="Your name"
+      />
       <Field
         label="Date of birth"
         value={dob}
@@ -69,8 +79,18 @@ export default function ProfileEditScreen() {
         keyboardType="numbers-and-punctuation"
         error={dobError}
       />
-      <Field label="Location" value={location} onChangeText={setLocation} placeholder="City / district" />
-      <Button title="Save changes" icon="checkmark" onPress={save} loading={saving} />
+      <Field
+        label="Location"
+        value={location}
+        onChangeText={setLocation}
+        placeholder="City / district"
+      />
+      <Button
+        title="Save changes"
+        icon="checkmark"
+        onPress={save}
+        loading={saving}
+      />
     </Screen>
   );
 }

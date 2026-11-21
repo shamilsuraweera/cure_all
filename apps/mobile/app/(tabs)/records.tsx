@@ -14,7 +14,10 @@ import {
   Subtitle,
 } from "@/src/components/ui";
 import { usePatientContext } from "@/src/hooks/use-patient-context";
-import { getPatientLabResults, getPatientPrescriptions } from "@/src/lib/patient-records";
+import {
+  getPatientLabResults,
+  getPatientPrescriptions,
+} from "@/src/lib/patient-records";
 import { errorMessage, formatDate, unwrap } from "@/src/lib/query";
 
 type Tab = "rx" | "labs";
@@ -22,7 +25,8 @@ type Tab = "rx" | "labs";
 export default function RecordsTab() {
   const router = useRouter();
   const { user } = useAuth();
-  const { patients, selectedPatientId, setSelectedPatientId, isLoading } = usePatientContext();
+  const { patients, selectedPatientId, setSelectedPatientId, isLoading } =
+    usePatientContext();
   const [tab, setTab] = useState<Tab>("rx");
 
   const rxQuery = useQuery({
@@ -66,7 +70,9 @@ export default function RecordsTab() {
         error={errorMessage(active.error)}
         onRetry={() => active.refetch()}
         isEmpty={tab === "rx" ? prescriptions.length === 0 : labs.length === 0}
-        emptyTitle={tab === "rx" ? "No prescriptions yet" : "No lab results yet"}
+        emptyTitle={
+          tab === "rx" ? "No prescriptions yet" : "No lab results yet"
+        }
         emptyMessage="New records will appear here as soon as they are added."
       >
         <View style={{ gap: 12 }}>
@@ -76,9 +82,17 @@ export default function RecordsTab() {
                   key={p.id}
                   index={i}
                   icon="medkit"
-                  title={p.items?.map((item) => item.medicine.name).join(", ") || "Prescription"}
+                  title={
+                    p.items?.map((item) => item.medicine.name).join(", ") ||
+                    "Prescription"
+                  }
                   subtitle={`${formatDate(p.createdAt)} · ${p.items?.length ?? 0} item(s)`}
-                  right={<Badge label={p.status.replace("_", " ")} tone={statusTone(p.status)} />}
+                  right={
+                    <Badge
+                      label={p.status.replace("_", " ")}
+                      tone={statusTone(p.status)}
+                    />
+                  }
                   onPress={() => router.push(`/prescriptions/${p.id}`)}
                 />
               ))

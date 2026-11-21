@@ -20,7 +20,9 @@ export default function Entry() {
         }}
       >
         <ActivityIndicator size="large" color={theme.primary} />
-        <Text style={{ color: theme.textMuted }}>Preparing your session...</Text>
+        <Text style={{ color: theme.textMuted }}>
+          Preparing your session...
+        </Text>
       </View>
     );
   }
