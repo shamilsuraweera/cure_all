@@ -28,11 +28,15 @@ export default function LoginScreen() {
   const submit = async () => {
     setLoading(true);
     setError(null);
-    const ok = await login(email.trim(), password);
-    setLoading(false);
-
-    if (!ok) {
-      setError("Login failed. Check your credentials.");
+    try {
+      const result = await login(email.trim(), password);
+      if (!result.ok) {
+        setError(result.error ?? "Login failed. Check your credentials.");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 

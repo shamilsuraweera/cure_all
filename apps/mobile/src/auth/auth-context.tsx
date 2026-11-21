@@ -17,7 +17,10 @@ type AuthState = {
 };
 
 type AuthContextValue = AuthState & {
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 };
@@ -90,7 +93,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!result.ok) {
         setState({ isReady: true, isAuthenticated: false, user: null });
-        return false;
+        return {
+          ok: false,
+          error:
+            result.status === 401
+              ? "Invalid email or password."
+              : (result.error?.message ?? "Login failed."),
+        };
       }
 
       if (result.data?.accessToken) {
@@ -100,8 +109,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await tokenStorage.setRefreshToken(result.data.refreshToken);
       }
 
-      await hydrateUser();
-      return true;
+      const hydrated = await hydrateUser();
+      return hydrated
+        ? { ok: true }
+        : { ok: false, error: "Signed in, but could not load your profile." };
     },
     [hydrateUser],
   );
