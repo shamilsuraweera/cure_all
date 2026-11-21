@@ -40,8 +40,14 @@ export const LoginPage = () => {
     event.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await login(email, password);
-    setLoading(false);
+    let res: Awaited<ReturnType<typeof login>>;
+    try {
+      res = await login(email, password);
+    } catch {
+      res = { ok: false, error: "Something went wrong. Please try again." };
+    } finally {
+      setLoading(false);
+    }
 
     if (!res.ok) {
       setError(res.error ?? "Login failed. Check your credentials.");
