@@ -26,10 +26,20 @@ export default function LoginScreen() {
   }, [isAuthenticated, router]);
 
   const submit = async () => {
+    if (loading) return;
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      setError("Enter both your email and password.");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(trimmedEmail)) {
+      setError("Enter a valid email address.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const result = await login(email.trim(), password);
+      const result = await login(trimmedEmail, password);
       if (!result.ok) {
         setError(result.error ?? "Login failed. Check your credentials.");
       }
@@ -55,6 +65,9 @@ export default function LoginScreen() {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="email"
+          textContentType="emailAddress"
           style={styles.input}
           placeholder="you@cureall.app"
         />
@@ -64,6 +77,11 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="password"
+          textContentType="password"
+          onSubmitEditing={submit}
           style={styles.input}
           placeholder="••••••••"
         />

@@ -98,7 +98,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           error:
             result.status === 401
               ? "Invalid email or password."
-              : (result.error?.message ?? "Login failed."),
+              : result.status === 400
+                ? "Enter a valid email and password."
+                : (result.error?.message ?? "Login failed."),
         };
       }
 
