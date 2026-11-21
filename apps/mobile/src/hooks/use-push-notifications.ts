@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
+import { Platform } from "react-native";
 
 import { useAuth } from "../auth/auth-context";
 import { notificationTarget, registerForPush } from "../lib/notifications";
@@ -15,6 +16,9 @@ export const usePushNotifications = () => {
   }, [isAuthenticated]);
 
   useEffect(() => {
+    // expo-notifications has no web implementation.
+    if (Platform.OS === "web") return;
+
     const open = (data: unknown) => {
       const target = notificationTarget(data);
       if (target) router.push(target as never);
