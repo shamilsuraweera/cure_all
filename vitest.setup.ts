@@ -1,4 +1,3 @@
-import { config } from "dotenv";
-import path from "path";
+import { loadTestEnv } from "./vitest.test-env";
 
-config({ path: path.resolve(process.cwd(), ".env.test") });
+loadTestEnv();

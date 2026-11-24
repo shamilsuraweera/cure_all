@@ -6,15 +6,14 @@
   "scripts": {
     "dev": "tsx src/server.ts",
     "start": "tsx src/server.ts",
-    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset",
     "format": "prettier . --check",
     "format:write": "prettier . --write",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:db:reset": "dotenv -e .env.test -- prisma migrate reset"
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",

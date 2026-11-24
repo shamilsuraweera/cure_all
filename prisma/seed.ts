@@ -6,6 +6,8 @@ import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+import { parseDatabaseUrl } from "../src/config/db-url.js";
+
 const envSchema = z.object({
   ROOT_ADMIN_EMAIL: z.string().email(),
   ROOT_ADMIN_PASSWORD: z.string().min(8),
@@ -13,10 +15,11 @@ const envSchema = z.object({
 
 const env = envSchema.parse(process.env);
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-const adapter = new PrismaPg(pool);
+const { connectionString, schema } = parseDatabaseUrl(
+  process.env.DATABASE_URL ?? "",
+);
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool, schema ? { schema } : undefined);
 const prisma = new PrismaClient({ adapter });
 
 const hashPassword = async (password: string) => argon2.hash(password);

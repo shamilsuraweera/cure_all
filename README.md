@@ -44,23 +44,32 @@ deployment, creating test accounts, and validating end‑to‑end flows.
 
 **Important:** do not commit real passwords or secrets. Keep them in `.env`.
 
-## Database setup (dev/test/shadow)
+## Database setup (one database, `postgres` user)
 
-Use the SQL scripts in `sql/` (run as postgres superuser):
-
-```bash
-psql -U postgres -f sql/dev_create.sql
-psql -U postgres -f sql/test_create.sql
-psql -U postgres -f sql/shadow_create.sql
-```
-
-To reset any database (destructive):
+The whole system uses a single database, `cure_all`, and the `postgres` user.
+No extra roles, shadow database or test database are created.
 
 ```bash
-psql -U postgres -f sql/dev_reset.sql
-psql -U postgres -f sql/test_reset.sql
-psql -U postgres -f sql/shadow_reset.sql
+# 1. Give postgres a password (the only place a password is needed)
+sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'your-password';"
+
+# 2. Create the one database
+sudo -u postgres createdb cure_all
 ```
+
+Put that password in `.env` (the only file that needs it):
+
+```
+DATABASE_URL="postgresql://postgres:your-password@localhost:5432/cure_all"
+```
+
+If the password contains special characters, URL-encode them (`@` becomes `%40`).
+
+Tests run inside a separate **schema** named `test` in the same `cure_all`
+database, so `npm test` can reset its own tables without touching dev data.
+It reuses the credentials from `.env`.
+
+Use `npx prisma migrate deploy` (not `migrate dev`, which needs a shadow database).
 
 ## Backend (API)
 
@@ -79,7 +88,7 @@ cp .env.example .env
 3) Run migrations + seed:
 
 ```bash
-npx prisma migrate dev
+npx prisma migrate deploy
 npx prisma db seed
 ```
 

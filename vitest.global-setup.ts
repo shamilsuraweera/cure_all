@@ -1,10 +1,8 @@
 import { execSync } from "child_process";
-import { config } from "dotenv";
-import path from "path";
-
-config({ path: path.resolve(process.cwd(), ".env.test") });
+import { loadTestEnv } from "./vitest.test-env";
 
 export default async () => {
+  loadTestEnv();
   execSync("npx prisma generate", { stdio: "inherit" });
   execSync("npx prisma db push --force-reset", {
     stdio: "inherit",
